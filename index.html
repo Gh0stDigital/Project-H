@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Thoth</title>
+    <meta name="theme-color" content="#0b0d12" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <style>
+      /* Enough styling for the boot and failure states to be readable on
+         their own. The real stylesheet is inside the JS bundle, so if the
+         bundle never runs, none of it exists. */
+      html, body { margin: 0; background: #0b0d12; color: #e8ecf5; }
+      body { font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+      .boot { padding: 2rem 1.5rem; max-width: 34rem; }
+      .boot h1 { font-size: 1.15rem; margin: 0 0 .75rem; }
+      .boot p { margin: 0 0 .75rem; color: #a6b0c3; }
+      .boot pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+        background: #161a24; color: #ffb4a2; padding: .6rem .7rem; border-radius: 6px;
+        white-space: pre-wrap; word-break: break-word; margin: 0;
+      }
+    </style>
+    <!-- With scripting off, the "Starting..." placeholder is a lie: nothing
+         is starting. Hide it so only the noscript explanation remains. -->
+    <noscript><style>#boot-status { display: none; }</style></noscript>
+  </head>
+  <body>
+    <!-- React replaces this on a successful boot. If you can still read it,
+         the page loaded but the app never started. -->
+    <div id="root">
+      <div class="boot" id="boot-status">
+        <h1>Starting Thoth&hellip;</h1>
+        <p>
+          If this message stays on screen, the page opened but its code never
+          ran. On iPhone that usually means the file was opened in a preview
+          &mdash; the Files app previews HTML without running JavaScript.
+        </p>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="boot">
+        <h1>JavaScript is turned off</h1>
+        <p>
+          Thoth is a JavaScript app, so nothing can render without it. If you
+          opened this from the Files app on iPhone, that preview blocks
+          JavaScript &mdash; open the file in a real browser instead.
+        </p>
+      </div>
+    </noscript>
+
+    <script>
+      // A crash inside the bundle would otherwise leave a blank page with no
+      // way to see why, and there is no console on a phone. Show the error
+      // instead. Classic (non-module) script so it runs everywhere, placed
+      // before the bundle so it is listening during boot.
+      (function () {
+        var shown = false
+        function report(what, detail) {
+          if (shown) return
+          // Once React has mounted it has replaced the boot placeholder. A
+          // later error is not worth wiping a working game off the screen.
+          if (!document.getElementById('boot-status')) return
+          shown = true
+          var el = document.getElementById('root') || document.body
+          var box = document.createElement('div')
+          box.className = 'boot'
+          var h = document.createElement('h1')
+          h.textContent = 'Thoth could not start'
+          var p = document.createElement('p')
+          p.textContent = what
+          var pre = document.createElement('pre')
+          pre.textContent = detail
+          box.appendChild(h)
+          box.appendChild(p)
+          box.appendChild(pre)
+          el.innerHTML = ''
+          el.appendChild(box)
+        }
+        window.addEventListener('error', function (e) {
+          report(
+            'Something in the game code failed. The error is below — send it on and it can be fixed.',
+            (e && e.message ? e.message : 'Unknown error') +
+              (e && e.filename ? '\n' + e.filename + ':' + e.lineno + ':' + e.colno : '')
+          )
+        })
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e && e.reason
+          report(
+            'Something in the game code failed while loading.',
+            (r && (r.stack || r.message)) || String(r)
+          )
+        })
+      })()
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

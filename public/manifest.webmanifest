@@ -1,0 +1,14 @@
+{
+  "name": "Thoth — Language Dungeon",
+  "short_name": "Thoth",
+  "description": "An offline Korean-vocabulary dungeon crawler.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

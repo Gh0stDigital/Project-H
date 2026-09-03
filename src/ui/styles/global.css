@@ -1,0 +1,3168 @@
+/* ==========================================================================
+   Thoth — global stylesheet.
+   System fonts only (no network font loads): Apple SD Gothic Neo / Malgun
+   Gothic / Noto Sans KR cover Hangul; the sans-serif stack covers English.
+   ========================================================================== */
+
+:root {
+  --bg-deep: #0b0d12;
+  --bg-panel: #161a24;
+  --bg-panel-raised: #1e2330;
+  --bg-card: #232838;
+  --border-soft: #333c52;
+  --border-strong: #4a5578;
+
+  --text-primary: #eef1f8;
+  --text-secondary: #a8b0c8;
+  --text-faint: #6b7390;
+
+  --accent-gold: #f2c14e;
+  --accent-gold-dim: #b8933a;
+  --accent-blue: #5fa8e0;
+  --accent-purple: #a58bd8;
+  --accent-green: #6bdb8f;
+  --accent-red: #e0654f;
+  /* Secondary "HUD" accent — thin borders, glows, scanline texture. Gold
+     stays the primary brand color; cyan is the sci-fi detailing layer. */
+  --accent-cyan: #4fe3f0;
+  --accent-cyan-dim: #2a8f9c;
+  --glow-cyan: rgba(79, 227, 240, 0.35);
+  --glow-gold: rgba(242, 193, 78, 0.3);
+
+  /* Element accents — one per word type (see config/wordTypes.ts). */
+  --element-earth: #c9a227;
+  --element-fire: #e0654f;
+  --element-water: #5fa8e0;
+  --element-wind: #8fd6b4;
+  --element-lightning: #a58bd8;
+  --element-metal: #9aa6bf;
+
+  --hp-color: #e0654f;
+  --charge-color: #f2c14e;
+  --xp-color: #5fa8e0;
+  --plateau-color: #a58bd8;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --font-body: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR',
+    'Segoe UI', Roboto, sans-serif;
+  /* HUD/readout font for stats, levels, HP, timers — system monospace
+     only, no network font load. */
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Roboto Mono', 'Courier New', monospace;
+
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  /* The app is a fixed-size single-viewport shell — only the active
+     screen's own content scrolls. This is what keeps every screen the
+     same size when navigating: nothing ever grows/shrinks the page
+     itself, so there's no jump or resize on screen changes. */
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* ---- App shell: iPhone 14 Pro Max portrait (430x932), fluid below ---- */
+
+.app-shell {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0d1017 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Faint ambient scanline texture — a light HUD touch, kept subtle enough
+   to never affect readability. */
+.app-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(79, 227, 240, 0.025) 0px,
+    rgba(79, 227, 240, 0.025) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Screens are fixed panes by default: they fill the shell and never
+   scroll. overflow:hidden (not auto) is deliberate — with `auto`, iOS
+   still rubber-bands and drags the pane around on touch even when the
+   content fits exactly, which reads as the whole UI sliding under your
+   finger. Only screens that opt in via .screen-scroll may scroll.
+   min-height: 0 lets this flex child shrink below its content size so
+   its own children can absorb the squeeze instead of overflowing. */
+.screen {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  padding: max(14px, env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  gap: 14px;
+}
+
+/* Opt-in scrolling, for screens whose whole purpose is browsing a list
+   (Compendium, Records, run Results). */
+.screen-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+/* A scrolling screen must not also squeeze its children: the screen is a
+   flex column, so panels would otherwise shrink to fit and clip their own
+   content instead of extending the scroll area. */
+.screen-scroll > * {
+  flex-shrink: 0;
+}
+
+/* ---- Typography ---- */
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(20px, 6vw, 26px);
+}
+
+h2 {
+  font-size: 18px;
+}
+
+h3 {
+  font-size: 15px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.faint {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+/* ---- Buttons ---- */
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.08s ease, opacity 0.15s ease, background 0.15s ease, box-shadow 0.15s ease,
+    border-color 0.15s ease;
+  min-height: 54px;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px var(--glow-cyan);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #f2c14e, #d8a53a);
+  color: #241a05;
+  border-color: #d8a53a;
+  box-shadow: 0 0 14px -4px var(--glow-gold);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: 0 0 18px -2px var(--glow-gold);
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #e0654f, #c14a37);
+  color: #2a0d06;
+  border-color: #c14a37;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-soft);
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--accent-cyan-dim);
+  color: var(--text-primary);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 11px 16px;
+  font-size: 14.5px;
+  min-height: 46px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ---- Panels / cards ---- */
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Thin HUD-style accent line along the top edge of every panel. */
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan-dim), var(--accent-cyan) 40%, transparent 85%);
+  opacity: 0.7;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.row-start {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---- Form fields ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.field select {
+  /* A <select> sizes itself to its widest <option>, so a long Spell Set
+     name would otherwise force its container wider than the screen.
+     width:100% + min-width:0 pins it to the column instead. */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  min-height: 48px;
+  color: var(--text-primary);
+  font-size: 16px;
+  outline: none;
+}
+
+.field input[type='text'],
+.field textarea {
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  min-height: 48px;
+  color: var(--text-primary);
+  font-size: 16px;
+  outline: none;
+}
+
+/* No focus glow/outline on text inputs — the answer box during a timed
+   challenge needs to stay fully legible, not ringed or obscured.
+   font-size: 16px on every text input/textarea/select (including ones
+   outside .field, which don't get the rules above) is the standard fix
+   for iOS Safari's auto-zoom-on-focus: it only zooms the viewport when
+   the focused field's computed font-size is below 16px. */
+input[type='text'],
+textarea,
+select {
+  font-size: 16px;
+  outline: none;
+}
+
+input[type='text']:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.field-error {
+  color: var(--accent-red);
+  font-size: 12px;
+}
+
+/* ---- Bars (HP / Charge / XP / Timer) ---- */
+
+.bar-track {
+  height: 10px;
+  border-radius: 6px;
+  background: #10131b;
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+}
+
+.bar-track.thin {
+  height: 6px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.25s ease;
+}
+
+.bar-fill.hp {
+  background: linear-gradient(90deg, #e0654f, #f28a5f);
+}
+
+.bar-fill.charge {
+  background: linear-gradient(90deg, #d8a53a, #f2c14e);
+}
+
+.bar-fill.xp {
+  background: linear-gradient(90deg, #3f7fb0, #5fa8e0);
+}
+
+.bar-fill.plateau {
+  background: linear-gradient(90deg, #7d5fb0, #a58bd8);
+}
+
+.bar-fill.timer {
+  background: linear-gradient(90deg, #6bdb8f, #f2c14e 60%, #e0654f);
+}
+
+/* ---- Main menu ---- */
+
+.menu-title {
+  text-align: center;
+  padding: 28px 0 6px;
+}
+
+.menu-title .glyph {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.menu-item:active {
+  transform: scale(0.98);
+}
+
+.menu-item:hover {
+  border-left-color: var(--accent-cyan);
+  box-shadow: -2px 0 12px -4px var(--glow-cyan);
+}
+
+.menu-item .icon {
+  font-size: 26px;
+  width: 40px;
+  text-align: center;
+}
+
+.menu-item .label {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.menu-item .desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar h1 {
+  flex: 1;
+}
+
+/* ---- Asset image ---- */
+
+.asset-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.avatar-img {
+  /* Square icon, not a circle. width:100% makes it fill whatever box it's
+     placed in (instead of falling back to the source PNG's native 256px
+     size), aspect-ratio locks that box to 1:1 no matter what the
+     surrounding layout tries to do, and object-fit: cover crops the
+     source image to fill the square instead of stretching/squishing it —
+     true regardless of the source PNG's own dimensions. */
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  image-rendering: pixelated;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+}
+
+/* ---- Spell card ---- */
+
+.spell-card {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-panel-raised));
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 126px;
+  max-width: 150px;
+  cursor: pointer;
+  position: relative;
+}
+
+.spell-card.selected {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(242, 193, 78, 0.35);
+}
+
+.spell-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.spell-card .art {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+}
+
+.spell-card .word {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spell-card .meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  color: var(--accent-cyan-dim);
+}
+
+.spell-card-list-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.spell-card-list-item .thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border-soft);
+}
+
+.spell-card-list-item .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spell-card-list-item .kor {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.spell-card-list-item .eng {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+/* ---- Dungeon scene ---- */
+
+.scene-window {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 0.82;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--accent-cyan-dim);
+  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 0 1px rgba(79, 227, 240, 0.08);
+  background: var(--bg-panel);
+  flex-shrink: 0;
+}
+
+.scene-window .asset-img {
+  position: absolute;
+  inset: 0;
+}
+
+.battle-enemy-overlay,
+.explore-event-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The art sits directly on the scene with no frame around it — a border
+   and panel behind a transparent sprite just reads as a stray window.
+   object-fit: contain (not cover) still keeps the whole sprite visible
+   rather than cropping it. */
+.battle-enemy-overlay .asset-img,
+.explore-event-overlay .asset-img {
+  position: static;
+  object-fit: contain;
+  border: 0;
+  background: none;
+  /* A soft drop shadow lifts the sprite off the backdrop without drawing
+     a box around it. */
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+}
+
+.battle-enemy-overlay .asset-img {
+  width: 80%;
+  height: 80%;
+}
+
+.explore-event-overlay .asset-img {
+  /* 25% larger than the previous 42%. */
+  width: 53%;
+  height: 53%;
+}
+
+.scene-window .scene-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(10, 12, 18, 0.72);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.progress-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
+.progress-meter b {
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.progress-meter .boss-status {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.progress-meter .boss-status.locked {
+  color: var(--text-faint);
+}
+
+.progress-meter .boss-status.open {
+  color: var(--accent-green);
+  animation: pulse-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 4px rgba(107, 219, 143, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(107, 219, 143, 0.8);
+  }
+}
+
+.typewriter-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  min-height: 92px;
+  font-size: 15px;
+  line-height: 1.55;
+  position: relative;
+  cursor: pointer;
+}
+
+.typewriter-box .tap-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.totem-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px 14px;
+  margin-top: 8px;
+  box-shadow: 0 0 16px -6px var(--glow-cyan);
+}
+
+/* Pinned label, matching .scene-tag, so the totem panel reads as its own
+   "window" alongside the scene window instead of a thin status strip. */
+.totem-panel-tag {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: rgba(10, 12, 18, 0.9);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.totem-panel .avatar-img {
+  /* The player's own character gets real presence in the dungeon HUD —
+     its own framed cell, sized as a share of the panel so it scales with
+     the screen instead of staying a fixed thumbnail. */
+  width: 38%;
+  max-width: 132px;
+  min-width: 96px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  padding: 4px;
+}
+
+/* The big character portrait on the Totem screen — sized generously and
+   using object-fit: contain (not the shared .avatar-img cover) so the
+   whole character is always visible, never cropped at the edges. */
+.totem-hero-frame {
+  width: 62%;
+  max-width: 220px;
+  margin: 0 auto 12px;
+}
+
+.avatar-hero {
+  object-fit: contain;
+  background: var(--bg-panel-raised);
+}
+
+.totem-panel .stats {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.totem-panel .name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 16px;
+}
+
+.totem-panel .name-row .name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.totem-panel .hp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-bar .btn {
+  flex: 1 1 auto;
+}
+
+/* ---- Word info panel (slide-up) ---- */
+
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 5, 8, 0.6);
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.slide-panel {
+  width: 100%;
+  max-width: 430px;
+  max-height: 82dvh;
+  background: var(--bg-panel);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  border-bottom: none;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.slide-panel-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.word-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.word-chip .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.done {
+  background: var(--accent-green);
+}
+
+.status-dot.pending {
+  background: var(--text-faint);
+}
+
+/* ---- Battle screen ---- */
+
+.battle-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.enemy-hp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plateau-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(165, 139, 216, 0.12);
+  border: 1px solid var(--plateau-color);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--plateau-color);
+}
+
+.hand-scroll {
+  display: flex;
+  gap: 10px;
+  padding: 4px 2px 10px;
+}
+
+/* Cards divide the row evenly so the whole hand is reachable without a
+   sideways swipe; min-width:0 lets them shrink below their content width. */
+.hand-scroll .spell-card {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.challenge-prompt {
+  text-align: center;
+  padding: 18px 10px;
+}
+
+.challenge-prompt .prompt-word {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent-gold);
+  margin-top: 6px;
+  text-shadow: 0 0 18px var(--glow-gold);
+}
+
+.challenge-prompt .prompt-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Answer tiles ---- */
+
+/* The slots the player fills in, above the tray. */
+.tile-answer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 58px;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  background: var(--bg-deep);
+  border: 1px solid var(--border-soft);
+}
+
+.answer-slot {
+  width: 40px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+  opacity: 0.5;
+}
+
+.tile-tray {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.answer-tile {
+  appearance: none;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 48px;
+  min-height: 56px;
+  padding: 10px 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: transform 0.08s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.answer-tile:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.answer-tile:disabled {
+  opacity: 0.22;
+  cursor: default;
+}
+
+/* Tiles already placed in the answer row read as "committed". */
+.answer-tile.placed {
+  min-height: 46px;
+  min-width: 42px;
+  padding: 8px 11px;
+  background: linear-gradient(180deg, rgba(242, 193, 78, 0.2), var(--bg-card));
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.tile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.feedback-banner {
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.feedback-banner.correct {
+  background: rgba(107, 219, 143, 0.15);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.feedback-banner.incorrect {
+  background: rgba(224, 101, 79, 0.15);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+}
+
+/* ---- Results screen ---- */
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.stat-tile .value {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--accent-gold);
+}
+
+.stat-tile .label {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+/* ---- Records screen ---- */
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.chip {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-panel-raised);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip.active {
+  background: var(--accent-gold);
+  color: #241a05;
+  border-color: var(--accent-gold);
+  font-weight: 700;
+}
+
+.record-row {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-row .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.record-row .head .kor {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.record-row .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.record-row .stats-grid b {
+  color: var(--text-primary);
+  display: block;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-faint);
+}
+
+.empty-state .glyph {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 360px) {
+  .screen {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .spell-card {
+    min-width: 96px;
+  }
+}
+
+/* ---- Main-menu Totem banner ---- */
+
+.totem-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px 14px;
+  margin-top: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  box-shadow: 0 0 16px -6px var(--glow-cyan);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.totem-banner:hover {
+  border-color: var(--accent-cyan-dim);
+  box-shadow: 0 0 20px -5px var(--glow-cyan);
+}
+
+.totem-banner:active {
+  transform: scale(0.99);
+}
+
+.totem-banner-tag {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: rgba(10, 12, 18, 0.9);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.totem-banner .avatar-img {
+  width: 38%;
+  max-width: 132px;
+  min-width: 96px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  padding: 4px;
+}
+
+.totem-banner-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.totem-banner-body .name-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 16px;
+}
+
+.totem-banner-body .name-row .name {
+  font-weight: 700;
+}
+
+.totem-banner-body .hp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.totem-banner-foot {
+  font-family: var(--font-mono);
+}
+
+/* ---- Dungeon room (entrance / intermission) ---- */
+
+.room-flavor h3 {
+  margin-bottom: 4px;
+}
+
+.room-flavor p {
+  font-size: 14px;
+}
+
+.room-notice {
+  background: rgba(107, 219, 143, 0.1);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--accent-green);
+}
+
+/* One stacked column, fixed order: Move, Totem, Tendency, Items. A grid
+   reflows as items are added or removed; a column never does, so the
+   button under the player's thumb is always the same one. */
+.room-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.room-action {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  color: var(--text-primary);
+  min-height: 98px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.room-action:hover {
+  border-left-color: var(--accent-cyan);
+  box-shadow: 0 0 16px -6px var(--glow-cyan);
+}
+
+.room-action:active {
+  transform: scale(0.98);
+}
+
+.room-action.primary {
+  border-left-color: var(--accent-gold);
+  background: linear-gradient(180deg, rgba(242, 193, 78, 0.12), var(--bg-card));
+}
+
+.room-action.primary:hover {
+  border-left-color: var(--accent-gold);
+  box-shadow: 0 0 16px -6px var(--glow-gold);
+}
+
+.room-action .icon {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.room-action .label {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.room-action .sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.35;
+}
+
+/* ---- Item panel ---- */
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.item-row .item-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.item-row .item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-row .item-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ---- Status panel ---- */
+
+.status-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.status-portrait {
+  width: 38%;
+  max-width: 130px;
+  flex-shrink: 0;
+}
+
+.status-portrait .avatar-img {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  padding: 4px;
+}
+
+.status-hero-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-hero-body .hp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+/* General 2-column stat grid (the Records screen scopes its own denser
+   3-column variant under .record-row, which stays more specific). */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ---- Spell Word batch import ---- */
+
+.import-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.import-count {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+}
+
+.import-count.ok {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.import-count.duplicate {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold-dim);
+}
+
+.import-count.error {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.import-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.import-row.ok {
+  border-left-color: var(--accent-green);
+}
+
+.import-row.duplicate {
+  border-left-color: var(--accent-gold-dim);
+}
+
+.import-row.error {
+  border-left-color: var(--accent-red);
+}
+
+.import-row-line {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  width: 22px;
+  text-align: right;
+}
+
+.import-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.import-row-message {
+  font-size: 11px;
+}
+
+.import-row-message.error {
+  color: var(--accent-red);
+}
+
+.import-row-message.duplicate {
+  color: var(--accent-gold-dim);
+}
+
+/* ---- Dungeon config screen ---- */
+
+.dungeon-name {
+  text-align: center;
+  font-size: 22px;
+  background: linear-gradient(180deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tier-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tier-card {
+  appearance: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.tier-card:active {
+  transform: scale(0.99);
+}
+
+.tier-card[data-selected='true'] {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 16px -6px var(--glow-gold);
+}
+
+.tier-card-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tier-card-meta {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.dungeon-info-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dungeon-info-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ---- Spell Word batch import ---- */
+
+.import-summary {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.import-count {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+}
+
+.import-count.ok {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.import-count.duplicate {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold-dim);
+}
+
+.import-count.error {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.import-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.import-row.ok {
+  border-left-color: var(--accent-green);
+}
+
+.import-row.duplicate {
+  border-left-color: var(--accent-gold-dim);
+}
+
+.import-row.error {
+  border-left-color: var(--accent-red);
+}
+
+.import-row-line {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  width: 22px;
+  text-align: right;
+}
+
+.import-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.import-row-message {
+  font-size: 11px;
+}
+
+.import-row-message.error {
+  color: var(--accent-red);
+}
+
+.import-row-message.duplicate {
+  color: var(--accent-gold-dim);
+}
+
+/* ---- Dungeon config screen ---- */
+
+.dungeon-name {
+  text-align: center;
+  font-size: 22px;
+  background: linear-gradient(180deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tier-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tier-card {
+  appearance: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.tier-card:active {
+  transform: scale(0.99);
+}
+
+.tier-card[data-selected='true'] {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 16px -6px var(--glow-gold);
+}
+
+.tier-card-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tier-card-meta {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.dungeon-info-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dungeon-info-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ---- Challenge modal (vocabulary answer popup) ---- */
+
+.challenge-modal-backdrop {
+  /* Slightly higher than the informational SlidePanel popups so a
+     challenge can be shown on top of e.g. the boss plateau banner. */
+  z-index: 45;
+  align-items: center;
+}
+
+.challenge-modal-panel {
+  max-height: none;
+  border-radius: var(--radius-lg);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+/* The prompt already renders its own .panel chrome (ChallengeView reuses
+   it inline elsewhere) — flatten that inside the modal so there's one
+   card, not two nested ones. */
+.challenge-modal-panel .challenge-prompt {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 4px 4px 0;
+}
+
+.challenge-modal-panel .challenge-prompt::before {
+  display: none;
+}
+
+.challenge-modal-panel .timer-row {
+  margin-bottom: -4px;
+}
+
+/* ---- Compact/no-scroll screen utilities ---- */
+
+/* Tighter padding/gap for screens that need to fit one viewport without
+   scrolling (Dungeon config). Main Menu and Totem are compact enough with
+   the default .screen spacing once their variable-length lists move into
+   popups; this one shaves a bit more since it has the most sections. */
+.screen-tight {
+  padding-top: max(10px, env(safe-area-inset-top));
+  gap: 10px;
+}
+
+.scene-window.compact {
+  height: 19dvh;
+}
+
+.totem-panel.compact {
+  padding: 10px 12px 8px;
+  gap: 12px;
+}
+
+.totem-panel.compact .avatar-img {
+  width: 36%;
+  max-width: 108px;
+  min-width: 78px;
+}
+
+.totem-panel.compact .name-row {
+  font-size: 14px;
+}
+
+/* Two selects side by side instead of stacked full-width fields.
+   min-width:0 on the grid children is required: grid items default to
+   min-width:auto, which refuses to shrink below their content's intrinsic
+   width and pushes the second column off-screen. */
+.config-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+.config-row > .field {
+  min-width: 0;
+}
+
+/* Tier cards as a compact horizontal row instead of a vertical stack. */
+.tier-card-list.row {
+  flex-direction: row;
+  gap: 6px;
+}
+
+.tier-card-list.row .tier-card {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 6px;
+  gap: 2px;
+}
+
+.tier-card-list.row .tier-card-name {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.tier-card-list.row .tier-card-meta {
+  font-size: 10px;
+}
+
+/* ---- Dungeon progress track (map-style, sits above the scene image) ---- */
+
+.dungeon-track {
+  padding: 2px 4px 0;
+}
+
+.dungeon-track-line {
+  position: relative;
+  height: 4px;
+  margin: 0 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.dungeon-track-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-cyan-dim), var(--accent-cyan));
+  box-shadow: 0 0 8px -1px var(--glow-cyan);
+  transition: width 0.4s ease;
+}
+
+/* "You are here" marker riding the filled edge of the track. */
+.dungeon-track-marker {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.25);
+  animation: track-marker-pulse 2s ease-in-out infinite;
+  transition: left 0.4s ease;
+}
+
+.dungeon-track-nodes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -2px;
+}
+
+.dungeon-track-node {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-panel-raised);
+  border: 2px solid var(--border-strong);
+  flex-shrink: 0;
+}
+
+/* Alternate each waypoint up/down off the line — a winding trail rather
+   than a flat row of dots. */
+.dungeon-track-nodes .dungeon-track-node:nth-child(odd) {
+  margin-top: -5px;
+}
+
+.dungeon-track-nodes .dungeon-track-node:nth-child(even) {
+  margin-top: 9px;
+}
+
+.dungeon-track-node.cleared {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 8px -1px var(--glow-cyan);
+}
+
+.dungeon-track-node.boss {
+  width: 22px;
+  height: 22px;
+  margin-top: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.dungeon-track-node.boss.locked {
+  background: var(--bg-panel-raised);
+  border-color: var(--border-strong);
+  opacity: 0.6;
+}
+
+.dungeon-track-node.boss.open {
+  background: linear-gradient(180deg, #f2c14e, #d8a53a);
+  border-color: #d8a53a;
+  animation: track-marker-pulse 2s ease-in-out infinite;
+}
+
+@keyframes track-marker-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px -1px var(--glow-gold);
+  }
+  50% {
+    box-shadow: 0 0 16px 2px var(--glow-gold);
+  }
+}
+
+/* ---- Dungeon in-run compaction (keeps every phase inside one viewport) ---- */
+
+/* In-run scene images are the layout's shock absorber: they take a
+   generous share of the viewport when there's room, but are allowed to
+   shrink (flex-shrink + an explicit min-height, which a flex column
+   otherwise blocks) so a tall room/battle never pushes content
+   off-screen on a shorter phone. */
+.scene-window.dungeon,
+.scene-window.battle,
+.scene-window.compact {
+  aspect-ratio: auto;
+  flex: 0 1 auto;
+  min-height: 78px;
+}
+
+.scene-window.dungeon {
+  height: 25dvh;
+}
+
+.scene-window.battle {
+  height: 24dvh;
+}
+
+/* On a short phone the battle image, both HUDs and a full tile board don't
+   all fit at 24dvh. Take the space off the image for the entire battle —
+   the same size in every phase — instead of collapsing it the moment the
+   answer board opens. */
+@media (max-height: 720px) {
+  .scene-window.battle {
+    height: 15dvh;
+  }
+
+  .challenge-prompt {
+    padding: 10px 8px;
+  }
+}
+
+.room-flavor h3 {
+  font-size: 13px;
+}
+
+.room-flavor p {
+  font-size: 12.5px;
+}
+
+.room-actions .room-action {
+  min-height: 62px;
+  padding: 10px 12px;
+}
+
+.room-actions .room-action .label {
+  font-size: 17px;
+}
+
+.room-actions .room-action .sub {
+  font-size: 11px;
+}
+
+/* ---- Move: dice-roll overlay (rendered inside the scene window) ---- */
+
+.move-roll-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  /* Light scrim so the location art still reads through the roll. */
+  background: rgba(10, 12, 18, 0.55);
+  backdrop-filter: blur(2px);
+  animation: roll-overlay-in 0.18s ease-out;
+}
+
+.move-roll-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.move-roll-die {
+  font-size: 58px;
+  line-height: 1;
+  color: var(--accent-gold);
+  text-shadow: 0 0 22px var(--glow-gold), 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.move-roll-die.rolling {
+  animation: die-tumble 0.32s linear infinite;
+}
+
+.move-roll-die.settled {
+  animation: die-land 0.35s ease-out;
+}
+
+.move-roll-result {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 14px var(--glow-cyan), 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.move-roll-btn {
+  margin-top: 4px;
+  min-width: 130px;
+}
+
+@keyframes roll-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes die-tumble {
+  0% {
+    transform: rotate(-14deg) translateY(0) scale(1);
+  }
+  50% {
+    transform: rotate(14deg) translateY(-8px) scale(1.06);
+  }
+  100% {
+    transform: rotate(-14deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes die-land {
+  0% {
+    transform: scale(1.35) rotate(8deg);
+  }
+  60% {
+    transform: scale(0.94) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Short-viewport tightening: on phones under ~800px tall the default
+   spacing/padding is what pushes dungeon screens over the edge, so trim
+   the flexible chrome rather than letting the page scroll. */
+@media (max-height: 900px) {
+  .screen {
+    gap: 9px;
+    padding-top: max(10px, env(safe-area-inset-top));
+  }
+
+  .totem-panel.compact {
+    padding: 8px 10px 6px;
+  }
+
+  .totem-panel.compact .avatar-img {
+    max-width: 76px;
+    min-width: 60px;
+  }
+
+  .room-flavor h3 {
+    font-size: 12px;
+  }
+
+  .room-flavor p {
+    font-size: 11.5px;
+  }
+
+  .room-action {
+    min-height: 76px;
+    padding: 10px 11px;
+  }
+
+  .answer-tile {
+    min-width: 44px;
+    min-height: 50px;
+    font-size: 18px;
+    padding: 8px 11px;
+  }
+
+  .answer-tile.placed {
+    min-height: 42px;
+  }
+
+  .answer-slot {
+    width: 36px;
+    height: 42px;
+  }
+
+  .dungeon-info-panel {
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .stat-tile {
+    padding: 6px 9px;
+  }
+
+  .stat-tile .value {
+    font-size: 16px;
+  }
+
+  .progress-meter {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+}
+
+/* Very short viewports (iPhone SE and similar): the Dungeon config screen
+   carries the most sections, so drop its most expendable chrome — the
+   flavor line and the tier subtitle — rather than scrolling. */
+@media (max-height: 700px) {
+  .screen-tight {
+    gap: 7px;
+  }
+
+  .screen {
+    gap: 7px;
+  }
+
+  .room-flavor p {
+    display: none;
+  }
+
+  .room-actions {
+    gap: 8px;
+  }
+
+  .room-action {
+    min-height: 66px;
+  }
+
+  /* Main Menu is a fixed pane now, so it has to fit the shortest phones
+     too — trim the title block and menu-tile padding rather than clip. */
+  .menu-title {
+    padding: 8px 0 2px;
+  }
+
+  .menu-title .glyph {
+    font-size: 34px;
+  }
+
+  .menu-title p {
+    display: none;
+  }
+
+  .menu-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .menu-item .desc {
+    display: none;
+  }
+
+  .totem-banner {
+    padding: 12px 12px 10px;
+  }
+
+  .totem-banner .avatar-img {
+    max-width: 84px;
+    min-width: 64px;
+  }
+
+  .dungeon-name {
+    font-size: 18px;
+  }
+
+  .dungeon-info-desc {
+    display: none;
+  }
+
+  .tier-card-list.row .tier-card-meta {
+    display: none;
+  }
+
+  .field label {
+    font-size: 12px;
+  }
+
+  .stat-tile .value {
+    font-size: 15px;
+  }
+}
+
+/* ---- Answering a challenge inline ---- */
+
+/* While a challenge is up, the surrounding windows are *hidden*, never
+   resized. Squeezing the scene image and totem panel to make room made the
+   whole screen appear to shift and rescale mid-answer; hiding them instead
+   means everything that stays on screen keeps its normal size, and
+   everything else returns unchanged when the answer is submitted.
+
+   The scene image is never one of the things that goes. You are always
+   looking at where you are — the enemy you're trading blows with, the
+   chest you're picking, the sealed door you're unpicking — so it stays on
+   screen and at a constant size through every event and every prompt.
+   What goes is only the readouts you don't act on mid-answer: the map
+   track, the words-seen meter, the narration box and the plateau banner. */
+.screen[data-challenge='true'] .dungeon-track,
+.screen[data-challenge='true'] .typewriter-box,
+.screen[data-challenge='true'] .progress-meter,
+.screen[data-challenge='true'] .plateau-banner {
+  display: none;
+}
+
+/* Pin the explore scene too, for the same reason the battle one is pinned:
+   it is the layout's shock absorber by default, and shrinking as the answer
+   board opens is exactly the rescale this block exists to prevent. */
+.screen[data-challenge='true'] .scene-window.dungeon {
+  flex-shrink: 0;
+}
+
+/* The answer board takes the space the hidden windows leave behind. */
+.screen[data-challenge='true'] .challenge-prompt {
+  margin-top: 4px;
+}
+
+/* The battle scene stays put while you answer — you're looking at the enemy
+   you're trading blows with. It normally acts as the layout's shock
+   absorber, so pin it here: shrinking as the answer board appears is the
+   rescale this whole block exists to avoid. The short-screen rules below
+   make sure there's room for it without the squeeze. */
+.screen[data-challenge='true'] .scene-window.battle {
+  flex-shrink: 0;
+}
+
+.challenge-prompt {
+  flex-shrink: 0;
+}
+
+/* ===========================================================================
+   Dragon King dungeon loop — run HUD, events, Hangman, rest, results
+   =========================================================================== */
+
+/* ---- Always-on run readout ---- */
+
+.run-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.run-hud-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.run-hud-row.secondary {
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.run-hud-mode {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  font-size: 11px;
+}
+
+.run-hud-turn {
+  color: var(--text-secondary);
+}
+
+.run-hud-life {
+  margin-left: auto;
+  color: var(--accent-gold);
+  letter-spacing: 1px;
+}
+
+.run-hud-money {
+  color: var(--text-secondary);
+}
+
+.run-hud-chip {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-panel-raised);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.run-hud-chip.on {
+  border-color: var(--accent-gold-dim);
+  color: var(--accent-gold);
+}
+
+.run-hud-chip.off {
+  color: var(--text-faint);
+}
+
+.run-hud-chip.mod {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+/* ---- Direction fork ---- */
+
+.direction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.direction-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  text-align: left;
+  min-height: 56px;
+  padding: 10px 12px;
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-panel-raised));
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--accent-purple);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.direction-card:active {
+  border-left-color: var(--accent-gold);
+}
+
+.direction-name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.direction-flavor {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.direction-duration {
+  font-size: 11px;
+}
+
+/* ---- Rewards ---- */
+
+.reward-panel {
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-gold-dim);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 18px -10px var(--glow-gold);
+  flex-shrink: 0;
+}
+
+.reward-title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 6px;
+}
+
+.reward-lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reward-line {
+  padding: 3px 9px;
+  font-size: 13px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+/* ---- Magic Room (Hangman) ---- */
+
+.hangman-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.hangman-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 48px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  background: var(--bg-deep);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.hangman-slot.filled {
+  border-style: solid;
+  border-color: var(--accent-gold-dim);
+}
+
+.hangman-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.hangman-mistakes {
+  color: var(--accent-red);
+  letter-spacing: 2px;
+}
+
+.hangman-mistakes.danger {
+  animation: pulse-gold 1.2s ease-in-out infinite;
+}
+
+.answer-tile.guess-hit {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  opacity: 0.85;
+}
+
+.answer-tile.guess-miss {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  opacity: 0.5;
+}
+
+/* ---- Rest area ---- */
+
+.rest-area {
+  flex-shrink: 0;
+}
+
+.rest-area h3 {
+  margin-bottom: 4px;
+}
+
+/* ---- Battle: attack-card clue, barrier state, defense volley ---- */
+
+/* The two-letter clue is the whole card face during an attack, so it gets
+   the card's full height and reads as the card's identity. */
+.word.card-clue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 76px;
+  font-family: var(--font-mono, monospace);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 18px var(--glow-cyan);
+  white-space: nowrap;
+}
+
+.card-barrier {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.card-barrier.pending {
+  color: var(--plateau-color);
+}
+
+.card-barrier.done {
+  color: var(--accent-green);
+}
+
+.spell-card.barrier-pending {
+  border-color: var(--plateau-color);
+}
+
+.spell-card.barrier-cleared {
+  opacity: 0.62;
+}
+
+.defense-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.defense-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.defense-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+}
+
+.defense-dot.active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 6px -1px var(--glow-cyan);
+}
+
+.defense-dot.hit {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.defense-dot.miss {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+/* ---- Life Points ---- */
+
+.life-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.life-pip {
+  color: var(--text-faint);
+  font-size: 16px;
+}
+
+.life-pip.lit {
+  color: var(--accent-gold);
+}
+
+/* ---- Results ---- */
+
+.totem-outcome.destroyed {
+  border-color: var(--accent-red);
+}
+
+.destroyed-note {
+  color: var(--accent-red);
+  font-size: 13px;
+}
+
+.word-report-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 9px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.word-report-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.word-report-word {
+  font-size: 14px;
+}
+
+.word-report-meta {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* ---- Answering modes: shed the chrome that isn't load-bearing ----
+
+   The run HUD's second row (key/door/path chips) and the exit row are
+   reference information, not something you act on mid-answer, so they go
+   while a prompt is up. What stays is everything the answer depends on:
+   the enemy, your Totem's HP, the timer and the board itself. Nothing is
+   resized — the surviving windows keep their normal size. */
+.screen[data-challenge='true'] .run-hud-row.secondary,
+.screen[data-challenge='true'] > .row {
+  display: none;
+}
+
+/* A Rest Area is a menu, not a scene — the map track and progress meter
+   don't earn their space there. */
+.screen[data-mode='rest'] .dungeon-track,
+.screen[data-mode='rest'] .progress-meter,
+.screen[data-mode='rest'] .typewriter-box {
+  display: none;
+}
+
+/* The Hangman board is the tallest single panel in the game; trim its
+   slots so a 5-syllable word still fits a short phone. */
+@media (max-height: 720px) {
+  .hangman-slot {
+    min-width: 34px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .hangman-slots {
+    margin: 6px 0;
+  }
+}
+
+/* Standby's secondary destinations (Rest Area, Boss Door) sit side by side
+   rather than stacked, so a fully-explored hub still fits one viewport. */
+.standby-extras {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.standby-extras > .btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+}
+
+/* On a short phone the map track is the most expendable readout — the
+   progress meter below it carries the same count in words. */
+@media (max-height: 720px) {
+  .dungeon-track {
+    display: none;
+  }
+}
+
+/* Confirmation for a one-way door (entering the boss). */
+.confirm-dialog {
+  width: min(340px, calc(100% - 32px));
+  margin: auto;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-red);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 30px -12px var(--accent-red);
+  text-align: center;
+}
+
+.confirm-dialog p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* The Rest Area's scene stays put like every other event's — it is never
+   the thing that shrinks to make room. */
+.screen[data-mode='rest'] .scene-window {
+  flex-shrink: 0;
+}
+
+/* Short phones: the Rest Area and the answer board each give up a little
+   of their own chrome so the scene window never has to. */
+@media (max-height: 720px) {
+  .rest-flavor {
+    display: none;
+  }
+
+  .rest-area .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .rest-area .stats-grid .stat-tile {
+    padding: 6px 4px;
+  }
+
+  .rest-area .stats-grid .value {
+    font-size: 14px;
+  }
+
+  /* The answer board gives up its own slack — never the scene window, and
+     never a tile's 44px touch target. */
+  .challenge-prompt {
+    padding: 8px 8px;
+  }
+
+  .challenge-prompt .prompt-word {
+    font-size: 22px;
+  }
+
+  .tile-answer {
+    min-height: 40px;
+    margin-top: 4px;
+    padding: 4px;
+  }
+
+  .answer-slot {
+    height: 32px;
+    width: 30px;
+  }
+}
+
+/* ===========================================================================
+   Vocabulary: word types and elements
+   =========================================================================== */
+
+/* One rule per element rather than six near-identical blocks: each sets the
+   local accent, and everything below paints from that. */
+.element-earth { --element: var(--element-earth); }
+.element-fire { --element: var(--element-fire); }
+.element-water { --element: var(--element-water); }
+.element-wind { --element: var(--element-wind); }
+.element-lightning { --element: var(--element-lightning); }
+.element-metal { --element: var(--element-metal); }
+
+/* Compact badge used in lists, records and import previews. */
+.element-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-radius: 999px;
+  border: 1px solid var(--element, var(--border-soft));
+  color: var(--element, var(--text-secondary));
+  background: color-mix(in srgb, var(--element, transparent) 12%, transparent);
+}
+
+/* The editor's read-only Element readout — shows what the Word Type chose. */
+.element-readout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--element, var(--border-soft));
+  background: color-mix(in srgb, var(--element, transparent) 8%, var(--bg-panel));
+  flex-shrink: 0;
+}
+
+.element-readout .element-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.element-readout .element-name {
+  font-weight: 700;
+  color: var(--element, var(--text-primary));
+}
+
+/* Conjugation fields appear and disappear with the word type, so they get a
+   frame that makes clear they belong together. */
+.conjugation-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  border-left: 2px solid var(--accent-cyan-dim);
+  background: var(--bg-panel);
+  flex-shrink: 0;
+}
+
+.conjugation-head {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+}
+
+/* A battle card is tinted by its element. */
+.spell-card[class*='element-'] {
+  border-color: color-mix(in srgb, var(--element, var(--border-soft)) 55%, var(--border-soft));
+}
+
+.spell-editor .field .faint {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+/* ---- Standby: stacked actions and the Move destination menu ---- */
+
+/* No icon column any more — the label is the button, centred, on a tall
+   target that is comfortable to hit one-handed. */
+.room-actions .room-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+  padding: 14px 16px;
+  min-height: 72px;
+}
+
+.room-actions .room-action .label {
+  font-size: 19px;
+  letter-spacing: 0.02em;
+}
+
+.room-actions .room-action .sub {
+  font-size: 12px;
+}
+
+.room-action-caret {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--accent-cyan);
+}
+
+/* Places the run has already found are destinations, not commands — they
+   hang off Move instead of cluttering the hub with extra buttons. */
+.destination-menu {
+  width: min(360px, calc(100% - 32px));
+  margin: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 30px -12px var(--glow-cyan);
+}
+
+.destination-menu h2 {
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.destination-option {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 68px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.destination-option.danger {
+  border-left-color: var(--accent-red);
+}
+
+.destination-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.destination-option .label {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.destination-option .sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ---- Results: one viewport, details behind modals ---- */
+
+.results-screen {
+  gap: 10px;
+}
+
+.results-head {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.results-head .glyph {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.results-head h1 {
+  font-size: 24px;
+  margin: 2px 0;
+}
+
+.results-head p {
+  font-size: 13px;
+}
+
+/* A denser stat grid than the standalone one — three across, less padding,
+   so six figures still fit above the fold. */
+.results-grid.tight {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.results-grid.tight .stat-tile {
+  padding: 8px 6px;
+}
+
+.results-grid.tight .stat-tile .value {
+  font-size: 17px;
+}
+
+.results-grid.tight .stat-tile .label {
+  font-size: 10px;
+}
+
+.totem-outcome {
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+
+.accuracy-panel {
+  padding: 10px 12px;
+  flex-shrink: 0;
+}
+
+.accuracy-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.accuracy-cell {
+  text-align: center;
+}
+
+.accuracy-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+/* Short phones trim the flourish, not the figures. */
+@media (max-height: 720px) {
+  .results-head .glyph {
+    font-size: 26px;
+  }
+
+  .results-head h1 {
+    font-size: 20px;
+  }
+
+  .results-grid.tight .stat-tile .value {
+    font-size: 15px;
+  }
+
+  .accuracy-value {
+    font-size: 17px;
+  }
+}
+
+/* A 667-tall screen cannot fit four taller buttons, a bigger portrait and a
+   dialogue box at once. The label keeps its new size — it is what the
+   player reads — and the secondary line is what gives way. */
+@media (max-height: 720px) {
+  .room-actions .room-action {
+    min-height: 58px;
+    padding: 8px 12px;
+  }
+
+  .room-actions .room-action .sub {
+    display: none;
+  }
+
+  .destination-option {
+    min-height: 60px;
+    padding: 9px 12px;
+  }
+
+  .destination-option .sub {
+    display: none;
+  }
+}
+
+/* ---- The answer board absorbs its own overflow ----
+
+   A long word with a full set of decoys wraps the tile tray onto extra
+   rows, and with a multi-word enemy attack (progress dots + timer) that
+   was enough to push the screen past the viewport. The board is the thing
+   that grows, so it is the thing that gives: it may shrink, and the tray
+   scrolls inside it once the tiles no longer fit.
+
+   Deliberately only the board — the scene image, both HUDs and the timer
+   keep their size, so nothing around the player rescales mid-answer. Tile
+   size is untouched, so tap targets stay where they are. */
+.challenge-prompt {
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.challenge-prompt .tile-tray {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  /* Room for the scrollbar so tiles never sit under it. */
+  padding-right: 2px;
+}
+
+/* The prompt, the assembled answer and the actions stay put; only the
+   tray between them scrolls. */
+.challenge-prompt .prompt-label,
+.challenge-prompt .prompt-word,
+.challenge-prompt .tile-answer,
+.challenge-prompt .tile-actions {
+  flex-shrink: 0;
+}
+
+/* ---- Totem portrait picker ---- */
+
+/* The hero frame is a button now — it keeps its look, gains a hint. */
+button.totem-hero-frame {
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.totem-hero-edit {
+  appearance: none;
+  display: block;
+  margin: -6px auto 10px;
+  padding: 4px 10px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--accent-cyan);
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.avatar-option {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 10px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
+.avatar-option.selected {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 16px -6px var(--glow-gold);
+  color: var(--accent-gold);
+}
+
+.avatar-option .avatar-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.avatar-option-name {
+  font-size: 10px;
+  word-break: break-all;
+  text-align: center;
+}
