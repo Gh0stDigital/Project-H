@@ -20,7 +20,7 @@ export function MainMenuScreen() {
     <div className="screen">
       <div className="menu-title">
         <span className="glyph">🔮</span>
-        <h1>Thoth</h1>
+        <h1>Project H</h1>
         <p className="muted">A language-study dungeon crawler</p>
       </div>
 
