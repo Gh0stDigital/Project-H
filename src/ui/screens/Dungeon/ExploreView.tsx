@@ -168,21 +168,23 @@ export function ExploreView() {
           </div>
         )}
         <span className="scene-tag">{inStandby || rolling ? 'Standby' : (event?.title ?? 'Standby')}</span>
-        {rolling && <MoveRollModal resultTitle={null} onSettled={() => setRollSettled(true)} />}
-      </div>
+        {/* The narration is its own window inside the scene, sitting over the
+            lower part of the art. Keeping it here rather than as a sibling
+            below buys back its whole height for the player's options. It is
+            deliberately NOT unmounted while the die is in the air — the text
+            carries on through the roll and is replaced once the roll lands. */}
+        <div className="dialogue-slot in-scene">
+          {dialogueLines.length > 0 && run.state !== 'Rest' && (
+            <TypewriterText
+              key={dialogueKey}
+              lines={dialogueLines}
+              charsPerSecond={charsPerSecond}
+              onRevealed={() => setRevealedKey(dialogueKey)}
+            />
+          )}
+        </div>
 
-      {/* One dialogue window, always in the same place. It is deliberately
-          NOT unmounted while the die is in the air — the text carries on
-          through the roll and is replaced once the roll lands. */}
-      <div className="dialogue-slot">
-        {dialogueLines.length > 0 && run.state !== 'Rest' && (
-          <TypewriterText
-            key={dialogueKey}
-            lines={dialogueLines}
-            charsPerSecond={charsPerSecond}
-            onRevealed={() => setRevealedKey(dialogueKey)}
-          />
-        )}
+        {rolling && <MoveRollModal resultTitle={null} onSettled={() => setRollSettled(true)} />}
       </div>
 
       <TotemPanel totem={totem} compact />
