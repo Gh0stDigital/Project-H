@@ -4,6 +4,7 @@ import { usePersistentStore } from '@/state/persistentStore'
 import { attackCardClue, selectableSpellIds } from '@/systems/battleEngine'
 import { isFullyCleared, remainingCount } from '@/systems/bossPlateau'
 import { AssetImage } from '@/ui/components/AssetImage'
+import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { sceneArt } from '@/config/scenes'
 import { Bar } from '@/ui/components/Bar'
 import { SpellCard } from '@/ui/components/SpellCard'
@@ -90,8 +91,8 @@ export function BattleView() {
       <RunHud run={run} totem={totem} modeLabel={battle.isBoss ? 'Boss Battle' : 'Battle'} />
 
       <div className="scene-window battle">
-        <AssetImage category={scene.category} assetKey={scene.key} alt="Dungeon location" />
-        <div className="battle-enemy-overlay">
+        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="Dungeon location" />
+        <div key={battle.enemy.imageKey} className="battle-enemy-overlay">
           <AssetImage category={battle.enemy.imageCategory} assetKey={battle.enemy.imageKey} alt={battle.enemy.name} />
         </div>
         <span className="scene-tag">{battle.enemy.name}</span>

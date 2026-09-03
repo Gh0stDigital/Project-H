@@ -38,11 +38,12 @@ const CORRIDORS = ['dkp_corridor1', 'dkp_corridor2'] as const
 
 /**
  * Situations whose candidates are peers rather than a first choice with
- * alternates. Standby is every plain corridor, so it alternates evenly;
+ * alternates. Standby is every plain corridor and the fight has two arena
+ * backdrops, so both alternate evenly;
  * everywhere else the leading candidate is the room the event is actually
  * about and should usually be what you see.
  */
-const EVEN_ODDS: ReadonlySet<SceneKind> = new Set<SceneKind>(['standby'])
+const EVEN_ODDS: ReadonlySet<SceneKind> = new Set<SceneKind>(['standby', 'battle_screen'])
 
 /**
  * Candidates per situation, best fit first. Corridors trail most lists
@@ -54,10 +55,10 @@ const sceneCandidates: Record<SceneKind, readonly string[]> = {
   treasure: ['dkp_treasureRoom', 'dkp_keyRoom', ...CORRIDORS],
   trap: ['dkp_trapRoom1', 'dkp_shrineRoom', ...CORRIDORS],
   // The encounter, met in a corridor or at a shrine — varied.
-  battle: ['dkp_battle', 'dkp_shrineRoom', ...CORRIDORS],
+  battle: ['dkp_battle', 'dkp_battle2', 'dkp_shrineRoom', ...CORRIDORS],
   // The fight itself. Always the battle backdrop: it is the arena, not a
   // place you happened to walk through.
-  battle_screen: ['dkp_battle'],
+  battle_screen: ['dkp_battle', 'dkp_battle2'],
   boss_battle: ['dkp_bossBattle'],
   boss_door: ['dkp_bossBattle'],
   rest: ['dkp_restRoom'],

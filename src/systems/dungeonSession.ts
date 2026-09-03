@@ -24,6 +24,7 @@ import { tickModifiers, addModifier as addModifierTo } from './directionModifier
 import { initWordStats, markIntroduced, recordAttempt, type AttemptKind } from './wordStats'
 import { transition } from './dungeonState'
 import { makeId } from './idGen'
+import { enemyArtFor } from './battleEngine'
 
 /**
  * Dungeon run orchestration — pure state transforms over DungeonRunState.
@@ -177,13 +178,18 @@ export function generateNextEvent(
   const direction = type === 'trap' ? 'kor_to_eng' : 'eng_to_kor'
   const challenge = spell ? generateChallenge(spell, def.challengeContext, direction) : null
 
+  // spawnEnemy is seeded by the event id, so deciding the art here from the
+  // same id means the encounter shows the foe the player is about to fight
+  // rather than a generic placeholder.
+  const eventId = makeId('evt')
+
   const event: DungeonEvent = {
-    id: makeId('evt'),
+    id: eventId,
     type,
     title: def.title,
     bodyText: def.bodyText,
     imageCategory: def.imageCategory,
-    imageKey: def.imageKey,
+    imageKey: type === 'battle' ? enemyArtFor(eventId) : def.imageKey,
     challenge,
     directionChoices: type === 'direction' ? buildDirectionChoices(rng) : null,
   }

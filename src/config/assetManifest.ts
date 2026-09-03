@@ -7,9 +7,9 @@ export const assetManifest = {
   bosses: ['default', 'guardian'],
   enemies: ['default', 'goblin', 'slime', 'wraith'],
   events: ['default', 'bossroom', 'branch', 'discovery', 'empty', 'special'],
-  locations: ['default', 'cave', 'dkp_2way', 'dkp_battle', 'dkp_bossBattle', 'dkp_corridor1', 'dkp_corridor2', 'dkp_entrance', 'dkp_keyRoom', 'dkp_restRoom', 'dkp_shrineRoom', 'dkp_trapRoom1', 'dkp_treasureRoom', 'forest', 'ruins'],
+  locations: ['default', 'cave', 'dkp_2way', 'dkp_battle', 'dkp_battle2', 'dkp_bossBattle', 'dkp_corridor1', 'dkp_corridor2', 'dkp_entrance', 'dkp_keyRoom', 'dkp_restRoom', 'dkp_shrineRoom', 'dkp_trapRoom1', 'dkp_treasureRoom', 'forest', 'ruins'],
   spells: ['default', 'arcane', 'earth', 'fire', 'water', 'wind'],
-  totems: ['default', 'totem_ember', 'totem_silverKnight', 'totem_stone', 'totem_tide'],
-  traps: ['default', 'sprung'],
-  treasure: ['default', 'locked', 'open', 'rest', 'shrine'],
+  totems: ['default', 'Magic_Parasite_Zoah', 'totem_ember', 'totem_silverKnight', 'totem_stone', 'totem_tide'],
+  traps: ['default', 'default3', 'sprung', 'sprung3'],
+  treasure: ['default', 'locked', 'open', 'open2', 'rest', 'shrine'],
 } as const
