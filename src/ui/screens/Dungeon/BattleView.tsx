@@ -5,6 +5,7 @@ import { attackCardClue, selectableSpellIds } from '@/systems/battleEngine'
 import { isFullyCleared, remainingCount } from '@/systems/bossPlateau'
 import { AssetImage } from '@/ui/components/AssetImage'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
+import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
 import { sceneArt } from '@/config/scenes'
 import { Bar } from '@/ui/components/Bar'
 import { SpellCard } from '@/ui/components/SpellCard'
@@ -70,6 +71,8 @@ export function BattleView() {
   const lastLog = battle.log[battle.log.length - 1] ?? ''
   const answering = battle.phase === 'player_challenge' || battle.phase === 'enemy_challenge'
 
+  const enemyHit = useDamageFlash(battle.enemy.currentHp)
+
   // A boss fight gets the boss room; ordinary fights get battle art.
   const scene = sceneArt(
     battle.isBoss ? 'boss_battle' : 'battle_screen',
@@ -92,7 +95,11 @@ export function BattleView() {
 
       <div className="scene-window battle">
         <SceneBackdrop category={scene.category} assetKey={scene.key} alt="Dungeon location" />
-        <div key={battle.enemy.imageKey} className="battle-enemy-overlay">
+        <div
+          key={battle.enemy.imageKey}
+          className={`battle-enemy-overlay${enemyHit ? ' is-hit' : ''}`}
+          data-asset={battle.enemy.imageKey}
+        >
           <AssetImage category={battle.enemy.imageCategory} assetKey={battle.enemy.imageKey} alt={battle.enemy.name} />
         </div>
         <span className="scene-tag">{battle.enemy.name}</span>

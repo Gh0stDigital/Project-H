@@ -163,7 +163,7 @@ export function ExploreView() {
         {event && !inStandby && !rolling && (
           // Keyed by event so the entrance animation replays for each new
           // event rather than only the first.
-          <div key={event.id} className="explore-event-overlay">
+          <div key={event.id} className="explore-event-overlay" data-asset={event.imageKey}>
             <AssetImage category={event.imageCategory} assetKey={event.imageKey} alt={event.title} />
           </div>
         )}

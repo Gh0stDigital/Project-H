@@ -3499,3 +3499,101 @@ button.totem-hero-frame {
 .scene-window.dungeon .explore-event-overlay {
   inset: 0 0 34% 0;
 }
+
+/* ===========================================================================
+   Taking a hit
+   =========================================================================== */
+
+/* A quick shake and a flash of white-hot red. Short on purpose: this fires
+   on every exchange, so anything longer would sit in the way of the next
+   prompt rather than punctuating the last one. */
+@keyframes hit-shake {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-6px) rotate(-1.5deg);
+  }
+  32% {
+    transform: translateX(5px) rotate(1.5deg);
+  }
+  50% {
+    transform: translateX(-4px) rotate(-1deg);
+  }
+  68% {
+    transform: translateX(3px) rotate(0.6deg);
+  }
+  85% {
+    transform: translateX(-2px) rotate(0deg);
+  }
+}
+
+@keyframes hit-flash {
+  0% {
+    filter: none;
+  }
+  22% {
+    filter: brightness(2.4) saturate(0.25) drop-shadow(0 0 14px rgba(255, 86, 86, 0.95));
+  }
+  60% {
+    filter: brightness(1.25) drop-shadow(0 0 8px rgba(255, 86, 86, 0.5));
+  }
+  100% {
+    filter: none;
+  }
+}
+
+/* The sprite carries both: the shake reads as the blow landing, the flash as
+   where it landed. These override the resting drop-shadow for the duration,
+   which is what makes the flash visible at all. */
+.battle-enemy-overlay.is-hit .asset-img,
+.explore-event-overlay.is-hit .asset-img,
+.totem-panel .avatar-hero.is-hit {
+  animation: hit-shake 400ms ease, hit-flash 400ms ease;
+}
+
+/* The player's whole panel gives a smaller nudge, so a hit registers even
+   when the portrait is off screen behind a prompt. */
+@keyframes panel-jolt {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  60% {
+    transform: translateX(2px);
+  }
+}
+
+.totem-panel.is-hit {
+  animation: panel-jolt 320ms ease;
+  border-color: var(--accent-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-enemy-overlay.is-hit .asset-img,
+  .explore-event-overlay.is-hit .asset-img,
+  .totem-panel .avatar-hero.is-hit,
+  .totem-panel.is-hit {
+    animation: none;
+  }
+}
+
+/* ---- The wraith is a portrait sprite ------------------------------------
+
+   It is 768x1376 where the others are 1200x896, so object-fit: contain fits
+   it by height and it reads far smaller than the rest of the roster at the
+   same box size. Give it the height to match them rather than scaling every
+   sprite up. */
+.battle-enemy-overlay[data-asset='wraith'] .asset-img {
+  width: 100%;
+  height: 100%;
+}
+
+.explore-event-overlay[data-asset='wraith'] .asset-img {
+  width: 78%;
+  height: 78%;
+}
