@@ -5,6 +5,7 @@ import { usePersistentStore } from '@/state/persistentStore'
 import { canEnterBoss } from '@/systems/dungeonSession'
 import { sceneArt, sceneKindForEvent } from '@/config/scenes'
 import { AssetImage } from '@/ui/components/AssetImage'
+import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { TypewriterText } from '@/ui/components/TypewriterText'
 import { Bar } from '@/ui/components/Bar'
 import { DungeonProgressTrack } from '@/ui/components/DungeonProgressTrack'
@@ -158,9 +159,11 @@ export function ExploreView() {
 
       {/* The scene window is always on screen — every state, every prompt. */}
       <div className="scene-window dungeon">
-        <AssetImage category={scene.category} assetKey={scene.key} alt="Dungeon location" />
+        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="Dungeon location" />
         {event && !inStandby && !rolling && (
-          <div className="explore-event-overlay">
+          // Keyed by event so the entrance animation replays for each new
+          // event rather than only the first.
+          <div key={event.id} className="explore-event-overlay">
             <AssetImage category={event.imageCategory} assetKey={event.imageKey} alt={event.title} />
           </div>
         )}
@@ -171,14 +174,16 @@ export function ExploreView() {
       {/* One dialogue window, always in the same place. It is deliberately
           NOT unmounted while the die is in the air — the text carries on
           through the roll and is replaced once the roll lands. */}
-      {dialogueLines.length > 0 && run.state !== 'Rest' && (
-        <TypewriterText
-          key={dialogueKey}
-          lines={dialogueLines}
-          charsPerSecond={charsPerSecond}
-          onRevealed={() => setRevealedKey(dialogueKey)}
-        />
-      )}
+      <div className="dialogue-slot">
+        {dialogueLines.length > 0 && run.state !== 'Rest' && (
+          <TypewriterText
+            key={dialogueKey}
+            lines={dialogueLines}
+            charsPerSecond={charsPerSecond}
+            onRevealed={() => setRevealedKey(dialogueKey)}
+          />
+        )}
+      </div>
 
       <TotemPanel totem={totem} compact />
 

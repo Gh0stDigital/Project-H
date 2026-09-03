@@ -2267,11 +2267,17 @@ select:focus {
    screen and at a constant size through every event and every prompt.
    What goes is only the readouts you don't act on mid-answer: the map
    track, the words-seen meter, the narration box and the plateau banner. */
+/* Nothing is removed from the layout any more. Hiding these used to free
+   room for the answer board, but taking panels out of flow is precisely the
+   resize this is meant to avoid: the screen visibly re-packed itself the
+   moment a prompt opened. The board is an overlay now (see "Answer board as
+   an overlay" below), so everything underneath keeps its size and place and
+   simply sits behind it. */
 .screen[data-challenge='true'] .dungeon-track,
-.screen[data-challenge='true'] .typewriter-box,
 .screen[data-challenge='true'] .progress-meter,
 .screen[data-challenge='true'] .plateau-banner {
-  display: none;
+  opacity: 0.45;
+  transition: opacity 220ms ease;
 }
 
 /* Pin the explore scene too, for the same reason the battle one is pinned:
@@ -2665,12 +2671,13 @@ select:focus {
   display: none;
 }
 
-/* A Rest Area is a menu, not a scene — the map track and progress meter
-   don't earn their space there. */
+/* A Rest Area is a menu, so it overlays like every other menu rather than
+   removing panels from the layout to fit. Dimmed, not hidden: taking them
+   out of flow is what made the screen re-pack itself on the way in and out. */
 .screen[data-mode='rest'] .dungeon-track,
-.screen[data-mode='rest'] .progress-meter,
-.screen[data-mode='rest'] .typewriter-box {
-  display: none;
+.screen[data-mode='rest'] .progress-meter {
+  opacity: 0.45;
+  transition: opacity 220ms ease;
 }
 
 /* The Hangman board is the tallest single panel in the game; trim its
@@ -3165,4 +3172,250 @@ button.totem-hero-frame {
   font-size: 10px;
   word-break: break-all;
   text-align: center;
+}
+
+/* ===========================================================================
+   Motion, a settled layout, and an answer board that fits
+   =========================================================================== */
+
+/* ---- Area transitions ----------------------------------------------------
+
+   The backdrop changes on every move. Swapped outright that reads as a hard
+   cut; SceneBackdrop keeps the outgoing picture mounted and fades the new
+   one in over it once it has decoded. */
+
+.scene-window .scene-layer {
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.scene-window .scene-layer.is-in {
+  opacity: 1;
+}
+
+/* The layer being replaced stays fully visible underneath until the new one
+   has finished arriving, so the crossfade never dips through empty. */
+.scene-window .scene-layer.is-out {
+  opacity: 1;
+}
+
+/* ---- Event art and avatars arriving -------------------------------------
+
+   Sprites rise and fade in rather than appearing between frames. Keyed by
+   event (and by enemy) in the views, so it replays for each new arrival. */
+
+@keyframes sprite-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.explore-event-overlay .asset-img,
+.battle-enemy-overlay .asset-img {
+  animation: sprite-arrive 380ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+/* The scene label slides in with the art it names. */
+@keyframes tag-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.scene-window .scene-tag {
+  animation: tag-arrive 320ms ease both;
+}
+
+/* Respect a system preference for reduced motion: the crossfade and the
+   arrivals become instant rather than merely faster. */
+@media (prefers-reduced-motion: reduce) {
+  .scene-window .scene-layer,
+  .explore-event-overlay .asset-img,
+  .battle-enemy-overlay .asset-img,
+  .scene-window .scene-tag {
+    animation: none;
+    transition: none;
+  }
+  .scene-window .scene-layer {
+    opacity: 1;
+  }
+}
+
+/* ---- A dialogue slot that never resizes ---------------------------------
+
+   The narration box used to mount and unmount, so every line arriving or
+   clearing re-packed the whole column. The slot is always in the layout at
+   a constant height; only its contents come and go. */
+
+.dialogue-slot {
+  flex: 0 0 auto;
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+.dialogue-slot:empty,
+.dialogue-slot .typewriter-box {
+  min-height: 92px;
+}
+
+.dialogue-slot .typewriter-box {
+  flex: 1;
+  animation: dialogue-arrive 260ms ease both;
+}
+
+@keyframes dialogue-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Answer board as an overlay -----------------------------------------
+
+   Prompts float above the screen instead of pushing it around. Anchored to
+   the bottom within the screen's own padding so it can never clip off the
+   edge, and capped short of the scene window so you are still looking at
+   where you are while you answer. */
+
+.screen[data-challenge='true'] .challenge-prompt,
+.screen[data-challenge='true'] .direction-list {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+  max-height: 62%;
+  margin: 0;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(79, 227, 240, 0.08);
+  animation: sheet-arrive 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+.screen[data-challenge='true'] .direction-list {
+  padding: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@keyframes sheet-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Tiles that fit instead of scrolling --------------------------------
+
+   The tray was a wrapping flex row of fixed-width tiles, so a long word plus
+   its decoys overflowed and had to scroll. As a grid the columns divide the
+   width available and the tiles shrink to match, which fits the board on one
+   screen at every size we target. The scroll is kept only as a backstop so
+   an unusually long answer can never become unreachable. */
+
+.challenge-prompt .tile-tray {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(34px, 10vw, 50px), 1fr));
+  gap: 6px;
+  align-content: start;
+  justify-items: stretch;
+}
+
+.challenge-prompt .tile-tray .answer-tile {
+  min-width: 0;
+  min-height: clamp(38px, 10.5vw, 54px);
+  padding: 6px 4px;
+  font-size: clamp(15px, 4.2vw, 20px);
+}
+
+.challenge-prompt .tile-answer {
+  min-height: clamp(44px, 12vw, 58px);
+  margin-top: 8px;
+  gap: 5px;
+}
+
+.challenge-prompt .answer-slot {
+  width: clamp(28px, 8vw, 40px);
+  height: clamp(34px, 9.5vw, 46px);
+}
+
+.challenge-prompt .answer-tile.placed {
+  min-height: clamp(34px, 9.5vw, 46px);
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: clamp(14px, 4vw, 19px);
+}
+
+.screen[data-challenge='true'] .challenge-prompt {
+  padding: 12px 10px;
+}
+
+.screen[data-challenge='true'] .challenge-prompt .prompt-word {
+  font-size: clamp(19px, 6vw, 26px);
+  margin-top: 2px;
+}
+
+.screen[data-challenge='true'] .challenge-prompt .tile-actions {
+  margin-top: 8px;
+}
+
+/* ---- The scene is a fixed window, not a shock absorber ------------------
+
+   It used to be allowed to shrink so a crowded screen could still fit, which
+   meant the picture was one size in Standby and another during an event —
+   the resize this whole pass is about. Now that prompts overlay instead of
+   taking space, nothing needs that give: pin the height and let the action
+   area below take up any slack instead. */
+
+.scene-window.dungeon,
+.scene-window.battle {
+  flex: 0 0 auto;
+}
+
+/* Whatever sits under the dialogue is what flexes now. Actions scroll among
+   themselves on a very short screen rather than stealing from the picture. */
+.screen .room-actions {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The Rest Area menu overlays too, for the same reason the answer board
+   does: it is the tallest panel in the game and used to overflow a short
+   phone once nothing was being hidden to make room for it. */
+.screen[data-mode='rest'] .rest-area {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+  max-height: 62%;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-color: var(--accent-cyan-dim);
+  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(79, 227, 240, 0.08);
+  animation: sheet-arrive 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }

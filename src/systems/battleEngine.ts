@@ -21,13 +21,37 @@ function keyOf(url: string): string {
   return url.split('/').pop()!.replace('.png', '')
 }
 
+/**
+ * Which foe a seed spawns, decided from the seed alone.
+ *
+ * Exported so an encounter event can show the creature it is actually about
+ * to put in front of the player. The event used to render the generic
+ * `enemies/default` placeholder while the fight spawned something else
+ * entirely; sharing this function is what keeps the two honest.
+ */
+export function enemyArtFor(seed: string): string {
+  return keyOf(pickFlavor('enemies', seed))
+}
+
+/** A readable name for a foe from its art: `wraith` -> "Wraith". */
+export function enemyNameFor(artKey: string): string {
+  if (!artKey || artKey === 'default') return 'Wandering Foe'
+  return artKey
+    .replace(/[_-]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
 export function spawnEnemy(seed: string, tier: DungeonTierDef): EnemyCombatant {
   const hp = 26 + Math.round(tier.enemyDamageMultiplier * 10)
+  const art = enemyArtFor(seed)
   return {
     kind: 'enemy',
-    name: 'Wandering Foe',
+    name: enemyNameFor(art),
     imageCategory: 'enemies',
-    imageKey: keyOf(pickFlavor('enemies', seed)),
+    imageKey: art,
     battleBgKey: keyOf(pickFlavor('battlebg', seed)),
     maxHp: hp,
     currentHp: hp,
