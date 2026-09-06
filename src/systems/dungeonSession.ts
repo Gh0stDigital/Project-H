@@ -84,6 +84,7 @@ export function startDungeon(config: DungeonConfig): DungeonRunState {
     keyRoomPressure: 0,
     restAreaFound: false,
     restUses: 0,
+    restNpcs: [],
     currentEvent: null,
     eventTimer: null,
     pendingReward: null,

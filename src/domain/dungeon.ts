@@ -2,6 +2,7 @@ import type { AssetCategory } from '@/config/assets'
 import type { DungeonEventType } from '@/config/dungeonEvents'
 import type { DungeonTierId } from '@/config/balance'
 import type { Challenge } from './challenge'
+import type { RestNpc } from '@/systems/restNpcs'
 
 export interface DungeonConfig {
   totemId: string
@@ -192,6 +193,12 @@ export interface DungeonRunState {
 
   restAreaFound: boolean
   restUses: number
+  /**
+   * The people in this run's Rest Area. Generated on first arrival and kept
+   * for the rest of the run, so who is there — and who you have already
+   * spoken to — survives leaving and coming back.
+   */
+  restNpcs: RestNpc[]
 
   currentEvent: DungeonEvent | null
   /**

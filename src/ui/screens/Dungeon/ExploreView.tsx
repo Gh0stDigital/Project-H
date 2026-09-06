@@ -68,6 +68,8 @@ export function ExploreView() {
   const openRestArea = useDungeonStore((s) => s.openRestArea)
   const leaveRest = useDungeonStore((s) => s.leaveRest)
   const buyRest = useDungeonStore((s) => s.buyRest)
+  const talkToNpc = useDungeonStore((s) => s.talkToNpc)
+  const npcSaid = useDungeonStore((s) => s.npcSaid)
   const askEnterBossDoor = useDungeonStore((s) => s.askEnterBossDoor)
   const cancelEnterBossDoor = useDungeonStore((s) => s.cancelEnterBossDoor)
   const enterBossDoor = useDungeonStore((s) => s.enterBossDoor)
@@ -232,6 +234,9 @@ export function ExploreView() {
         <RestAreaView
           totem={totem}
           usesSoFar={run.restUses}
+          npcs={run.restNpcs}
+          said={npcSaid}
+          onTalk={talkToNpc}
           onRest={buyRest}
           onLeave={leaveRest}
         />

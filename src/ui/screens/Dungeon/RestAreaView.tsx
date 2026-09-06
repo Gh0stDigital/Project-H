@@ -1,9 +1,16 @@
 import type { Totem } from '@/domain/totem'
+import type { RewardBundle } from '@/domain/dungeon'
+import type { RestNpc } from '@/systems/restNpcs'
 import { quoteRest } from '@/systems/restArea'
+import { AssetImage } from '@/ui/components/AssetImage'
 
 interface RestAreaViewProps {
   totem: Totem
   usesSoFar: number
+  npcs: RestNpc[]
+  /** The last exchange, kept on screen until the player leaves. */
+  said: { npcId: string; reward: RewardBundle } | null
+  onTalk: (npcId: string) => void
   onRest: () => void
   onLeave: () => void
 }
@@ -13,8 +20,9 @@ interface RestAreaViewProps {
  * can be revisited from Standby; each use costs more than the last. Every
  * number shown here comes from the rest quote, never from the component.
  */
-export function RestAreaView({ totem, usesSoFar, onRest, onLeave }: RestAreaViewProps) {
+export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onLeave }: RestAreaViewProps) {
   const quote = quoteRest(totem, usesSoFar)
+  const speaking = said ? npcs.find((n) => n.id === said.npcId) : null
 
   return (
     <div className="panel rest-area">
@@ -63,6 +71,48 @@ export function RestAreaView({ totem, usesSoFar, onRest, onLeave }: RestAreaView
           Rest — 💰 {quote.price}
         </button>
       </div>
+
+      {npcs.length > 0 && (
+        <div className="npc-section">
+          <div className="npc-heading">
+            Others here <span className="faint">· {npcs.filter((n) => !n.spoken).length} to speak to</span>
+          </div>
+
+          <div className="npc-row">
+            {npcs.map((npc) => (
+              <button
+                key={npc.id}
+                className={`npc-card${npc.spoken ? ' spoken' : ''}${said?.npcId === npc.id ? ' active' : ''}`}
+                onClick={() => onTalk(npc.id)}
+                disabled={npc.spoken}
+              >
+                <AssetImage category="npcs" assetKey={npc.avatarKey} alt={npc.name} className="npc-portrait" />
+                <span className="npc-name">{npc.name}</span>
+                <span className="faint npc-state">{npc.spoken ? 'Spoken' : 'Talk'}</span>
+              </button>
+            ))}
+          </div>
+
+          {speaking && (
+            // Their line is one of the player's own sample sentences, which
+            // is the point: your examples come back at you in the dungeon.
+            <div className="npc-speech" key={speaking.id}>
+              <div className="npc-speech-name">{speaking.name}</div>
+              <p className="npc-line" lang="ko">
+                {speaking.line}
+              </p>
+              {speaking.translation && <p className="npc-translation faint">{speaking.translation}</p>}
+              <div className="npc-gift">
+                {said && (said.reward.money > 0 || said.reward.lines.length > 0) ? (
+                  <>Gave you {said.reward.lines.join(' · ')}</>
+                ) : (
+                  <span className="faint">They had nothing to spare.</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <button className="btn btn-ghost btn-block" onClick={onLeave}>
         Leave
       </button>

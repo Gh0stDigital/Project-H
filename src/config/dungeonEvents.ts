@@ -237,3 +237,26 @@ export const restBalance = {
 export function restPriceFor(usesSoFar: number): number {
   return Math.round(restBalance.startingPrice * Math.pow(restBalance.priceGrowth, usesSoFar))
 }
+
+/**
+ * The folk you meet at a Rest Area.
+ *
+ * They are a reason to revisit and a way to see your own sample sentences in
+ * someone else's mouth. Gifts are deliberately modest: a Rest Area is
+ * already a money sink, and talking is free, so anything generous here would
+ * undercut the cost curve above.
+ */
+export const npcBalance = {
+  /** A Rest Area holds between this many and `maxCount` people. */
+  minCount: 1,
+  maxCount: 3,
+  /** Chance that talking to someone yields anything at all. */
+  giftChance: 0.6,
+  /** Money gift range, inclusive. */
+  minMoney: 6,
+  maxMoney: 22,
+  /** Totem XP for the conversation itself, gift or no gift. */
+  totemXp: 4,
+  /** Chance a gift includes an item rather than only coin. */
+  itemChance: 0.22,
+} as const

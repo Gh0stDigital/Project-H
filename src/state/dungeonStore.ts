@@ -54,6 +54,7 @@ import {
 import { isFullyCleared } from '@/systems/bossPlateau'
 import { createPuzzle, guess as applyGuess, type HangmanPuzzle } from '@/systems/hangman'
 import { applyRest, quoteRest } from '@/systems/restArea'
+import { buildRestNpcs, rollNpcGift, markSpoken, findNpc } from '@/systems/restNpcs'
 import { buildRunReport, type RunReport } from '@/systems/runResults'
 import type { AttemptKind } from '@/systems/wordStats'
 import { resolveChallenge } from '@/systems/challengeEngine'
@@ -109,6 +110,8 @@ interface DungeonStore {
   submitting: boolean
   /** True when the Rest Area was opened from Standby rather than an event. */
   restRevisit: boolean
+  /** The last thing a Rest Area NPC said and gave, shown until you leave. */
+  npcSaid: { npcId: string; reward: RewardBundle } | null
   /** Boss-door confirmation is showing. Entering is irreversible. */
   confirmingBoss: boolean
 
@@ -118,6 +121,8 @@ interface DungeonStore {
   move(): void
   finishRoll(): void
   openRestArea(): void
+  /** Talk to one of the Rest Area's people. Pays out once each. */
+  talkToNpc(npcId: string): void
   leaveRest(): void
   buyRest(): void
   askEnterBossDoor(): void
@@ -184,6 +189,20 @@ function creditReward(totemId: string, reward: RewardBundle) {
   for (const itemId of reward.itemIds) store.grantItem(itemId as ItemId)
 }
 
+/**
+ * Populates a run's Rest Area the first time the player stands in it.
+ *
+ * Done lazily rather than when the area is discovered so the cast is drawn
+ * from the Compendium as it stands on arrival, and so a run that never
+ * visits never pays for it. Idempotent: a revisit keeps the same people,
+ * including who has already been spoken to.
+ */
+function withRestNpcs(run: DungeonRunState): DungeonRunState {
+  if (run.restNpcs.length > 0) return run
+  const spells = usePersistentStore.getState().spells
+  return { ...run, restNpcs: buildRestNpcs(spells, Math.random) }
+}
+
 /** Rolls an item drop and folds it into a bundle, with its display line. */
 function addItemDrop(reward: RewardBundle, chance: number): RewardBundle {
   if (Math.random() >= chance) return reward
@@ -219,6 +238,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
   rolling: false,
   submitting: false,
   restRevisit: false,
+  npcSaid: null,
   confirmingBoss: false,
 
   beginDungeon(config) {
@@ -273,13 +293,47 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
   openRestArea() {
     const { run, battle } = get()
     if (!run || battle || !run.restAreaFound || !canMove(run.state)) return
-    set({ run: setState(run, 'Rest'), stage: 'rest', restRevisit: true, activePanel: null })
+    set({
+      run: withRestNpcs(setState(run, 'Rest')),
+      stage: 'rest',
+      restRevisit: true,
+      activePanel: null,
+      npcSaid: null,
+    })
+  },
+
+  talkToNpc(npcId) {
+    const { run, submitting } = get()
+    if (!run || submitting || run.state !== 'Rest') return
+    const npc = findNpc(run.restNpcs, npcId)
+    // Once each: talking is free, so a repeatable gift would be a money
+    // printer rather than a reward.
+    if (!npc || npc.spoken) return
+
+    const store = usePersistentStore.getState()
+    const totem = store.totems.find((t) => t.id === run.config.totemId)
+    if (!totem) return
+
+    const gift = rollNpcGift(Math.random)
+    let reward: RewardBundle = {
+      ...emptyRewardBundle(),
+      money: gift.money,
+      totemXp: gift.totemXp,
+      lines: gift.money > 0 ? [`💰 ${gift.money}`] : [],
+    }
+    if (gift.item) reward = addItemDrop(reward, 1)
+
+    creditReward(totem.id, reward)
+    set({
+      run: { ...run, restNpcs: markSpoken(run.restNpcs, npcId) },
+      npcSaid: { npcId, reward },
+    })
   },
 
   leaveRest() {
     const { run } = get()
     if (!run) return
-    set({ run: toStandby(run), stage: 'intro', restRevisit: false })
+    set({ run: toStandby(run), stage: 'intro', restRevisit: false, npcSaid: null })
   },
 
   buyRest() {
@@ -479,7 +533,9 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
       return
     }
     if (run.state === 'ResolvingEvent' && event?.type === 'rest') {
-      set({ run: setState(run, 'Rest'), stage: 'rest', restRevisit: false })
+      // Arriving by event populates the cast exactly as revisiting does —
+      // otherwise the first visit of a run would have nobody in it.
+      set({ run: withRestNpcs(setState(run, 'Rest')), stage: 'rest', restRevisit: false, npcSaid: null })
       return
     }
     if (run.state === 'ResolvingEvent' && event?.type === 'magic_room') {

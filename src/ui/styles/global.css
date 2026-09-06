@@ -3411,7 +3411,10 @@ button.totem-hero-frame {
   right: 16px;
   bottom: calc(16px + env(safe-area-inset-bottom));
   z-index: 40;
-  max-height: 62%;
+  /* Room for the rest quote, up to three people and whatever one of them is
+     saying, without the panel having to scroll. Matches the answer board's
+     allowance; it still cannot clip, being anchored inside the padding. */
+  max-height: 84%;
   margin: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -3685,5 +3688,170 @@ button.totem-hero-frame {
     min-height: clamp(28px, 7.5vw, 38px);
     padding: 5px 7px;
     font-size: clamp(14px, 3.6vw, 17px);
+  }
+}
+
+/* ===========================================================================
+   Rest Area NPCs
+   =========================================================================== */
+
+.npc-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.npc-heading {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Up to three people side by side, each an equal share of the width so the
+   row reads as a group rather than a list. */
+.npc-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.npc-card {
+  appearance: none;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: transform 0.08s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.npc-card:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.npc-card.active {
+  border-color: var(--accent-gold);
+}
+
+/* Spoken to: still shown, because who you have met is information, but
+   plainly finished rather than merely dimmed. */
+.npc-card.spoken {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.npc-portrait {
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.npc-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.npc-state {
+  font-size: 11px;
+}
+
+.npc-speech {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--bg-deep);
+  border: 1px solid var(--accent-cyan-dim);
+  border-radius: var(--radius-md);
+  animation: sheet-arrive 220ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+.npc-speech-name {
+  font-size: 12px;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.npc-line {
+  margin: 4px 0 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.npc-translation {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.npc-gift {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent-gold);
+}
+
+/* Three people and a long sentence is the tallest a Rest Area gets. On
+   anything but a large phone that combination overruns the panel, so the
+   NPC block tightens rather than the panel scrolling. */
+@media (max-height: 900px) {
+  .npc-section {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .npc-heading {
+    margin-bottom: 6px;
+  }
+
+  .npc-portrait {
+    max-width: 46px;
+  }
+
+  .npc-card {
+    padding: 6px 4px;
+    gap: 2px;
+  }
+
+  .npc-name {
+    font-size: 12px;
+  }
+
+  .npc-speech {
+    margin-top: 8px;
+    padding: 8px 10px;
+  }
+
+  .npc-line {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .npc-translation {
+    font-size: 12px;
+  }
+}
+
+/* Short phones give up the Rest Area's flavour line too — the numbers and
+   the conversation are what the player is actually there for. */
+@media (max-height: 760px) {
+  .rest-area .rest-flavor {
+    display: none;
+  }
+
+  .npc-portrait {
+    max-width: 38px;
+  }
+
+  .npc-line {
+    font-size: 14px;
   }
 }

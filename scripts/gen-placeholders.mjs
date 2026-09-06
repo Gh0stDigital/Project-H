@@ -249,6 +249,18 @@ const manifest = {
       boss: 'skull',
     },
   },
+  // Rest Area folk. Drop real portraits over these to replace them.
+  npcs: {
+    palette: { bg: '#1c2a22', accent: '#6fbf8f' },
+    items: {
+      default: 'circle',
+      npc_wanderer: 'circle',
+      npc_merchant: 'diamond',
+      npc_scholar: 'square',
+      npc_pilgrim: 'triangle',
+      npc_hunter: 'bolt',
+    },
+  },
   spells: {
     palette: { bg: '#1a1a2e', accent: '#f2c14e' },
     items: {
@@ -272,6 +284,8 @@ const accentShift = {
   slime: '#6bdb8f', goblin: '#8fdb6b', wraith: '#9f8fe0',
   guardian: '#f2453f',
   cave2: '#334455', boss: '#f2453f',
+  npc_wanderer: '#6fbf8f', npc_merchant: '#e8c04a', npc_scholar: '#7fb8d8',
+  npc_pilgrim: '#c9a0dc', npc_hunter: '#e0904f',
   fire: '#f2653f', water: '#4f9ef2', earth: '#8f6f3f', wind: '#bfe0f2', arcane: '#c15fe0',
 }
 
