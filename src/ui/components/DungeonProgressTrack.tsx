@@ -20,7 +20,7 @@ export function DungeonProgressTrack({ challenged, total, bossUnlocked }: Dungeo
   const clearedCheckpoints = Math.round(fraction * CHECKPOINT_COUNT)
 
   return (
-    <div className="dungeon-track" role="img" aria-label={`Dungeon progress: ${challenged} of ${total} words challenged`}>
+    <div className="dungeon-track" role="img" aria-label={`던전 진행도: ${total}개 중 ${challenged}개 단어를 마주함`}>
       <div className="dungeon-track-line">
         <div className="dungeon-track-fill" style={{ width: `${fraction * 100}%` }} />
         <div className="dungeon-track-marker" style={{ left: `${fraction * 100}%` }} aria-hidden="true" />

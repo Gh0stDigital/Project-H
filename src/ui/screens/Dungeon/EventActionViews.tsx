@@ -43,7 +43,7 @@ export function DirectionChoices({
 export function KeyRoomView({ onTake }: { onTake: () => void }) {
   return (
     <>
-      <div className="feedback-banner correct">🗝️ The dungeon key is yours.</div>
+      <div className="feedback-banner correct">🗝️ 던전 열쇠를 손에 넣었습니다.</div>
       <button className="btn btn-primary btn-block" onClick={onTake}>
         Take the key
       </button>
@@ -56,8 +56,8 @@ export function BossDoorNotice({ keyFound, onContinue }: { keyFound: boolean; on
     <>
       <div className={`feedback-banner ${keyFound ? 'correct' : ''}`}>
         {keyFound
-          ? 'You have the key. This door will open whenever you are ready.'
-          : 'The keyhole is empty. You will need the dungeon key.'}
+          ? '열쇠를 가지고 있습니다. 준비되면 언제든 이 문은 열립니다.'
+          : '열쇠 구멍이 비어 있습니다. 던전 열쇠가 필요합니다.'}
       </div>
       <button className="btn btn-primary btn-block" onClick={onContinue}>
         Mark it and continue →
@@ -70,10 +70,10 @@ export function RewardSummary({ reward, onContinue }: { reward: RewardBundle; on
   return (
     <>
       <div className="reward-panel">
-        <div className="reward-title">Rewards</div>
+        <div className="reward-title">보상</div>
         <div className="reward-lines">
           {reward.lines.length === 0 ? (
-            <span className="faint">Nothing of value.</span>
+            <span className="faint">쓸 만한 것은 없습니다.</span>
           ) : (
             reward.lines.map((line, i) => (
               <span key={i} className="reward-line">

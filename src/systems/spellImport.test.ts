@@ -147,8 +147,8 @@ describe('export', () => {
     const lines = csv.split('\n')
     expect(lines).toHaveLength(3)
     expect(lines[0]).toContain('element')
-    expect(lines[1]).toContain('Fire')
-    expect(lines[2]).toContain('Earth')
+    expect(lines[1]).toContain('fire')
+    expect(lines[2]).toContain('earth')
   })
 
   it('round-trips back through the importer', () => {
@@ -166,5 +166,32 @@ describe('export', () => {
     const tricky = [createSpell({ korean: '음', english: 'well, um', wordType: 'expression' })]
     const csv = exportSpellsToCsv(tricky)
     expect(csv).toContain('"well, um"')
+  })
+})
+
+describe('word type column stays language-independent', () => {
+  // The interface is Korean, but a CSV is a file people keep. Translating
+  // the display labels must not strand a file exported before the change,
+  // nor one written by hand in either language.
+  it('accepts the stable ids that export now writes', () => {
+    expect(parseWordType('action_verb')).toBe('action_verb')
+    expect(parseWordType('descriptive_verb')).toBe('descriptive_verb')
+    expect(parseWordType('grammar')).toBe('grammar')
+  })
+
+  it('still accepts the English names older exports wrote', () => {
+    expect(parseWordType('Action Verb')).toBe('action_verb')
+    expect(parseWordType('Descriptive Verb / Adjective')).toBe('descriptive_verb')
+    expect(parseWordType('Grammar / Particle')).toBe('grammar')
+    expect(parseWordType('Noun')).toBe('noun')
+  })
+
+  it('accepts the Korean names the app now shows', () => {
+    expect(parseWordType('명사')).toBe('noun')
+    expect(parseWordType('동사')).toBe('action_verb')
+    expect(parseWordType('형용사')).toBe('descriptive_verb')
+    expect(parseWordType('부사')).toBe('adverb')
+    expect(parseWordType('표현 / 관용구')).toBe('expression')
+    expect(parseWordType('문법 / 조사')).toBe('grammar')
   })
 })

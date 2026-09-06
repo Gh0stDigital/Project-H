@@ -45,74 +45,74 @@ export interface ElementDef {
 }
 
 export const elementDefs: Record<Element, ElementDef> = {
-  earth: { id: 'earth', label: 'Earth', icon: '🪨', colorVar: '--element-earth' },
-  fire: { id: 'fire', label: 'Fire', icon: '🔥', colorVar: '--element-fire' },
-  water: { id: 'water', label: 'Water', icon: '💧', colorVar: '--element-water' },
-  wind: { id: 'wind', label: 'Wind', icon: '🌬️', colorVar: '--element-wind' },
-  lightning: { id: 'lightning', label: 'Lightning', icon: '⚡', colorVar: '--element-lightning' },
-  metal: { id: 'metal', label: 'Metal', icon: '⚙️', colorVar: '--element-metal' },
+  earth: { id: 'earth', label: '땅', icon: '🪨', colorVar: '--element-earth' },
+  fire: { id: 'fire', label: '불', icon: '🔥', colorVar: '--element-fire' },
+  water: { id: 'water', label: '물', icon: '💧', colorVar: '--element-water' },
+  wind: { id: 'wind', label: '바람', icon: '🌬️', colorVar: '--element-wind' },
+  lightning: { id: 'lightning', label: '번개', icon: '⚡', colorVar: '--element-lightning' },
+  metal: { id: 'metal', label: '쇠', icon: '⚙️', colorVar: '--element-metal' },
 }
 
 export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   noun: {
     id: 'noun',
-    label: 'Noun',
+    label: '명사',
     shortLabel: 'Noun',
     element: 'earth',
     conjugates: false,
     allowsDerivedVerb: true,
-    futureLabel: 'Future/Intention',
-    hint: 'A thing, person, place or concept — 검토, 학교, 사랑.',
+    futureLabel: '미래/의도',
+    hint: '사물, 사람, 장소, 개념 — 검토, 학교, 사랑.',
   },
   action_verb: {
     id: 'action_verb',
-    label: 'Action Verb',
+    label: '동사',
     shortLabel: 'Action',
     element: 'fire',
     conjugates: true,
     allowsDerivedVerb: false,
-    futureLabel: 'Future/Intention',
-    hint: 'Something done — 전달하다, 먹다, 가다.',
+    futureLabel: '미래/의도',
+    hint: '행동을 나타내는 말 — 전달하다, 먹다, 가다.',
   },
   descriptive_verb: {
     id: 'descriptive_verb',
-    label: 'Descriptive Verb / Adjective',
+    label: '형용사',
     shortLabel: 'Descriptive',
     element: 'water',
     conjugates: true,
     allowsDerivedVerb: false,
-    futureLabel: 'Future/Prediction',
-    hint: 'A state or quality — 좋다, 예쁘다, 바쁘다.',
+    futureLabel: '미래/추측',
+    hint: '상태나 성질을 나타내는 말 — 좋다, 예쁘다, 바쁘다.',
   },
   adverb: {
     id: 'adverb',
-    label: 'Adverb',
+    label: '부사',
     shortLabel: 'Adverb',
     element: 'wind',
     conjugates: false,
     allowsDerivedVerb: false,
-    futureLabel: 'Future',
-    hint: 'How, when or how much — 괜히, 빨리, 자주.',
+    futureLabel: '미래',
+    hint: '어떻게, 언제, 얼마나 — 괜히, 빨리, 자주.',
   },
   expression: {
     id: 'expression',
-    label: 'Expression / Phrase',
+    label: '표현 / 관용구',
     shortLabel: 'Phrase',
     element: 'lightning',
     conjugates: false,
     allowsDerivedVerb: true,
-    futureLabel: 'Future',
-    hint: 'A set phrase — 안녕하세요, 잘 부탁드립니다.',
+    futureLabel: '미래',
+    hint: '굳어진 표현 — 안녕하세요, 잘 부탁드립니다.',
   },
   grammar: {
     id: 'grammar',
-    label: 'Grammar / Particle',
+    label: '문법 / 조사',
     shortLabel: 'Grammar',
     element: 'metal',
     conjugates: false,
     allowsDerivedVerb: false,
-    futureLabel: 'Future',
-    hint: 'A particle or pattern — 은/는, -고 싶다.',
+    futureLabel: '미래',
+    hint: '조사나 문형 — 은/는, -고 싶다.',
   },
 }
 
@@ -158,6 +158,6 @@ export function showsConjugations(wordType: WordType, derivedVerb: string): bool
  */
 export function futureLabelFor(wordType: WordType, derivedVerb: string): string {
   const def = wordTypeDefs[wordType]
-  if (!def.conjugates && derivedVerb.trim().length > 0) return 'Future/Intention'
+  if (!def.conjugates && derivedVerb.trim().length > 0) return '미래/의도'
   return def.futureLabel
 }

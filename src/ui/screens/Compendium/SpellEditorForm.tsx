@@ -81,7 +81,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
   return (
     <div className="list spell-editor">
       <div className="field">
-        <label htmlFor="kor-input">Word</label>
+        <label htmlFor="kor-input">단어</label>
         <input
           id="kor-input"
           type="text"
@@ -95,7 +95,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
 
       {/* ---- Word type, and the Element it produces ---- */}
       <div className="field">
-        <label htmlFor="type-input">Word Type</label>
+        <label htmlFor="type-input">품사</label>
         <select id="type-input" value={wordType} onChange={(e) => setWordType(e.target.value as WordType)}>
           {allWordTypes.map((t) => (
             <option key={t.id} value={t.id}>
@@ -110,13 +110,13 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
         <span className="element-icon">{element.icon}</span>
         <div>
           <div className="element-name">{element.label}</div>
-          <div className="faint">Set automatically from the Word Type</div>
+          <div className="faint">품사에 따라 자동으로 정해집니다</div>
         </div>
       </div>
 
       {/* ---- Meanings ---- */}
       <div className="field">
-        <label htmlFor="def1-input">Definition 1</label>
+        <label htmlFor="def1-input">뜻 1</label>
         <input
           id="def1-input"
           type="text"
@@ -130,7 +130,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       </div>
 
       <div className="field">
-        <label htmlFor="def2-input">Definition 2 (optional)</label>
+        <label htmlFor="def2-input">뜻 2 (선택)</label>
         <input
           id="def2-input"
           type="text"
@@ -143,7 +143,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       </div>
 
       <div className="field">
-        <label htmlFor="def3-input">Definition 3 (optional)</label>
+        <label htmlFor="def3-input">뜻 3 (선택)</label>
         <input
           id="def3-input"
           type="text"
@@ -153,12 +153,12 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           onChange={(e) => setDefinition3(e.target.value)}
           placeholder="e.g. to pass along"
         />
-        <span className="faint">Any filled-in definition counts as a correct answer.</span>
+        <span className="faint">입력된 뜻은 무엇이든 정답으로 인정됩니다.</span>
       </div>
 
       {/* ---- Example usage ---- */}
       <div className="field">
-        <label htmlFor="sample-input">Sample Sentence (optional)</label>
+        <label htmlFor="sample-input">예문 (선택)</label>
         <input
           id="sample-input"
           type="text"
@@ -170,7 +170,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       </div>
 
       <div className="field">
-        <label htmlFor="sample-tr-input">Sample Sentence Translation (optional)</label>
+        <label htmlFor="sample-tr-input">예문 번역 (선택)</label>
         <input
           id="sample-tr-input"
           type="text"
@@ -185,7 +185,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       {/* ---- Derived 하다 verb, for types that can take one ---- */}
       {typeDef.allowsDerivedVerb && (
         <div className="field">
-          <label htmlFor="derived-input">Derived Verb (optional)</label>
+          <label htmlFor="derived-input">파생 동사 (선택)</label>
           <input
             id="derived-input"
             type="text"
@@ -209,7 +209,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           </div>
 
           <div className="field">
-            <label htmlFor="present-input">Present</label>
+            <label htmlFor="present-input">현재</label>
             <input
               id="present-input"
               type="text"
@@ -221,7 +221,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           </div>
 
           <div className="field">
-            <label htmlFor="past-input">Past</label>
+            <label htmlFor="past-input">과거</label>
             <input
               id="past-input"
               type="text"
@@ -247,20 +247,20 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       )}
 
       <div className="field">
-        <label htmlFor="notes-input">Notes (optional)</label>
+        <label htmlFor="notes-input">메모 (선택)</label>
         <textarea
           id="notes-input"
           rows={3}
           spellCheck
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Usage notes, mnemonics, nuance..."
+          placeholder="쓰임새, 암기법, 뉘앙스…"
         />
       </div>
 
       <div className="btn-row">
         <button className="btn btn-primary btn-block" onClick={handleSave}>
-          {existing ? 'Save Changes' : 'Create Entry'}
+          {existing ? '변경 사항 저장' : '항목 만들기'}
         </button>
       </div>
       <button className="btn btn-ghost btn-block" onClick={onCancel}>

@@ -19,7 +19,7 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
   const tier = dungeonTiers.find((t) => t.id === run.config.tierId)
 
   return (
-    <SlidePanel title="Status" onClose={onClose}>
+    <SlidePanel title="상태" onClose={onClose}>
       <section className="status-hero">
         <div className="status-portrait">
           <AssetImage category="totems" assetKey={totem.avatarKey} alt={totem.name} className="avatar-img avatar-hero" />
@@ -45,61 +45,61 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
       </section>
 
       <section>
-        <h3>This Run</h3>
+        <h3>이번 탐험</h3>
         <div className="stats-grid">
           <div className="stat-tile">
-            <div className="faint">Dungeon</div>
+            <div className="faint">던전</div>
             <div className="value">{tier?.label ?? run.config.tierId}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Words Introduced</div>
+            <div className="faint">접한 단어</div>
             <div className="value">{challenged}/{run.config.dungeonWordIds.length}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Turn</div>
+            <div className="faint">턴</div>
             <div className="value">{run.turn}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Foes Defeated</div>
+            <div className="faint">처치한 적</div>
             <div className="value">{run.stats.enemiesDefeated}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Correct</div>
+            <div className="faint">정답</div>
             <div className="value">{run.stats.correctAnswers}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Incorrect</div>
+            <div className="faint">오답</div>
             <div className="value">{run.stats.incorrectAnswers}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Money Earned</div>
+            <div className="faint">획득한 돈</div>
             <div className="value">💰 {run.stats.moneyEarned}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Boss Door</div>
-            <div className="value">{run.bossDoorFound ? (run.keyFound ? 'OPEN' : 'Locked') : 'Unknown'}</div>
+            <div className="faint">보스의 문</div>
+            <div className="value">{run.bossDoorFound ? (run.keyFound ? '열림' : '잠김') : '알 수 없음'}</div>
           </div>
         </div>
       </section>
 
       <section>
-        <h3>Overall</h3>
+        <h3>전체</h3>
         <div className="stats-grid">
           <div className="stat-tile">
-            <div className="faint">Money</div>
+            <div className="faint">돈</div>
             <div className="value">💰 {totem.money}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Bosses Beaten</div>
+            <div className="faint">처치한 보스</div>
             <div className="value">{totem.stats.bossesDefeated}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Dungeons Cleared</div>
+            <div className="faint">클리어한 던전</div>
             <div className="value">{totem.stats.dungeonsCompleted}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Battle Deck</div>
-            <div className="value">{totemSet ? `${totemSet.spellIds.length} Spells` : 'None'}</div>
+            <div className="faint">전투 덱</div>
+            <div className="value">{totemSet ? `주문 ${totemSet.spellIds.length}개` : '없음'}</div>
           </div>
         </div>
       </section>

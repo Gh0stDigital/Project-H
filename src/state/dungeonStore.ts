@@ -422,7 +422,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
   leaveTreasure() {
     const { run } = get()
     if (!run || run.state !== 'ResolvingEvent') return
-    set({ run: toStandby(setOutcomeText(run, ['You leave the chest untouched.']), 'You left a chest behind.'), stage: 'intro' })
+    set({ run: toStandby(setOutcomeText(run, ['상자를 건드리지 않고 지나갑니다.']), '상자를 하나 두고 왔습니다.'), stage: 'intro' })
   },
 
   submitEventAnswer(text) {
@@ -455,7 +455,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
 
     if (puzzle.status !== 'solved') {
       set({
-        run: toStandby(run, 'The magic door sealed itself for good.'),
+        run: toStandby(run, '마법의 문이 영원히 봉인되었습니다.'),
         stage: 'intro',
         puzzle: null,
         submitting: false,
@@ -473,7 +473,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
     creditReward(run.config.totemId, reward)
 
     set({
-      run: setOutcomeText(applyRewardBundle(run, reward), ['The glyphs unwind. The room opens.']),
+      run: setOutcomeText(applyRewardBundle(run, reward), ['문양이 풀립니다. 방이 열립니다.']),
       stage: 'reward',
       puzzle: null,
       submitting: false,
@@ -489,7 +489,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
     set({ submitting: true })
     const run2 = applyDirectionChoice(run, choice)
     set({
-      run: toStandby(run2, `You take ${choice.label}.`),
+      run: toStandby(run2, `${choice.label}(으)로 향합니다.`),
       stage: 'intro',
       submitting: false,
     })
@@ -502,7 +502,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
     set({ submitting: true })
     // grantKey is idempotent — a run can never mint two keys.
     set({
-      run: toStandby(grantKey(run), '🗝️ You obtained the dungeon key.'),
+      run: toStandby(grantKey(run), '🗝️ 던전 열쇠를 손에 넣었습니다.'),
       stage: 'intro',
       submitting: false,
     })
@@ -547,7 +547,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
       return
     }
     if (run.state === 'ResolvingEvent' && event?.type === 'boss_door') {
-      set({ run: toStandby(run, '🚪 You mark the Boss Door on your map.'), stage: 'intro' })
+      set({ run: toStandby(run, '🚪 지도에 보스의 문을 표시했습니다.'), stage: 'intro' })
       return
     }
     if (run.state === 'ResolvingEvent' && event?.type === 'key_room') {
@@ -807,7 +807,7 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
   const tier = tierFor(run)
   if (correct) {
     set({
-      run: setOutcomeText(run, ['You freeze — then step clear. The trap never fires.']),
+      run: setOutcomeText(run, ['숨을 멈추고 — 조심스레 비켜섭니다. 함정은 끝내 작동하지 않았습니다.']),
       stage: 'trap_result',
       submitting: false,
     })
@@ -819,8 +819,8 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
   const totem = usePersistentStore.getState().totems.find((t) => t.id === run.config.totemId)
   set({
     run: setOutcomeText(run, [
-      timedOut ? 'Too slow — the mechanism fires!' : 'Wrong! The mechanism fires!',
-      `You take ${damage} damage.`,
+      timedOut ? '너무 늦었습니다 — 장치가 작동합니다!' : '틀렸습니다! 장치가 작동합니다!',
+      `${damage}의 피해를 입었습니다.`,
       `HP: ${Math.max(0, totem?.currentHp ?? 0)}/${totem?.maxHp ?? 0}`,
     ]),
     stage: 'trap_result',
@@ -832,7 +832,7 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
 function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
   if (!correct) {
     set({
-      run: setOutcomeText(run, ['The lock shears with a snap.', 'This chest will never open now.']),
+      run: setOutcomeText(run, ['자물쇠가 딱 하고 부러집니다.', '이 상자는 이제 영영 열리지 않습니다.']),
       stage: 'treasure_result',
       submitting: false,
     })
@@ -861,7 +861,7 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
   creditReward(run.config.totemId, reward)
 
   set({
-    run: setOutcomeText(applyRewardBundle(run, reward), ['The lock gives. The lid swings open.']),
+    run: setOutcomeText(applyRewardBundle(run, reward), ['자물쇠가 풀립니다. 뚜껑이 열립니다.']),
     stage: 'treasure_result',
     submitting: false,
   })

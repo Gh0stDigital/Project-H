@@ -5,10 +5,10 @@ import { Bar } from '@/ui/components/Bar'
 import { totemBalance } from '@/config/balance'
 
 const menuItems = [
-  { screen: 'compendium' as const, icon: '📖', label: 'Load Spells / Compendium', desc: 'Create, edit, and organize Spell Words and Spell Sets.' },
-  { screen: 'totem' as const, icon: '🗿', label: 'Totem', desc: 'View your Totem and equip a Spell Set for battle.' },
-  { screen: 'dungeon' as const, icon: '🗝️', label: 'Dungeon', desc: 'Configure a dungeon and start exploring.' },
-  { screen: 'records' as const, icon: '📊', label: 'Records', desc: 'Review every Spell Word and its study statistics.' },
+  { screen: 'compendium' as const, icon: '📖', label: '주문 불러오기 / 도감', desc: '주문 단어와 주문 세트를 만들고 정리합니다.' },
+  { screen: 'totem' as const, icon: '🗿', label: '토템', desc: '토템을 확인하고 전투용 주문 세트를 장착합니다.' },
+  { screen: 'dungeon' as const, icon: '🗝️', label: '던전', desc: '던전을 설정하고 탐험을 시작합니다.' },
+  { screen: 'records' as const, icon: '📊', label: '기록', desc: '모든 주문 단어와 학습 통계를 살펴봅니다.' },
 ]
 
 export function MainMenuScreen() {
@@ -21,12 +21,12 @@ export function MainMenuScreen() {
       <div className="menu-title">
         <span className="glyph">🔮</span>
         <h1>Project H</h1>
-        <p className="muted">A language-study dungeon crawler</p>
+        <p className="muted">언어 학습 던전 크롤러</p>
       </div>
 
       {totem && (
         <button className="totem-banner" onClick={() => goTo('totem')}>
-          <span className="totem-banner-tag">Your Totem</span>
+          <span className="totem-banner-tag">내 토템</span>
           <AssetImage
             category="totems"
             assetKey={totem.avatarKey}
@@ -51,7 +51,7 @@ export function MainMenuScreen() {
               </div>
             </div>
             <div className="totem-banner-foot faint">
-              💰 {totem.money} · {spellCount} Spells known
+              💰 {totem.money} · 아는 주문 {spellCount}개
             </div>
           </div>
         </button>
@@ -71,7 +71,7 @@ export function MainMenuScreen() {
 
       <div style={{ flex: 1 }} />
       <p className="faint" style={{ textAlign: 'center' }}>
-        Fully offline · progress saved on this device
+        완전 오프라인 · 진행 상황은 이 기기에 저장됩니다
       </p>
     </div>
   )

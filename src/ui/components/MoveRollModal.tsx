@@ -46,7 +46,7 @@ export function MoveRollModal({ resultTitle, onSettled }: MoveRollModalProps) {
 
   return (
     <div className="move-roll-overlay">
-      <div className="move-roll-label">{settled ? 'You press onward…' : 'Rolling…'}</div>
+      <div className="move-roll-label">{settled ? '앞으로 나아갑니다…' : 'Rolling…'}</div>
       <div className={`move-roll-die${settled ? ' settled' : ' rolling'}`} aria-live="polite">
         {DIE_FACES[face]}
       </div>

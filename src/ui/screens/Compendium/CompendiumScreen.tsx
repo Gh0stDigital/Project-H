@@ -12,7 +12,7 @@ export function CompendiumScreen() {
 
   return (
     <div className="screen screen-scroll">
-      <TopBar title="Compendium" onBack={() => goTo('menu')} />
+      <TopBar title="도감" onBack={() => goTo('menu')} />
 
       <div className="btn-row">
         <button className={`btn btn-sm ${tab === 'spells' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('spells')}>

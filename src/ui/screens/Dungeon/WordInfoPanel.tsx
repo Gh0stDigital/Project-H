@@ -23,10 +23,10 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
   const totemSpells = (totemSet?.spellIds ?? []).map((id) => spells.find((s) => s.id === id)).filter(Boolean)
 
   return (
-    <SlidePanel title="Word Information" onClose={onClose}>
+    <SlidePanel title="단어 정보" onClose={onClose}>
       {battle?.plateau && (
         <section>
-          <h3>Boss Barrier</h3>
+          <h3>보스 결계</h3>
           <div className="list">
             {battle.plateau.map((req) => {
               const spell = spells.find((s) => s.id === req.spellId)
@@ -34,7 +34,7 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
                 <div key={req.spellId} className="word-chip">
                   <span className={`status-dot ${req.cleared ? 'done' : 'pending'}`} />
                   <span style={{ flex: 1 }}>{spell?.korean ?? '?'}</span>
-                  <span className="faint">{req.cleared ? 'Cleared' : 'Pending'}</span>
+                  <span className="faint">{req.cleared ? '완료' : '미완료'}</span>
                 </div>
               )
             })}

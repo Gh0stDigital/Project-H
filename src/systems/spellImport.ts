@@ -32,7 +32,6 @@ import {
   allWordTypes,
   elementDefFor,
   showsConjugations,
-  wordTypeDefs,
   type WordType,
 } from '@/config/wordTypes'
 import { validateNewSpell, type NewSpellInput } from './spellFactory'
@@ -137,9 +136,31 @@ const COLUMN_ALIASES: Record<string, ColumnKey> = {
   element: 'ignore',
 }
 
-/** Word-type spellings accepted in the Word Type column. */
+/**
+ * Word-type spellings accepted in the Word Type column.
+ *
+ * Three families, all still accepted: the stable ids (what export writes),
+ * the English names (what older exports wrote, and what a file written
+ * before the interface was translated contains), and the Korean names now
+ * shown in the app. Dropping any of them would strand files people already
+ * have, which is why export moved to ids rather than following the display
+ * language around.
+ */
 const WORD_TYPE_ALIASES: Record<string, WordType> = {
   noun: 'noun',
+  // Korean names, as displayed in the app.
+  '명사': 'noun',
+  '동사': 'action_verb',
+  '형용사': 'descriptive_verb',
+  '부사': 'adverb',
+  '표현': 'expression',
+  '표현 / 관용구': 'expression',
+  '표현/관용구': 'expression',
+  '관용구': 'expression',
+  '문법': 'grammar',
+  '문법 / 조사': 'grammar',
+  '문법/조사': 'grammar',
+  '조사': 'grammar',
   n: 'noun',
   'action verb': 'action_verb',
   action_verb: 'action_verb',
@@ -258,11 +279,11 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
     const validation = validateNewSpell({ korean, english })
 
     if (validation.length > 0) {
-      const missing = validation.map((e) => (e.field === 'english' ? 'definition' : e.field)).join(' and ')
+      const missing = validation.map((e) => (e.field === 'english' ? '뜻' : '단어')).join(', ')
       rows.push({
         ...base,
         status: 'error',
-        message: fields.length < 2 ? 'Could not find two columns — check the delimiter.' : `Missing ${missing}.`,
+        message: fields.length < 2 ? '열을 두 개 찾지 못했습니다 — 구분자를 확인하세요.' : `${missing}이(가) 비어 있습니다.`,
       })
       return
     }
@@ -333,8 +354,10 @@ export function exportSpellsToCsv(spells: Spell[]): string {
     const forms = showsConjugations(s.wordType, s.derivedVerb)
     return [
       s.korean,
-      wordTypeDefs[s.wordType].label,
-      elementDefFor(s.wordType).label,
+      // Ids, not display labels — a file exported in one language has to
+      // import in another, and labels move when the app is translated.
+      s.wordType,
+      elementDefFor(s.wordType).id,
       s.english,
       s.definition2,
       s.definition3,
@@ -363,10 +386,10 @@ export function definitionSummary(spell: Spell): string {
  */
 export const IMPORT_TEMPLATE_CSV = [
   EXPORT_HEADER.join(','),
-  '전달하다,Action Verb,,to deliver,to convey,to pass along,내용을 담당자에게 전달했어요.,I passed the information along to the person in charge.,,전달해요,전달했어요,전달할 거예요,',
-  '괜히,Adverb,,for no reason,needlessly,unnecessarily,괜히 걱정했어요.,I worried for no reason.,,,,,',
-  '검토,Noun,,review,examination,consideration,,,검토하다,검토해요,검토했어요,검토할 거예요,',
-  '안녕하세요,Expression/Phrase,,hello,,,,,,,,,common greeting',
+  '전달하다,동사,,to deliver,to convey,to pass along,내용을 담당자에게 전달했어요.,I passed the information along to the person in charge.,,전달해요,전달했어요,전달할 거예요,',
+  '괜히,부사,,for no reason,needlessly,unnecessarily,괜히 걱정했어요.,I worried for no reason.,,,,,',
+  '검토,명사,,review,examination,consideration,,,검토하다,검토해요,검토했어요,검토할 거예요,',
+  '안녕하세요,표현/관용구,,hello,,,,,,,,,common greeting',
 ].join('\n')
 
 /** The short two-column form, for players who just want a quick list. */

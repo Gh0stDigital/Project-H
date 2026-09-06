@@ -76,8 +76,8 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
         <div className="empty-state">
           <span className="glyph">✅</span>
           <p>
-            Imported {imported} Spell Word{imported === 1 ? '' : 's'}
-            {makeSet ? ' and created a Spell Set from them.' : '.'}
+            주문 단어 {imported}개를 가져왔습니다
+            {makeSet ? '. 이 단어들로 주문 세트도 만들었습니다.' : '.'}
           </p>
         </div>
         <button className="btn btn-primary btn-block" onClick={onDone}>
@@ -90,7 +90,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
   return (
     <div className="list">
       <div className="field">
-        <label htmlFor="import-text">Paste your word list</label>
+        <label htmlFor="import-text">단어 목록을 붙여 넣으세요</label>
         <textarea
           id="import-text"
           rows={7}

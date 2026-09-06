@@ -39,9 +39,9 @@ const NAMES = [
 
 /** Said when the player has no sample sentences to draw on yet. */
 const FALLBACK_LINES = [
-  'Rest while you can. The dark does not.',
-  'I have no story worth telling. Write some sentences and I might.',
-  'Quiet here, for now.',
+  '쉴 수 있을 때 쉬세요. 어둠은 쉬지 않으니까요.',
+  '들려줄 이야기가 없네요. 예문을 좀 써 두면 생길지도 모르죠.',
+  '지금은 여기도 조용하네요.',
 ]
 
 function pick<T>(items: readonly T[], rng: () => number): T {

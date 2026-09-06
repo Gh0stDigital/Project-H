@@ -91,15 +91,15 @@ export const directionBalance = {
 export const twoWayDirections: DirectionEffect[] = [
   {
     id: 'dir_gilded',
-    label: 'The Gilded Passage',
-    flavor: 'A faint glitter of coin-light spills from this way.',
+    label: '황금빛 통로',
+    flavor: '이쪽에서 희미한 동전 빛이 새어 나옵니다.',
     weightDeltas: { treasure: directionBalance.boost },
     durationMoves: directionBalance.standardDuration,
   },
   {
     id: 'dir_snares',
-    label: 'The Whispering Passage',
-    flavor: 'Something clicks softly in the dark down here.',
+    label: '속삭이는 통로',
+    flavor: '아래쪽 어둠 속에서 무언가 나직이 딸깍입니다.',
     weightDeltas: { trap: directionBalance.boost },
     durationMoves: directionBalance.standardDuration,
   },
@@ -108,29 +108,29 @@ export const twoWayDirections: DirectionEffect[] = [
 export const fourWayDirections: DirectionEffect[] = [
   {
     id: 'dir_warpath',
-    label: 'The Warpath',
-    flavor: 'Deep gouges score the walls. Something hunts here.',
+    label: '전화의 길',
+    flavor: '벽에 깊은 발톱 자국이 나 있습니다. 무언가 사냥하고 있습니다.',
     weightDeltas: { battle: directionBalance.boost },
     durationMoves: directionBalance.standardDuration,
   },
   {
     id: 'dir_hush',
-    label: 'The Hushed Way',
-    flavor: 'The air is still and strangely undisturbed.',
+    label: '고요한 길',
+    flavor: '공기가 멎어 있고, 이상하리만치 흐트러짐이 없습니다.',
     weightDeltas: { battle: -directionBalance.reduction },
     durationMoves: directionBalance.shortDuration,
   },
   {
     id: 'dir_sigils',
-    label: 'The Sigil Road',
-    flavor: 'Old glyphs pulse faintly along the stonework.',
+    label: '문양의 길',
+    flavor: '오래된 문양이 돌벽을 따라 희미하게 맥동합니다.',
     weightDeltas: { magic_room: directionBalance.boost },
     durationMoves: directionBalance.standardDuration,
   },
   {
     id: 'dir_hoard',
-    label: 'The Hoarder’s Descent',
-    flavor: 'Riches and ruin, tangled together somewhere below.',
+    label: '수집가의 내리막',
+    flavor: '아래 어딘가에 부와 파멸이 뒤엉켜 있습니다.',
     weightDeltas: {
       treasure: Math.round(directionBalance.boost * 0.7),
       trap: Math.round(directionBalance.boost * 0.7),

@@ -26,7 +26,7 @@ export function SpellSetsTab() {
       {spellSets.length === 0 && (
         <div className="empty-state">
           <span className="glyph">🗂️</span>
-          <p>No Spell Sets yet. Group your Spells into a set to equip them.</p>
+          <p>아직 주문 세트가 없습니다. 주문을 세트로 묶어야 장착할 수 있습니다.</p>
         </div>
       )}
 
@@ -36,7 +36,7 @@ export function SpellSetsTab() {
             <div style={{ fontWeight: 700 }}>{set.name}</div>
             <div className="faint">{set.spellIds.length} Spells</div>
           </div>
-          <span className="faint">Edit →</span>
+          <span className="faint">편집 →</span>
         </button>
       ))}
     </div>

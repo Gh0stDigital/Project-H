@@ -22,10 +22,10 @@ export interface EventDefinition {
 export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   treasure: {
     type: 'treasure',
-    title: 'Locked Treasure',
+    title: '잠긴 보물',
     bodyText: [
-      'A sturdy chest sits half-buried in the rubble.',
-      'The lock is old, but the mechanism still bites. Speak the word to force it.',
+      '튼튼한 상자가 돌무더기에 반쯤 파묻혀 있습니다.',
+      '자물쇠는 낡았지만 아직 단단합니다. 단어를 말해 열어 보세요.',
     ],
     imageCategory: 'treasure',
     imageKey: 'locked',
@@ -34,8 +34,8 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   trap: {
     type: 'trap',
-    title: 'A Trap!',
-    bodyText: ['You hear a click underfoot.', 'Recall the meaning before the mechanism finishes winding!'],
+    title: '함정이다!',
+    bodyText: ['발밑에서 딸깍 소리가 납니다.', '장치가 다 감기기 전에 뜻을 떠올리세요!'],
     imageCategory: 'traps',
     imageKey: 'default',
     hasChallenge: true,
@@ -43,10 +43,10 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   magic_room: {
     type: 'magic_room',
-    title: 'Sealed Magic Room',
+    title: '봉인된 마법의 방',
     bodyText: [
-      'A door of layered glyphs blocks the passage.',
-      'One word holds it shut — reveal it letter by letter, and it will open.',
+      '겹겹이 새겨진 문양의 문이 길을 막고 있습니다.',
+      '한 단어가 문을 붙잡고 있습니다. 한 글자씩 밝혀내면 열립니다.',
     ],
     imageCategory: 'treasure',
     imageKey: 'shrine',
@@ -55,8 +55,8 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   rest: {
     type: 'rest',
-    title: 'Rest Area',
-    bodyText: ['A safe alcove, quiet and dry.', 'A place to bind wounds — for a price.'],
+    title: '쉼터',
+    bodyText: ['조용하고 마른, 안전한 구석입니다.', '상처를 돌볼 수 있는 곳입니다. 물론 값을 치러야 하지만요.'],
     imageCategory: 'treasure',
     imageKey: 'rest',
     hasChallenge: false,
@@ -64,8 +64,8 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   battle: {
     type: 'battle',
-    title: 'Monster Encounter!',
-    bodyText: ['A hostile creature blocks your path!', 'Prepare for battle.'],
+    title: '몬스터 조우!',
+    bodyText: ['적대적인 생물이 길을 막아섭니다!', '전투를 준비하세요.'],
     imageCategory: 'enemies',
     imageKey: 'default',
     hasChallenge: false,
@@ -73,8 +73,8 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   direction: {
     type: 'direction',
-    title: 'Branching Path',
-    bodyText: ['The passage forks ahead.', 'Each way carries its own promise — and its own risk.'],
+    title: '갈림길',
+    bodyText: ['앞에서 길이 갈라집니다.', '어느 쪽이든 기회가 있고, 그만한 위험도 있습니다.'],
     imageCategory: 'events',
     imageKey: 'branch',
     hasChallenge: false,
@@ -82,10 +82,10 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   boss_door: {
     type: 'boss_door',
-    title: 'The Boss Door',
+    title: '보스의 문',
     bodyText: [
-      'An enormous door of black stone fills the passage.',
-      'A single keyhole sits at its centre. You mark the way back.',
+      '거대한 검은 돌문이 길을 가득 메우고 있습니다.',
+      '한가운데에 열쇠 구멍 하나가 있습니다. 돌아올 길을 표시해 둡니다.',
     ],
     imageCategory: 'events',
     imageKey: 'bossroom',
@@ -94,10 +94,10 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
   },
   key_room: {
     type: 'key_room',
-    title: 'The Key Chamber',
+    title: '열쇠의 방',
     bodyText: [
-      'Every word this dungeon had to teach, you have now faced.',
-      'On a plain stone plinth rests a heavy iron key.',
+      '이 던전이 가르치려던 모든 단어를 마주했습니다.',
+      '소박한 돌 받침 위에 묵직한 쇠 열쇠가 놓여 있습니다.',
     ],
     imageCategory: 'events',
     imageKey: 'special',
@@ -108,6 +108,6 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
 
 /** Flavor for the mimic reveal, shown before the fight starts. */
 export const mimicRevealText = [
-  'The lid shudders — then splits into a grinning maw.',
-  'It was never a chest. It was waiting.',
+  '뚜껑이 흔들리더니, 이빨을 드러낸 아가리로 갈라집니다.',
+  '애초에 상자가 아니었습니다. 기다리고 있었을 뿐입니다.',
 ]

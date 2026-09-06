@@ -17,7 +17,7 @@ export function TotemPanel({ totem, effectText, compact }: TotemPanelProps) {
 
   return (
     <div className={`totem-panel${compact ? ' compact' : ''}${hit ? ' is-hit' : ''}`}>
-      <span className="totem-panel-tag">Your Totem</span>
+      <span className="totem-panel-tag">내 토템</span>
       <AssetImage
         category="totems"
         assetKey={totem.avatarKey}

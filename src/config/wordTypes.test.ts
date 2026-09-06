@@ -73,11 +73,11 @@ describe('conditional conjugation fields', () => {
 
 describe('future field labelling', () => {
   it('uses intention for action verbs and prediction for descriptive verbs', () => {
-    expect(futureLabelFor('action_verb', '')).toBe('Future/Intention')
-    expect(futureLabelFor('descriptive_verb', '')).toBe('Future/Prediction')
+    expect(futureLabelFor('action_verb', '')).toBe('미래/의도')
+    expect(futureLabelFor('descriptive_verb', '')).toBe('미래/추측')
   })
 
   it("treats a noun's derived 하다 verb as an action verb", () => {
-    expect(futureLabelFor('noun', '검토하다')).toBe('Future/Intention')
+    expect(futureLabelFor('noun', '검토하다')).toBe('미래/의도')
   })
 })

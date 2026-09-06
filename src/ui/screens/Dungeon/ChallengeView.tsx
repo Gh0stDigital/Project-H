@@ -18,7 +18,7 @@ interface ChallengeViewProps {
  * is the player's own saved answer, spelled out) and means no keyboard
  * ever opens mid-dungeon.
  */
-export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = 'Answer' }: ChallengeViewProps) {
+export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답' }: ChallengeViewProps) {
   const asksForKorean = challenge.direction === 'eng_to_kor'
   const kind = asksForKorean ? 'korean' : 'english'
 
@@ -51,7 +51,7 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
 
   return (
     <div className="panel challenge-prompt">
-      <div className="prompt-label">{asksForKorean ? 'Translate to Korean' : 'Translate to English'}</div>
+      <div className="prompt-label">{asksForKorean ? '한국어로 번역하세요' : '영어로 번역하세요'}</div>
       <div className="prompt-word" lang={asksForKorean ? 'en' : 'ko'}>
         {challenge.prompt}
       </div>

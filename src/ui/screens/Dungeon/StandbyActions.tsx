@@ -56,27 +56,27 @@ export function StandbyActions({
             Move{hasDestinations && <span className="room-action-caret">▾</span>}
           </span>
           <span className="sub">
-            {hasDestinations ? 'Press on, or head somewhere you found' : 'Press on into the dungeon'}
+            {hasDestinations ? '계속 나아가거나, 찾아 둔 곳으로 갑니다' : '던전 안으로 나아갑니다'}
           </span>
         </button>
         <button className="room-action" onClick={onCheckTotem}>
-          <span className="label">Totem</span>
-          <span className="sub">Inspect your Totem</span>
+          <span className="label">토템</span>
+          <span className="sub">토템을 살펴봅니다</span>
         </button>
         <button className="room-action" onClick={onCheckWords}>
-          <span className="label">Tendency</span>
-          <span className="sub">Review this run's Spellwords</span>
+          <span className="label">성향</span>
+          <span className="sub">이번 탐험의 주문 단어 보기</span>
         </button>
         <button className="room-action" onClick={onUseItem}>
-          <span className="label">Items</span>
-          <span className="sub">Heal, recharge, or leave the dungeon</span>
+          <span className="label">아이템</span>
+          <span className="sub">회복하거나, 충전하거나, 던전을 떠납니다</span>
         </button>
       </div>
 
       {destinationsOpen && (
         <div className="overlay-backdrop" onClick={() => setDestinationsOpen(false)}>
           <div className="destination-menu" onClick={(e) => e.stopPropagation()}>
-            <h2>Where to?</h2>
+            <h2>어디로 갈까요?</h2>
 
             <button
               className="destination-option"
@@ -85,8 +85,8 @@ export function StandbyActions({
                 onMove()
               }}
             >
-              <span className="label">Press onward</span>
-              <span className="sub">Roll for whatever lies ahead</span>
+              <span className="label">계속 나아가기</span>
+              <span className="sub">앞에 무엇이 있든 주사위를 굴립니다</span>
             </button>
 
             {restAreaFound && (
@@ -97,8 +97,8 @@ export function StandbyActions({
                   onReturnToRest()
                 }}
               >
-                <span className="label">Rest Area</span>
-                <span className="sub">Bind your wounds, for a price</span>
+                <span className="label">쉼터</span>
+                <span className="sub">값을 치르고 상처를 돌봅니다</span>
               </button>
             )}
 
@@ -111,9 +111,9 @@ export function StandbyActions({
                   onEnterBoss()
                 }}
               >
-                <span className="label">Boss Door</span>
+                <span className="label">보스의 문</span>
                 <span className="sub">
-                  {canEnterBoss ? 'The key turns. There is no way back.' : keyFound ? 'The key is spent' : 'Locked — find the key'}
+                  {canEnterBoss ? '열쇠가 돌아갑니다. 돌아갈 길은 없습니다.' : keyFound ? '열쇠는 이미 썼습니다' : '잠김 — 열쇠를 찾으세요'}
                 </span>
               </button>
             )}

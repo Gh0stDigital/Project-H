@@ -52,28 +52,28 @@ export function ResultsView() {
           )}
         </div>
         {report.totemDestroyed ? (
-          <p className="destroyed-note">Your Totem is destroyed. Raise a new one from the Totem screen.</p>
+          <p className="destroyed-note">토템이 파괴되었습니다. 토템 화면에서 새로 기르세요.</p>
         ) : (
-          report.lifePointLost && <p className="faint">You lost 1 Life Point.</p>
+          report.lifePointLost && <p className="faint">생명력 1을 잃었습니다.</p>
         )}
       </div>
 
       {/* ---- Headline numbers ---- */}
       <div className="results-grid tight">
-        <Stat label="Money" value={`💰 ${report.moneyEarned}`} />
-        <Stat label="Totem XP" value={report.totemXpEarned} />
-        <Stat label="Foes" value={report.enemiesDefeated} />
-        <Stat label="Mimics" value={report.mimicsDefeated} />
-        <Stat label="Treasure" value={report.treasureCollected} />
-        <Stat label="Rests" value={report.restsUsed} />
+        <Stat label="돈" value={`💰 ${report.moneyEarned}`} />
+        <Stat label="토템 경험치" value={report.totemXpEarned} />
+        <Stat label="적" value={report.enemiesDefeated} />
+        <Stat label="미믹" value={report.mimicsDefeated} />
+        <Stat label="보물" value={report.treasureCollected} />
+        <Stat label="휴식" value={report.restsUsed} />
       </div>
 
       {/* ---- Accuracy ---- */}
       <div className="panel accuracy-panel">
         <div className="accuracy-row">
-          <Accuracy label="Overall" value={report.totalAccuracy} />
-          <Accuracy label="Attack" value={report.attackAccuracy} />
-          <Accuracy label="Defense" value={report.defenseAccuracy} />
+          <Accuracy label="전체" value={report.totalAccuracy} />
+          <Accuracy label="공격" value={report.attackAccuracy} />
+          <Accuracy label="방어" value={report.defenseAccuracy} />
         </div>
         <div className="faint" style={{ textAlign: 'center' }}>
           {report.totalCorrect} correct · {report.totalIncorrect} wrong
@@ -110,10 +110,10 @@ export function ResultsView() {
 
 function WordsPanel({ report, onClose }: { report: RunReport; onClose: () => void }) {
   return (
-    <SlidePanel title="Word Performance" onClose={onClose}>
+    <SlidePanel title="단어 성적" onClose={onClose}>
       {report.struggled.length > 0 && (
         <section>
-          <h3>Worth Reviewing</h3>
+          <h3>복습할 만한</h3>
           <div className="list">
             {report.struggled.map((w) => (
               <WordRow key={w.spellId} word={w} />
@@ -122,7 +122,7 @@ function WordsPanel({ report, onClose }: { report: RunReport; onClose: () => voi
         </section>
       )}
       <section>
-        <h3>Every Word</h3>
+        <h3>모든 단어</h3>
         <div className="list">
           {report.words.map((w) => (
             <WordRow key={w.spellId} word={w} />
@@ -140,10 +140,10 @@ function HaulPanel({ report, onClose }: { report: RunReport; onClose: () => void
   }, {})
 
   return (
-    <SlidePanel title="Haul" onClose={onClose}>
+    <SlidePanel title="전리품" onClose={onClose}>
       {Object.keys(itemCounts).length > 0 && (
         <section>
-          <h3>Items &amp; Treasure</h3>
+          <h3>아이템 & 보물</h3>
           <div className="reward-lines">
             {Object.entries(itemCounts).map(([id, count]) => {
               const def = getItemDef(id as ItemId)
@@ -159,27 +159,27 @@ function HaulPanel({ report, onClose }: { report: RunReport; onClose: () => void
 
       {report.levelUps.length > 0 && (
         <section>
-          <h3>Spell Level-Ups</h3>
+          <h3>주문 레벨업</h3>
           <p>{report.levelUps.map((l) => `${l.korean} ${l.from}→${l.to}`).join(' · ')}</p>
         </section>
       )}
 
       {report.masteredWords.length > 0 && (
         <section>
-          <h3>Newly Mastered</h3>
+          <h3>새로 숙달함</h3>
           <p>{report.masteredWords.join(', ')}</p>
         </section>
       )}
 
       <section>
-        <h3>Totals</h3>
+        <h3>합계</h3>
         <div className="stats-grid">
           <div className="stat-tile">
-            <div className="faint">Spell XP</div>
+            <div className="faint">주문 경험치</div>
             <div className="value">{report.spellXpEarned}</div>
           </div>
           <div className="stat-tile">
-            <div className="faint">Turns</div>
+            <div className="faint">턴 수</div>
             <div className="value">{report.turns}</div>
           </div>
         </div>
@@ -199,7 +199,7 @@ function WordRow({ word }: { word: WordReportRow }) {
         </div>
         <div className="faint word-report-meta">
           {attempts === 0 ? (
-            'Never attempted'
+            '시도한 적 없음'
           ) : (
             <>
               {word.correct}✓ / {word.incorrect}✗ · {pct(word.accuracy)}

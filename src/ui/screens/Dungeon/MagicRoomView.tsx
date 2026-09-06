@@ -23,7 +23,7 @@ export function MagicRoomView({ puzzle, onGuess, onFinish }: MagicRoomViewProps)
 
   return (
     <div className="panel challenge-prompt magic-room">
-      <div className="prompt-label">Break the seal</div>
+      <div className="prompt-label">봉인을 풀기</div>
 
       <div className="hangman-slots" lang="ko">
         {slots.map((s, i) => (
@@ -45,8 +45,8 @@ export function MagicRoomView({ puzzle, onGuess, onFinish }: MagicRoomViewProps)
         <>
           <div className={`feedback-banner ${puzzle.status === 'solved' ? 'correct' : 'incorrect'}`}>
             {puzzle.status === 'solved'
-              ? 'The glyphs unwind — the room opens!'
-              : `The door seals for good. The word was ${puzzle.answer}.`}
+              ? '문양이 풀리며 — 방이 열립니다!'
+              : `문이 영영 봉인됩니다. 답은 ${puzzle.answer}이었습니다.`}
           </div>
           <div className="tile-actions">
             <button className="btn btn-primary btn-sm" onClick={onFinish}>

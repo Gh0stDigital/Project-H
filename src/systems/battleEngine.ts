@@ -35,7 +35,7 @@ export function enemyArtFor(seed: string): string {
 
 /** A readable name for a foe from its art: `wraith` -> "Wraith". */
 export function enemyNameFor(artKey: string): string {
-  if (!artKey || artKey === 'default') return 'Wandering Foe'
+  if (!artKey || artKey === 'default') return '떠도는 적'
   return artKey
     .replace(/[_-]+/g, ' ')
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
@@ -82,7 +82,7 @@ export function spawnBoss(seed: string, tier: DungeonTierDef, wordCount: number)
   const hp = battleBalance.bossBaseHp + wordCount * battleBalance.bossHpPerWord
   return {
     kind: 'boss',
-    name: 'Boss Guardian',
+    name: '보스 수호자',
     imageCategory: 'bosses',
     imageKey: keyOf(pickFlavor('bosses', seed)),
     battleBgKey: 'boss',
@@ -107,7 +107,7 @@ export function startBattle(
     activeChallenge: null,
     defense: null,
     timer: null,
-    log: [isBoss ? 'The boss blocks your path!' : `${enemy.name} appears!`],
+    log: [isBoss ? '보스가 길을 막아섭니다!' : `${enemy.name}이(가) 나타났습니다!`],
     totemDamageTakenThisBattle: 0,
     lastResult: null,
     rewardsGranted: false,
@@ -195,9 +195,9 @@ export function resolvePlayerAttack(state: BattleState, spell: Spell, submitted:
     ...state.log,
     resolution.correct
       ? damageDealt > 0
-        ? `${spell.korean} lands for ${damageDealt} damage!`
-        : `${spell.korean} strikes true, but the Plateau absorbs it.`
-      : `You mistranslate "${challenge.prompt}" — the attack fizzles.`,
+        ? `${spell.korean}이(가) 명중해 ${damageDealt}의 피해를 입혔습니다!`
+        : `${spell.korean}이(가) 명중했지만 결계가 흡수합니다.`
+      : `"${challenge.prompt}"을(를) 잘못 옮겼습니다 — 공격이 흩어집니다.`,
   ]
 
   const nextPhase = enemy.currentHp <= 0 ? 'victory' : 'player_resolve'
@@ -348,10 +348,10 @@ export function resolveDefensePrompt(
   const log = [
     ...state.log,
     resolution.correct
-      ? `You recall "${challenge.prompt}" in time.`
+      ? `"${challenge.prompt}"을(를) 제때 떠올렸습니다.`
       : timedOut
         ? `Too slow! "${challenge.prompt}" goes unanswered.`
-        : `Wrong meaning for "${challenge.prompt}".`,
+        : `"${challenge.prompt}"의 뜻이 틀렸습니다.`,
   ]
 
   if (!complete) {
@@ -377,10 +377,10 @@ export function resolveDefensePrompt(
   const damageToTotem = defenseDamage(state.enemy.damage, correctCount, results.length)
   const summary =
     correctCount === results.length
-      ? `Attack blocked — only ${damageToTotem} damage gets through.`
+      ? `공격을 막아냈습니다 — ${damageToTotem}의 피해만 들어왔습니다.`
       : correctCount === 0
-        ? `The attack lands in full for ${damageToTotem} damage!`
-        : `Partly blocked — ${correctCount}/${results.length} correct, ${damageToTotem} damage taken.`
+        ? `공격이 그대로 적중해 ${damageToTotem}의 피해를 입혔습니다!`
+        : `일부만 막았습니다 — ${results.length}개 중 ${correctCount}개 정답, ${damageToTotem}의 피해를 입었습니다.`
 
   return {
     state: {

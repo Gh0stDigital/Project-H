@@ -120,10 +120,10 @@ export function buildRunReport({
     outcome,
     title:
       outcome === 'victory'
-        ? 'Dungeon Cleared!'
+        ? '던전 클리어!'
         : outcome === 'abandoned'
-          ? 'Dungeon Abandoned'
-          : 'Your Totem Has Fallen',
+          ? '던전 포기'
+          : '토템이 쓰러졌습니다',
     turns: run.stats.turns,
     moneyEarned: run.stats.moneyEarned,
     totemXpEarned: run.stats.totemXpEarned,

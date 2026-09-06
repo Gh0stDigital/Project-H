@@ -12,11 +12,11 @@ export function ItemPanel({ inventory, onUse, onClose }: ItemPanelProps) {
   const stacks = inventory.filter((e) => e.quantity > 0)
 
   return (
-    <SlidePanel title="Items" onClose={onClose}>
+    <SlidePanel title="아이템" onClose={onClose}>
       {stacks.length === 0 ? (
         <div className="empty-state">
           <span className="glyph">🎒</span>
-          <p>Your pack is empty. Open treasure chests to find items.</p>
+          <p>가방이 비었습니다. 보물 상자를 열어 아이템을 찾으세요.</p>
         </div>
       ) : (
         <div className="list">

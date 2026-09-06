@@ -62,9 +62,9 @@ export function itemUseText(def: ItemDef): string {
     case 'heal':
       return `${def.icon} ${def.name} used — HP restored.`
     case 'charge':
-      return `${def.icon} ${def.name} used — your deck crackles with charge.`
+      return `${def.icon} ${def.name} 사용 — 덱이 충전으로 요동칩니다.`
     case 'escape':
-      return `${def.icon} ${def.name} used — you climb out of the dungeon.`
+      return `${def.icon} ${def.name} 사용 — 던전 밖으로 빠져나옵니다.`
   }
 }
 

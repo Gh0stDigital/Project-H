@@ -26,26 +26,26 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
 
   return (
     <div className="panel rest-area">
-      <h3>⛺ Rest Area</h3>
+      <h3>⛺ 쉼터</h3>
       {/* Flavor is the first thing to go on a short phone — the numbers
           below are what the player actually decides on. */}
-      <p className="muted rest-flavor">A dry alcove and a banked fire. Someone left supplies — at a price.</p>
+      <p className="muted rest-flavor">마른 구석과 잦아든 모닥불. 누군가 물자를 두고 갔습니다 — 값을 받고요.</p>
 
       <div className="stats-grid">
         <div className="stat-tile">
-          <div className="faint">Restores</div>
+          <div className="faint">회복량</div>
           <div className="value">❤️ {quote.healAmount}</div>
         </div>
         <div className="stat-tile">
-          <div className="faint">Price</div>
+          <div className="faint">가격</div>
           <div className="value">💰 {quote.price}</div>
         </div>
         <div className="stat-tile">
-          <div className="faint">You have</div>
+          <div className="faint">보유</div>
           <div className="value">💰 {totem.money}</div>
         </div>
         <div className="stat-tile">
-          <div className="faint">Next visit</div>
+          <div className="faint">다음 이용</div>
           <div className="value">💰 {quote.nextPrice}</div>
         </div>
       </div>
@@ -57,9 +57,9 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
         <span className="faint">Rested {usesSoFar}×</span>
       </div>
 
-      {quote.blockedReason === 'full_hp' && <p className="faint">You're already at full health.</p>}
+      {quote.blockedReason === 'full_hp' && <p className="faint">이미 체력이 가득합니다.</p>}
       {quote.blockedReason === 'too_expensive' && (
-        <p className="faint">You can't afford to rest here yet.</p>
+        <p className="faint">아직 여기서 쉴 돈이 부족합니다.</p>
       )}
 
       <div className="btn-row">
@@ -88,7 +88,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
               >
                 <AssetImage category="npcs" assetKey={npc.avatarKey} alt={npc.name} className="npc-portrait" />
                 <span className="npc-name">{npc.name}</span>
-                <span className="faint npc-state">{npc.spoken ? 'Spoken' : 'Talk'}</span>
+                <span className="faint npc-state">{npc.spoken ? '대화함' : '대화'}</span>
               </button>
             ))}
           </div>
@@ -106,7 +106,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
                 {said && (said.reward.money > 0 || said.reward.lines.length > 0) ? (
                   <>Gave you {said.reward.lines.join(' · ')}</>
                 ) : (
-                  <span className="faint">They had nothing to spare.</span>
+                  <span className="faint">나눠 줄 것이 없었습니다.</span>
                 )}
               </div>
             </div>

@@ -91,10 +91,10 @@ export function BattleView() {
         )}
       </div>
 
-      <RunHud run={run} totem={totem} modeLabel={battle.isBoss ? 'Boss Battle' : 'Battle'} />
+      <RunHud run={run} totem={totem} modeLabel={battle.isBoss ? '보스 전투' : '전투'} />
 
       <div className="scene-window battle">
-        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="Dungeon location" />
+        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="던전 배경" />
         <div
           key={battle.enemy.imageKey}
           className={`battle-enemy-overlay${enemyHit ? ' is-hit' : ''}`}
@@ -189,7 +189,7 @@ export function BattleView() {
           answer={answerFor(challengeSpell)}
           decoyPool={decoyPool}
           onSubmit={submitAttackAnswer}
-          submitLabel="Attack!"
+          submitLabel="공격!"
         />
       )}
 
@@ -199,7 +199,7 @@ export function BattleView() {
           answer={answerFor(challengeSpell)}
           decoyPool={decoyPool}
           onSubmit={submitDefenseAnswer}
-          submitLabel="Defend!"
+          submitLabel="방어!"
         />
       )}
 
@@ -234,7 +234,7 @@ export function BattleView() {
 
       {battle.phase === 'defeat' && (
         <>
-          <div className="feedback-banner incorrect">💀 Your Totem has fallen...</div>
+          <div className="feedback-banner incorrect">💀 토템이 쓰러졌습니다…</div>
           <button className="btn btn-primary btn-block" onClick={continueAfterDefeat}>
             See Results
           </button>

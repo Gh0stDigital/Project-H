@@ -34,7 +34,7 @@ export function SpellSetEditor({ existing, onDone, onCancel }: SpellSetEditorPro
       for (const id of existing.spellIds) if (!selected.has(id)) removeSpellFromSet(existing.id, id)
       for (const id of selected) if (!existing.spellIds.includes(id)) addSpellToSet(existing.id, id)
     } else {
-      createSpellSet(name || 'Untitled Set', [...selected])
+      createSpellSet(name || '이름 없는 세트', [...selected])
     }
     onDone()
   }
@@ -42,12 +42,12 @@ export function SpellSetEditor({ existing, onDone, onCancel }: SpellSetEditorPro
   return (
     <div className="list">
       <div className="field">
-        <label htmlFor="set-name">Set name</label>
+        <label htmlFor="set-name">세트 이름</label>
         <input id="set-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Chapter 1 Verbs" />
       </div>
 
       <h3>Spells in this set ({selected.size})</h3>
-      {spells.length === 0 && <p className="faint">Create Spell Words first, then add them to a set here.</p>}
+      {spells.length === 0 && <p className="faint">먼저 주문 단어를 만든 뒤 여기에서 세트에 추가하세요.</p>}
       <div className="list">
         {spells.map((s) => (
           <label key={s.id} className="card row" style={{ cursor: 'pointer' }}>
@@ -61,14 +61,14 @@ export function SpellSetEditor({ existing, onDone, onCancel }: SpellSetEditorPro
 
       <div className="btn-row">
         <button className="btn btn-primary btn-block" onClick={handleSave}>
-          {existing ? 'Save Changes' : 'Create Set'}
+          {existing ? '변경 사항 저장' : '세트 만들기'}
         </button>
       </div>
       {existing && (
         <button
           className="btn btn-danger btn-block"
           onClick={() => {
-            if (confirm(`Delete set "${existing.name}"? This will not delete the Spells themselves.`)) {
+            if (confirm(`"${existing.name}" 세트를 삭제할까요? 주문 자체는 삭제되지 않습니다.`)) {
               deleteSpellSet(existing.id)
               onDone()
             }

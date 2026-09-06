@@ -43,8 +43,8 @@ export function TotemScreen() {
   if (!totem) {
     return (
       <div className="screen">
-        <TopBar title="Totem" onBack={() => goTo('menu')} />
-        <p className="muted">No Totem found.</p>
+        <TopBar title="토템" onBack={() => goTo('menu')} />
+        <p className="muted">토템이 없습니다.</p>
       </div>
     )
   }
@@ -54,10 +54,10 @@ export function TotemScreen() {
 
   return (
     <div className="screen">
-      <TopBar title="Totem" onBack={() => goTo('menu')} />
+      <TopBar title="토템" onBack={() => goTo('menu')} />
 
       <div className="panel" style={{ textAlign: 'center' }}>
-        <button className="totem-hero-frame" onClick={() => setRosterOpen(true)} title="Switch Totem">
+        <button className="totem-hero-frame" onClick={() => setRosterOpen(true)} title="토템 교체">
           <AssetImage category="totems" assetKey={totem.avatarKey} alt={totem.name} className="avatar-img avatar-hero" />
         </button>
         {/* Below the frame, not over the art. Switching is the primary
@@ -93,14 +93,14 @@ export function TotemScreen() {
 
         <p className="muted">Level {totem.level}</p>
 
-        <div className="life-points" title="Life Points">
+        <div className="life-points" title="생명력">
           {Array.from({ length: totem.maxLifePoints }, (_, i) => (
             <span key={i} className={`life-pip${i < totem.lifePoints ? ' lit' : ''}`}>
               {i < totem.lifePoints ? '◆' : '◇'}
             </span>
           ))}
           <span className="faint">
-            {totem.lifePoints}/{totem.maxLifePoints} Life Points
+            {totem.lifePoints}/{totem.maxLifePoints} 생명력
           </span>
         </div>
 
@@ -121,46 +121,46 @@ export function TotemScreen() {
             <b>{totem.currentHp}/{totem.maxHp}</b>
           </div>
           <div>
-            <div className="faint">Money</div>
+            <div className="faint">돈</div>
             <b>💰 {totem.money}</b>
           </div>
           <div>
-            <div className="faint">Bosses Beaten</div>
+            <div className="faint">처치한 보스</div>
             <b>{totem.stats.bossesDefeated}</b>
           </div>
         </div>
       </div>
 
       <div className="field">
-        <label>Battle Deck (Equipped Spell Set)</label>
+        <label>전투 덱 (장착한 주문 세트)</label>
         <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setPickerOpen(true)}>
           <div>
-            <div style={{ fontWeight: 700 }}>{equippedSet ? equippedSet.name : 'None equipped'}</div>
-            <div className="faint">{equippedSet ? `${equippedSet.spellIds.length} Spells` : 'Tap to choose a Spell Set'}</div>
+            <div style={{ fontWeight: 700 }}>{equippedSet ? equippedSet.name : '장착 없음'}</div>
+            <div className="faint">{equippedSet ? `${equippedSet.spellIds.length} Spells` : '눌러서 주문 세트를 고르세요'}</div>
           </div>
-          <span className="faint">Change</span>
+          <span className="faint">변경</span>
         </button>
       </div>
 
       <div className="field">
-        <label>Your Totems</label>
+        <label>내 토템들</label>
         <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setRosterOpen(true)}>
           <div>
             <div style={{ fontWeight: 700 }}>
               {totems.length} raised{usable.length < totems.length ? ` · ${usable.length} still standing` : ''}
             </div>
-            <div className="faint">Switch to another, or raise a new one</div>
+            <div className="faint">다른 토템으로 바꾸거나, 새로 기릅니다</div>
           </div>
-          <span className="faint">Switch</span>
+          <span className="faint">교체</span>
         </button>
       </div>
 
       <div style={{ flex: 1 }} />
 
       {rosterOpen && (
-        <SlidePanel title="Your Totems" onClose={() => setRosterOpen(false)}>
+        <SlidePanel title="내 토템들" onClose={() => setRosterOpen(false)}>
           <p className="faint">
-            Each Totem is its own character — its own level, experience, HP, money, Life Points and record.
+            Each Totem is its own character — its own level, experience, HP, money, 생명력 and record.
             Switching changes who you play as; it is not a change of portrait.
           </p>
 
@@ -183,14 +183,14 @@ export function TotemScreen() {
                     Lv {t.level} · {t.destroyed ? 'destroyed' : `❤️ ${t.currentHp}/${t.maxHp} · ◆ ${t.lifePoints}/${t.maxLifePoints}`}
                   </div>
                 </div>
-                {t.id === totem.id ? <span style={{ color: 'var(--accent-gold)' }}>✓ Active</span> : null}
+                {t.id === totem.id ? <span style={{ color: 'var(--accent-gold)' }}>✓ 사용 중</span> : null}
               </button>
             ))}
           </div>
 
-          <h3>Raise a New Totem</h3>
+          <h3>새 토템 기르기</h3>
           <p className="faint">
-            Starts at level 1 with a full set of Life Points, named after its portrait. Every portrait in{' '}
+            Starts at level 1 with a full set of 생명력, named after its portrait. Every portrait in{' '}
             <code>public/assets/totems</code> is available.
           </p>
           <div className="avatar-grid">
@@ -212,7 +212,7 @@ export function TotemScreen() {
       )}
 
       {avatarPickerOpen && (
-        <SlidePanel title="Choose Portrait" onClose={() => setAvatarPickerOpen(false)}>
+        <SlidePanel title="초상화 고르기" onClose={() => setAvatarPickerOpen(false)}>
           <p className="faint">
             Every portrait in <code>public/assets/totems</code>. Purely cosmetic — nothing else about the Totem
             changes.
@@ -236,11 +236,11 @@ export function TotemScreen() {
       )}
 
       {pickerOpen && (
-        <SlidePanel title="Choose Spell Set" onClose={() => setPickerOpen(false)}>
+        <SlidePanel title="주문 세트 고르기" onClose={() => setPickerOpen(false)}>
           {spellSets.length === 0 && (
             <div className="empty-state">
               <span className="glyph">🗂️</span>
-              <p>No Spell Sets yet — create one from the Compendium first.</p>
+              <p>아직 주문 세트가 없습니다 — 먼저 도감에서 만드세요.</p>
             </div>
           )}
 
@@ -264,9 +264,9 @@ export function TotemScreen() {
                   <div className="faint">{set.spellIds.length} Spells</div>
                 </div>
                 {set.id === totem.equippedSpellSetId ? (
-                  <span style={{ color: 'var(--accent-gold)' }}>✓ Equipped</span>
+                  <span style={{ color: 'var(--accent-gold)' }}>✓ 장착됨</span>
                 ) : (
-                  <span className="faint">Equip</span>
+                  <span className="faint">장착</span>
                 )}
               </button>
             ))}

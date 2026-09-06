@@ -28,16 +28,16 @@ import {
 } from './EventActionViews'
 
 const modeLabels: Record<DungeonState, string> = {
-  DungeonSetup: 'Setup',
-  Standby: 'Standby',
-  Rolling: 'Moving',
-  ResolvingEvent: 'Event',
-  VocabularyInput: 'Answering',
-  Battle: 'Battle',
-  Rest: 'Rest Area',
-  BossBattle: 'Boss Battle',
-  Results: 'Results',
-  Defeat: 'Defeated',
+  DungeonSetup: '준비',
+  Standby: '대기',
+  Rolling: '이동 중',
+  ResolvingEvent: '이벤트',
+  VocabularyInput: '응답 중',
+  Battle: '전투',
+  Rest: '쉼터',
+  BossBattle: '보스 전투',
+  Results: '결과',
+  Defeat: '패배',
 }
 
 /**
@@ -161,7 +161,7 @@ export function ExploreView() {
 
       {/* The scene window is always on screen — every state, every prompt. */}
       <div className="scene-window dungeon">
-        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="Dungeon location" />
+        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="던전 배경" />
         {event && !inStandby && !rolling && (
           // Keyed by event so the entrance animation replays for each new
           // event rather than only the first.
@@ -169,7 +169,7 @@ export function ExploreView() {
             <AssetImage category={event.imageCategory} assetKey={event.imageKey} alt={event.title} />
           </div>
         )}
-        <span className="scene-tag">{inStandby || rolling ? 'Standby' : (event?.title ?? 'Standby')}</span>
+        <span className="scene-tag">{inStandby || rolling ? '대기' : (event?.title ?? '대기')}</span>
         {/* The narration is its own window inside the scene, sitting over the
             lower part of the art. Keeping it here rather than as a sibling
             below buys back its whole height for the player's options. It is
@@ -211,7 +211,7 @@ export function ExploreView() {
             finishRoll()
           }}
         >
-          {rollSettled ? 'Continue →' : 'Rolling…'}
+          {rollSettled ? '계속 →' : 'Rolling…'}
         </button>
       )}
 
@@ -281,7 +281,7 @@ export function ExploreView() {
               <BossDoorNotice keyFound={run.keyFound} onContinue={acknowledgeEvent} />
             ) : (
               <button className="btn btn-primary btn-block" onClick={acknowledgeEvent}>
-                {event.type === 'battle' ? '⚔️ Fight' : 'Continue →'}
+                {event.type === 'battle' ? '⚔️ Fight' : '계속 →'}
               </button>
             ))}
         </>
@@ -304,7 +304,7 @@ export function ExploreView() {
       {confirmingBoss && (
         <div className="overlay-backdrop" onClick={cancelEnterBossDoor}>
           <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <h2>Enter the Boss Door?</h2>
+            <h2>보스의 문으로 들어갈까요?</h2>
             <p className="muted">
               The key turns once. You cannot return to exploring this dungeon — the run ends in victory or defeat.
             </p>

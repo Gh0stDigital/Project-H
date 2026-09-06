@@ -9,12 +9,12 @@ import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
 
 const sortOptions: { key: RecordsSortKey; label: string }[] = [
-  { key: 'level', label: 'Level' },
-  { key: 'charge', label: 'Charge' },
-  { key: 'accuracy', label: 'Accuracy' },
-  { key: 'mostPracticed', label: 'Most Practiced' },
-  { key: 'mostMissed', label: 'Most Missed' },
-  { key: 'recentlyPracticed', label: 'Recent' },
+  { key: 'level', label: '레벨' },
+  { key: 'charge', label: '충전' },
+  { key: 'accuracy', label: '정확도' },
+  { key: 'mostPracticed', label: '가장 많이 연습한' },
+  { key: 'mostMissed', label: '가장 많이 틀린' },
+  { key: 'recentlyPracticed', label: '최근' },
   { key: 'alphabetical', label: 'A-Z' },
 ]
 
@@ -31,7 +31,7 @@ export function RecordsScreen() {
 
   return (
     <div className="screen screen-scroll">
-      <TopBar title="Records" onBack={() => goTo('menu')} />
+      <TopBar title="기록" onBack={() => goTo('menu')} />
 
       <div className="filter-row">
         <span
@@ -58,7 +58,7 @@ export function RecordsScreen() {
       {list.length === 0 && (
         <div className="empty-state">
           <span className="glyph">📊</span>
-          <p>No Spells to show yet.</p>
+          <p>아직 보여줄 주문이 없습니다.</p>
         </div>
       )}
 

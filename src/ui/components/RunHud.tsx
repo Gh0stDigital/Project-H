@@ -11,7 +11,7 @@ interface RunHudProps {
 
 /**
  * The always-on run readout: what mode you're in, how deep you are, your
- * Life Points and money, whether the key and Boss Door are accounted for,
+ * 생명력 and money, whether the key and Boss Door are accounted for,
  * and which Direction biases are still running. Kept to two compact rows so
  * it can sit above every dungeon state without changing the layout.
  */
@@ -21,7 +21,7 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
       <div className="run-hud-row">
         <span className="run-hud-mode">{modeLabel}</span>
         <span className="run-hud-turn">Turn {run.turn}</span>
-        <span className="run-hud-life" title="Life Points">
+        <span className="run-hud-life" title="생명력">
           {'◆'.repeat(Math.max(0, totem.lifePoints))}
           <span className="faint">{'◇'.repeat(Math.max(0, totem.maxLifePoints - totem.lifePoints))}</span>
         </span>
@@ -36,7 +36,7 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
           {run.bossDoorFound ? '🚪 Door found' : '🚪 Door unknown'}
         </span>
         {run.modifiers.length === 0 ? (
-          <span className="run-hud-chip faint">No path effects</span>
+          <span className="run-hud-chip faint">길 효과 없음</span>
         ) : (
           run.modifiers.map((m) => (
             <span key={m.id} className="run-hud-chip mod" title={m.label}>

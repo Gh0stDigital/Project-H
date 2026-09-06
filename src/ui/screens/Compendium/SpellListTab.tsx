@@ -49,7 +49,7 @@ export function SpellListTab() {
       {spells.length > 0 && (
         <input
           type="text"
-          placeholder="Search your Spells..."
+          placeholder="주문 검색…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -58,7 +58,7 @@ export function SpellListTab() {
       {filtered.length === 0 && (
         <div className="empty-state">
           <span className="glyph">📖</span>
-          <p>{spells.length === 0 ? 'No Spells yet — create your first one!' : 'No matches.'}</p>
+          <p>{spells.length === 0 ? '아직 주문이 없습니다 — 첫 주문을 만들어 보세요!' : '결과가 없습니다.'}</p>
         </div>
       )}
 

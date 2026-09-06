@@ -41,7 +41,7 @@ export function DungeonConfigScreen() {
 
   return (
     <div className="screen screen-tight">
-      <TopBar title="Dungeon" onBack={() => goTo('menu')} />
+      <TopBar title="던전" onBack={() => goTo('menu')} />
 
       {!totem && (
         <div className="empty-state">
@@ -55,7 +55,7 @@ export function DungeonConfigScreen() {
       {spellSets.length === 0 && (
         <div className="empty-state">
           <span className="glyph">🗝️</span>
-          <p>You need at least one Spell Set to enter a dungeon. Create one from the Compendium.</p>
+          <p>던전에 들어가려면 주문 세트가 최소 하나 필요합니다. 도감에서 만드세요.</p>
         </div>
       )}
 
@@ -67,7 +67,7 @@ export function DungeonConfigScreen() {
 
           {/* 2. Dungeon entrance image */}
           <div className="scene-window compact">
-            <AssetImage category="locations" assetKey="dkp_entrance" alt="Dungeon entrance" />
+            <AssetImage category="locations" assetKey="dkp_entrance" alt="던전 입구" />
             <span className="scene-tag">{tier.label}</span>
           </div>
 
@@ -76,9 +76,9 @@ export function DungeonConfigScreen() {
 
           <div className="config-row">
             <div className="field">
-              <label htmlFor="totem-set-select">Battle Deck</label>
+              <label htmlFor="totem-set-select">전투 덱</label>
               <select id="totem-set-select" value={totemSetId ?? ''} onChange={(e) => setTotemSetId(e.target.value || null)}>
-                <option value="">— choose —</option>
+                <option value="">— 선택 —</option>
                 {spellSets.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.spellIds.length})
@@ -89,9 +89,9 @@ export function DungeonConfigScreen() {
 
             {/* 6. Dungeon Tendency — the word pool this run draws from */}
             <div className="field">
-              <label htmlFor="dungeon-set-select">Tendency (Words)</label>
+              <label htmlFor="dungeon-set-select">성향 (단어)</label>
               <select id="dungeon-set-select" value={dungeonSetId ?? ''} onChange={(e) => setDungeonSetId(e.target.value || null)}>
-                <option value="">— choose —</option>
+                <option value="">— 선택 —</option>
                 {spellSets.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name} ({s.spellIds.length})
@@ -103,7 +103,7 @@ export function DungeonConfigScreen() {
 
           {/* 4. Dungeon tier selection */}
           <div className="field">
-            <label>Dungeon Tier</label>
+            <label>던전 등급</label>
             <div className="tier-card-list row">
               {dungeonTiers.map((t) => (
                 <button
@@ -124,15 +124,15 @@ export function DungeonConfigScreen() {
             <p className="dungeon-info-desc">{tier.description}</p>
             <div className="stats-grid">
               <div className="stat-tile">
-                <div className="faint">Word Limit</div>
+                <div className="faint">단어 수 제한</div>
                 <div className="value">{tier.wordLimit}</div>
               </div>
               <div className="stat-tile">
-                <div className="faint">Boss Unlocks</div>
+                <div className="faint">보스 해금</div>
                 <div className="value">~{tier.minEventsBeforeBossEligible} evts</div>
               </div>
               <div className="stat-tile">
-                <div className="faint">Enemy Dmg</div>
+                <div className="faint">적 피해</div>
                 <div className="value">×{tier.enemyDamageMultiplier}</div>
               </div>
             </div>
@@ -149,7 +149,7 @@ export function DungeonConfigScreen() {
           <button className="btn btn-primary btn-block" disabled={!canStart} onClick={handleStart}>
             Enter Dungeon
           </button>
-          {!canStart && <p className="faint">Choose a non-empty Spell Set for both roles to continue.</p>}
+          {!canStart && <p className="faint">두 역할 모두에 비어 있지 않은 주문 세트를 골라야 계속할 수 있습니다.</p>}
         </>
       )}
     </div>
