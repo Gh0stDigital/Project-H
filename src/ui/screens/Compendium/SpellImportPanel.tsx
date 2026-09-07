@@ -81,7 +81,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           </p>
         </div>
         <button className="btn btn-primary btn-block" onClick={onDone}>
-          Done
+          완료
         </button>
       </div>
     )
@@ -136,7 +136,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
         </button>
         {hasContent && (
           <button className="btn btn-ghost btn-sm" onClick={() => setText('')}>
-            Clear
+            지우기
           </button>
         )}
       </div>
@@ -183,7 +183,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           <div className="field">
             <label className="row-start" style={{ gap: 8, cursor: 'pointer' }}>
               <input type="checkbox" checked={makeSet} onChange={(e) => setMakeSet(e.target.checked)} />
-              Also create a Spell Set from these words
+              이 단어들로 주문 세트도 만들기
             </label>
             {makeSet && (
               <input
@@ -203,7 +203,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
         </button>
       </div>
       <button className="btn btn-ghost btn-block" onClick={onCancel}>
-        Cancel
+        취소
       </button>
     </div>
   )

@@ -38,7 +38,7 @@ export function RecordsScreen() {
           className={`chip ${setFilter === 'all' ? 'active' : ''}`}
           onClick={() => setSetFilter('all')}
         >
-          All Spells
+          모든 주문
         </span>
         {spellSets.map((set) => (
           <span key={set.id} className={`chip ${setFilter === set.id ? 'active' : ''}`} onClick={() => setSetFilter(set.id)}>
@@ -76,7 +76,7 @@ export function RecordsScreen() {
 
             <div className="row">
               <span className="faint" style={{ minWidth: 46 }}>
-                Charge
+                충전
               </span>
               <div style={{ flex: 1 }}>
                 <Bar value={spell.charge} max={spell.maxCharge} kind="charge" thin />
@@ -87,11 +87,11 @@ export function RecordsScreen() {
             <div className="stats-grid">
               <div>
                 <b>{Math.round(spellAccuracy(spell) * 100)}%</b>
-                Accuracy
+                정확도
               </div>
               <div>
                 <b>{spell.timesEncountered}</b>
-                Encounters
+                조우
               </div>
               <div>
                 <b>{spell.experience}</b>
@@ -99,27 +99,27 @@ export function RecordsScreen() {
               </div>
               <div>
                 <b>{spell.correctAnswers}</b>
-                Correct
+                정답
               </div>
               <div>
                 <b>{spell.incorrectAnswers}</b>
-                Incorrect
+                오답
               </div>
               <div>
                 <b>{spell.correctAttacks}</b>
-                Attacks Hit
+                공격 성공
               </div>
               <div>
                 <b>{spell.failedAttacks}</b>
-                Attacks Missed
+                공격 실패
               </div>
               <div>
                 <b>{spell.successfulDefenses}</b>
-                Defenses
+                방어
               </div>
               <div>
                 <b>{spell.failedDefenses}</b>
-                Failed Def.
+                방어 실패
               </div>
             </div>
 

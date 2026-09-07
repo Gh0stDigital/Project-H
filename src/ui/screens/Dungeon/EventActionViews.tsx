@@ -13,7 +13,7 @@ export function TreasureChoice({ onAttempt, onLeave }: { onAttempt: () => void; 
         🔓 Attempt the lock
       </button>
       <button className="btn btn-ghost btn-block" onClick={onLeave}>
-        Leave it
+        그냥 두기
       </button>
     </>
   )
@@ -45,7 +45,7 @@ export function KeyRoomView({ onTake }: { onTake: () => void }) {
     <>
       <div className="feedback-banner correct">🗝️ 던전 열쇠를 손에 넣었습니다.</div>
       <button className="btn btn-primary btn-block" onClick={onTake}>
-        Take the key
+        열쇠 집기
       </button>
     </>
   )

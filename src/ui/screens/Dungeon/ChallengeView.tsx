@@ -87,7 +87,7 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
 
       <div className="tile-actions">
         <button className="btn btn-ghost btn-sm" disabled={picked.length === 0} onClick={() => setPicked([])}>
-          Clear
+          지우기
         </button>
         <button className="btn btn-primary btn-sm" disabled={picked.length === 0} onClick={submit}>
           {submitLabel}

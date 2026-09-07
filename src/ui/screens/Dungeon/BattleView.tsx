@@ -177,7 +177,7 @@ export function BattleView() {
           </div>
           {handSpells.length === 0 && (
             <p className="faint" style={{ textAlign: 'center' }}>
-              No Spellwords equipped — visit the Totem screen after this battle.
+              장착한 주문 단어가 없습니다 — 이 전투가 끝나면 토템 화면을 확인하세요.
             </p>
           )}
         </>
@@ -236,7 +236,7 @@ export function BattleView() {
         <>
           <div className="feedback-banner incorrect">💀 토템이 쓰러졌습니다…</div>
           <button className="btn btn-primary btn-block" onClick={continueAfterDefeat}>
-            See Results
+            결과 보기
           </button>
         </>
       )}

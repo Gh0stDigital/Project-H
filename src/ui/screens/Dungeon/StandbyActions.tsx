@@ -119,7 +119,7 @@ export function StandbyActions({
             )}
 
             <button className="btn btn-ghost btn-block" onClick={() => setDestinationsOpen(false)}>
-              Stay here
+              여기 머무르기
             </button>
           </div>
         </div>

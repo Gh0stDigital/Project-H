@@ -74,9 +74,21 @@ online once so the service worker can precache.
 
 Every PNG under `public/assets/<category>/` is registered automatically —
 `scripts/gen-asset-manifest.mjs` scans the folder and writes
-`src/config/assetManifest.ts`. Drop a file in, run `npm run gen:assets` (it
-also runs on install and before every build), and it is selectable in game.
-There is no list to update by hand.
+`src/config/assetManifest.ts`. **Dropping a file in is the whole job.** The
+generator runs by itself when the dev server starts, whenever art is added or
+removed while it is running, and at the start of every build, so a new totem
+is offered in game without any command to remember. `npm run gen:assets` still
+runs it by hand.
+
+A browser cannot list a directory, so this cannot happen at runtime in a built
+app — the catalogue has to be baked in when the app is built. What is
+automatic is the generation, not a live filesystem scan: a hosted or offline
+build only gains new art on the next build.
+
+`assetManifest.ts` is generated *and* committed, so it can go stale if art is
+committed without it. `src/config/assetManifest.test.ts` compares it against
+the files on disk and fails if they diverge — that mismatch has shipped twice,
+each time as a portrait sitting in the folder that the game never offered.
 
 Placeholders are generated for any slot that has no file yet, and are never
 overwritten — committing real artwork over one is permanent.

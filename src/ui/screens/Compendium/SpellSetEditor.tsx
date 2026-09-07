@@ -74,11 +74,11 @@ export function SpellSetEditor({ existing, onDone, onCancel }: SpellSetEditorPro
             }
           }}
         >
-          Delete Set
+          세트 삭제
         </button>
       )}
       <button className="btn btn-ghost btn-block" onClick={onCancel}>
-        Cancel
+        취소
       </button>
     </div>
   )

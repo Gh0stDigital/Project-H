@@ -65,10 +65,10 @@ export function TotemScreen() {
             record. Repainting the one you have is the rarer, cosmetic case. */}
         <div className="btn-row" style={{ justifyContent: 'center' }}>
           <button className="totem-hero-edit" onClick={() => setRosterOpen(true)}>
-            Switch Totem
+            토템 교체
           </button>
           <button className="totem-hero-edit" onClick={() => setAvatarPickerOpen(true)}>
-            Change portrait
+            초상화 변경
           </button>
         </div>
 
@@ -82,7 +82,7 @@ export function TotemScreen() {
                 setRenaming(false)
               }}
             >
-              Save
+              저장
             </button>
           </div>
         ) : (
@@ -280,7 +280,7 @@ export function TotemScreen() {
                 setPickerOpen(false)
               }}
             >
-              Unequip Spell Set
+              주문 세트 해제
             </button>
           )}
         </SlidePanel>

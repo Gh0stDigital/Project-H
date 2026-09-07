@@ -147,7 +147,7 @@ export function DungeonConfigScreen() {
 
           {/* 7. Enter dungeon */}
           <button className="btn btn-primary btn-block" disabled={!canStart} onClick={handleStart}>
-            Enter Dungeon
+            던전 입장
           </button>
           {!canStart && <p className="faint">두 역할 모두에 비어 있지 않은 주문 세트를 골라야 계속할 수 있습니다.</p>}
         </>

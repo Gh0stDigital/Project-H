@@ -16,10 +16,10 @@ export function CompendiumScreen() {
 
       <div className="btn-row">
         <button className={`btn btn-sm ${tab === 'spells' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('spells')}>
-          Spell Words
+          주문 단어
         </button>
         <button className={`btn btn-sm ${tab === 'sets' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab('sets')}>
-          Spell Sets
+          주문 세트
         </button>
       </div>
 

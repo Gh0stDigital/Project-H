@@ -312,7 +312,7 @@ export function ExploreView() {
               ⚔️ Enter
             </button>
             <button className="btn btn-ghost btn-block" onClick={cancelEnterBossDoor}>
-              Not yet
+              아직 아님
             </button>
           </div>
         </div>

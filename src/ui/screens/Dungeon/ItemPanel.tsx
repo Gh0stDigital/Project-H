@@ -32,7 +32,7 @@ export function ItemPanel({ inventory, onUse, onClose }: ItemPanelProps) {
                   <div className="faint">{def.description}</div>
                 </div>
                 <button className="btn btn-primary btn-sm" onClick={() => onUse(entry.itemId)}>
-                  Use
+                  사용
                 </button>
               </div>
             )

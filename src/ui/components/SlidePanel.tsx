@@ -14,7 +14,7 @@ export function SlidePanel({ title, onClose, children }: SlidePanelProps) {
         <div className="row">
           <h2>{title}</h2>
           <button className="btn btn-ghost btn-sm" onClick={onClose}>
-            Close
+            닫기
           </button>
         </div>
         <div className="slide-panel-body">{children}</div>

@@ -264,7 +264,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
         </button>
       </div>
       <button className="btn btn-ghost btn-block" onClick={onCancel}>
-        Cancel
+        취소
       </button>
     </div>
   )

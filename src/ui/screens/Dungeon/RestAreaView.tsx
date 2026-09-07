@@ -114,7 +114,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
         </div>
       )}
       <button className="btn btn-ghost btn-block" onClick={onLeave}>
-        Leave
+        떠나기
       </button>
     </div>
   )

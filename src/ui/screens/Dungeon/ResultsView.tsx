@@ -99,7 +99,7 @@ export function ResultsView() {
           goTo('menu')
         }}
       >
-        Return to Main Menu
+        메인 메뉴로
       </button>
 
       {panel === 'words' && <WordsPanel report={report} onClose={() => setPanel(null)} />}
