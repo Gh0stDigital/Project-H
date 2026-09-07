@@ -210,8 +210,31 @@ self.addEventListener('fetch', (event) => {
   const request = event.request
   if (request.method !== 'GET') return
 
-  // Cache-first: this game has no server and no live data, so a cache hit
-  // is always correct and always the fastest answer.
+  // Navigations go to the network first, falling back to the cache.
+  //
+  // The page shell carries the whole app — the code is inlined into
+  // index.html — so serving it cache-first meant a redeploy was invisible:
+  // the player got the old build, and the new worker only took over after
+  // they had already looked at it. Asking the network first costs one
+  // request when online and still opens instantly offline, which is the
+  // trade that actually matters here.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const copy = response.clone()
+            caches.open(CACHE).then((cache) => cache.put('./index.html', copy))
+          }
+          return response
+        })
+        .catch(() => caches.match('./index.html').then((hit) => hit || Response.error())),
+    )
+    return
+  }
+
+  // Everything else is art and static files, cache-first: they are content
+  // addressed by name and a hit is always both correct and fastest.
   event.respondWith(
     caches.match(request, { ignoreSearch: true }).then((hit) => {
       if (hit) return hit
@@ -224,13 +247,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response
         })
-        .catch(() => {
-          // Offline and not cached. For a navigation that means the player
-          // launched the app — hand back the shell rather than a browser
-          // error page.
-          if (request.mode === 'navigate') return caches.match('./index.html')
-          return Response.error()
-        })
+        .catch(() => Response.error())
     }),
   )
 })
