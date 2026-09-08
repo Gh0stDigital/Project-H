@@ -12,10 +12,11 @@
  */
 
 import type { AnswerKind } from './answerChecker'
+import type { EnglishAnswerMode } from '@/domain/settings'
 import { tileBalance } from '@/config/balance'
 
 /** How an answer is cut into tappable pieces. */
-export type TileGranularity = 'syllable' | 'word' | 'letter'
+export type TileGranularity = 'syllable' | 'word' | 'letter' | 'whole'
 
 export interface AnswerTile {
   /** Stable per-tile key (text alone isn't unique — answers repeat letters). */
@@ -34,19 +35,31 @@ export interface TileChallenge {
 }
 
 /**
- * Chooses how to cut an answer into tiles:
- * - Korean: one tile per Hangul syllable block (each is a single codepoint).
- * - English, multi-word: one tile per word ("thank you" → [thank][you]).
- * - English, single word: one tile per letter ("love" → [l][o][v][e]).
+ * Chooses how to cut an answer into tiles.
+ *
+ * Korean is always one tile per Hangul syllable block: assembling the word
+ * is the production practice, so it is not something the mode below turns
+ * off. English depends on the mode:
+ * - `choice`: the whole answer is a single tile ("thank you" stays intact),
+ *   sitting among other complete answers. Recall without spelling.
+ * - `spell`: multi-word answers split per word, single words per letter.
  */
-export function granularityFor(answer: string, kind: AnswerKind): TileGranularity {
+export function granularityFor(
+  answer: string,
+  kind: AnswerKind,
+  mode: EnglishAnswerMode = 'choice',
+): TileGranularity {
   if (kind === 'korean') return 'syllable'
+  if (mode === 'choice') return 'whole'
   return answer.trim().includes(' ') ? 'word' : 'letter'
 }
 
 export function segmentAnswer(answer: string, granularity: TileGranularity): string[] {
   const trimmed = answer.trim()
   switch (granularity) {
+    case 'whole':
+      // One piece: the answer entire, spaces and all.
+      return trimmed ? [trimmed] : []
     case 'word':
       return trimmed.split(/\s+/).filter(Boolean)
     case 'syllable':
@@ -81,8 +94,9 @@ export function buildTileChallenge(
   kind: AnswerKind,
   decoySources: string[],
   rng: () => number = Math.random,
+  mode: EnglishAnswerMode = 'choice',
 ): TileChallenge {
-  const granularity = granularityFor(answer, kind)
+  const granularity = granularityFor(answer, kind, mode)
   const answerSegments = segmentAnswer(answer, granularity)
 
   // Candidate decoys: segments from other answers that the correct answer
@@ -97,10 +111,17 @@ export function buildTileChallenge(
     }
   }
 
-  const wanted = Math.min(
-    tileBalance.maxDecoys,
-    Math.max(tileBalance.minDecoys, Math.round(answerSegments.length * tileBalance.decoyRatio)),
-  )
+  // Scaling decoys to the answer's length is right when the answer is many
+  // pieces, but a whole-answer tile is always one piece — that formula would
+  // offer the minimum every time regardless of how much vocabulary the run
+  // has. Ask for a fixed handful instead, so the choice is a real one.
+  const wanted =
+    granularity === 'whole'
+      ? tileBalance.wholeAnswerChoices - 1
+      : Math.min(
+          tileBalance.maxDecoys,
+          Math.max(tileBalance.minDecoys, Math.round(answerSegments.length * tileBalance.decoyRatio)),
+        )
   const decoys = shuffle(candidates, rng).slice(0, wanted)
 
   const tiles = shuffle(

@@ -83,7 +83,7 @@ export function BattleView() {
   return (
     <div className="screen" data-challenge={answering ? 'true' : undefined}>
       <div className="row">
-        <span className="faint">{battle.isBoss ? '⚔️ BOSS BATTLE' : `⚔️ ${battle.enemy.name.toUpperCase()}`}</span>
+        <span className="faint">{battle.isBoss ? '⚔️ 보스 전투' : `⚔️ ${battle.enemy.name}`}</span>
         {!answering && (
           <button className="btn btn-ghost btn-sm" onClick={toggleWordInfo}>
             ℹ️ Words

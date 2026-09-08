@@ -200,6 +200,12 @@ export const tileBalance = {
   decoyRatio: 1,
   minDecoys: 3,
   maxDecoys: 8,
+  /**
+   * Options shown when the whole answer is one tile — the answer plus
+   * decoys. Four is enough to make recall matter without turning the board
+   * into a reading exercise.
+   */
+  wholeAnswerChoices: 4,
 }
 
 // ---------------------------------------------------------------------------

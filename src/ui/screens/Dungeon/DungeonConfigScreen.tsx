@@ -12,6 +12,8 @@ import { isUsable } from '@/systems/totemManager'
 export function DungeonConfigScreen() {
   const goTo = useUiStore((s) => s.goTo)
   const totems = usePersistentStore((s) => s.totems)
+  const englishAnswerMode = usePersistentStore((s) => s.settings.englishAnswerMode)
+  const updateSettings = usePersistentStore((s) => s.updateSettings)
   const activeTotemId = usePersistentStore((s) => s.activeTotemId)
   const spellSets = usePersistentStore((s) => s.spellSets)
   const lastSelection = usePersistentStore((s) => s.lastDungeonSelection)
@@ -119,7 +121,31 @@ export function DungeonConfigScreen() {
             </div>
           </div>
 
-          {/* 5. Dungeon information display */}
+          {/* 5. How English answers are given */}
+          <div className="field">
+            <label>영어 답 입력 방식</label>
+            <div className="answer-mode-row">
+              <button
+                className="answer-mode-option"
+                data-selected={englishAnswerMode === 'choice'}
+                onClick={() => updateSettings({ englishAnswerMode: 'choice' })}
+              >
+                <span className="label">단어 고르기</span>
+                <span className="sub">뜻을 통째로 골라 답합니다</span>
+              </button>
+              <button
+                className="answer-mode-option"
+                data-selected={englishAnswerMode === 'spell'}
+                onClick={() => updateSettings({ englishAnswerMode: 'spell' })}
+              >
+                <span className="label">철자 맞추기</span>
+                <span className="sub">글자를 하나씩 배열합니다</span>
+              </button>
+            </div>
+            <p className="faint">한국어 답은 언제나 음절로 조합합니다.</p>
+          </div>
+
+          {/* 6. Dungeon information display */}
           <div className="dungeon-info-panel">
             <p className="dungeon-info-desc">{tier.description}</p>
             <div className="stats-grid">

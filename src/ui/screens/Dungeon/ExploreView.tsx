@@ -281,7 +281,7 @@ export function ExploreView() {
               <BossDoorNotice keyFound={run.keyFound} onContinue={acknowledgeEvent} />
             ) : (
               <button className="btn btn-primary btn-block" onClick={acknowledgeEvent}>
-                {event.type === 'battle' ? '⚔️ Fight' : '계속 →'}
+                {event.type === 'battle' ? '⚔️ 싸우기' : '계속 →'}
               </button>
             ))}
         </>
@@ -293,7 +293,7 @@ export function ExploreView() {
           answer={asksForKorean ? challengeSpell!.korean : challengeSpell!.english}
           decoyPool={answersInRun.map((sp) => (asksForKorean ? sp.korean : sp.english))}
           onSubmit={submitEventAnswer}
-          submitLabel={event!.type === 'trap' ? 'Disarm!' : 'Unlock!'}
+          submitLabel={event!.type === 'trap' ? '해제!' : '열기!'}
         />
       )}
 

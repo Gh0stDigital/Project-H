@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Challenge } from '@/domain/challenge'
+import { usePersistentStore } from '@/state/persistentStore'
 import { buildTileChallenge, assembledText, type AnswerTile } from '@/systems/tileAssembly'
 
 interface ChallengeViewProps {
@@ -21,13 +22,18 @@ interface ChallengeViewProps {
 export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답' }: ChallengeViewProps) {
   const asksForKorean = challenge.direction === 'eng_to_kor'
   const kind = asksForKorean ? 'korean' : 'english'
+  // Only affects the English direction; Korean is syllables either way.
+  const mode = usePersistentStore((s) => s.settings.englishAnswerMode)
 
   // Rebuilt only when the challenge changes — not on every timer tick,
   // which would reshuffle the tiles under the player's finger.
   const board = useMemo(
-    () => buildTileChallenge(answer, kind, decoyPool),
+    () => buildTileChallenge(answer, kind, decoyPool, Math.random, mode),
+    // Rebuilt when the prompt changes, or when the answer mode is switched
+    // between runs — not on every render, which would reshuffle the tiles
+    // under the player's finger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [challenge.id],
+    [challenge.id, mode],
   )
 
   const [picked, setPicked] = useState<AnswerTile[]>([])
@@ -50,7 +56,7 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
   }
 
   return (
-    <div className="panel challenge-prompt">
+    <div className={`panel challenge-prompt${board.granularity === 'whole' ? ' choice-board' : ''}`}>
       <div className="prompt-label">{asksForKorean ? '한국어로 번역하세요' : '영어로 번역하세요'}</div>
       <div className="prompt-word" lang={asksForKorean ? 'en' : 'ko'}>
         {challenge.prompt}

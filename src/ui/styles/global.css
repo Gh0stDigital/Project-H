@@ -3855,3 +3855,82 @@ button.totem-hero-frame {
     font-size: 14px;
   }
 }
+
+/* ---- Whole-answer boards -------------------------------------------------
+
+   When the answer is one complete word the board stops being a keyboard and
+   becomes a short list of choices. The grid of small square tiles is wrong
+   for that: "internationalization" needs a row to itself, not a 50px cell. */
+
+.challenge-prompt.choice-board .tile-tray {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.challenge-prompt.choice-board .tile-tray .answer-tile {
+  min-height: clamp(46px, 12vw, 58px);
+  padding: 10px 14px;
+  font-size: clamp(16px, 4.4vw, 20px);
+  font-weight: 600;
+  /* Long answers wrap rather than overflowing their tile. */
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* One slot, so the answer row should not reserve a keyboard's worth of
+   height while it sits empty. */
+.challenge-prompt.choice-board .tile-answer {
+  min-height: clamp(46px, 12vw, 58px);
+}
+
+.challenge-prompt.choice-board .answer-slot {
+  width: 60%;
+  height: clamp(38px, 10vw, 48px);
+}
+
+.challenge-prompt.choice-board .answer-tile.placed {
+  min-height: clamp(38px, 10vw, 48px);
+  padding: 8px 14px;
+  font-size: clamp(15px, 4.2vw, 19px);
+  white-space: normal;
+}
+
+/* ---- Answer-mode picker (dungeon setup) --------------------------------- */
+
+.answer-mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.answer-mode-option {
+  appearance: none;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.answer-mode-option[data-selected='true'] {
+  border-color: var(--accent-gold);
+  background: linear-gradient(180deg, rgba(242, 193, 78, 0.14), var(--bg-card));
+}
+
+.answer-mode-option .label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.answer-mode-option .sub {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}

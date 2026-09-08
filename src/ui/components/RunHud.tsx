@@ -30,10 +30,10 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
 
       <div className="run-hud-row secondary">
         <span className={`run-hud-chip ${run.keyFound ? 'on' : 'off'}`}>
-          {run.keyFound ? '🗝️ Key' : '🗝️ No key'}
+          {run.keyFound ? '🗝️ 열쇠 있음' : '🗝️ 열쇠 없음'}
         </span>
         <span className={`run-hud-chip ${run.bossDoorFound ? 'on' : 'off'}`}>
-          {run.bossDoorFound ? '🚪 Door found' : '🚪 Door unknown'}
+          {run.bossDoorFound ? '🚪 문 발견' : '🚪 문 미발견'}
         </span>
         {run.modifiers.length === 0 ? (
           <span className="run-hud-chip faint">길 효과 없음</span>
