@@ -25,8 +25,19 @@ export function DungeonConfigScreen() {
   const active = totems.find((t) => t.id === activeTotemId)
   const totem = active && isUsable(active) ? active : totems.find(isUsable)
 
-  const [totemSetId, setTotemSetId] = useState<string | null>(totem?.equippedSpellSetId ?? lastSelection.totemSpellSetId)
-  const [dungeonSetId, setDungeonSetId] = useState<string | null>(lastSelection.dungeonSpellSetId ?? totemSetId)
+  // Fall back to a set that could actually be used. A freshly raised Totem
+  // has nothing equipped and a first run has nothing remembered, so both
+  // pickers opened empty — and the run could not be started until you found
+  // and set them, with the button that says so sitting off the bottom of the
+  // screen. Picking the obvious choice when there is one is not a decision
+  // taken away: both pickers are right there to change.
+  const firstUsableSet = spellSets.find((s) => s.spellIds.length > 0)?.id ?? null
+  const [totemSetId, setTotemSetId] = useState<string | null>(
+    totem?.equippedSpellSetId ?? lastSelection.totemSpellSetId ?? firstUsableSet,
+  )
+  const [dungeonSetId, setDungeonSetId] = useState<string | null>(
+    lastSelection.dungeonSpellSetId ?? totemSetId ?? firstUsableSet,
+  )
   const [tierId, setTierId] = useState<DungeonTierId>(lastSelection.tierId)
   const [worldId, setWorldId] = useState<string | null>(() => playableWorlds()[0]?.id ?? null)
 
@@ -52,7 +63,7 @@ export function DungeonConfigScreen() {
   }
 
   return (
-    <div className="screen screen-tight">
+    <div className="screen screen-tight screen-scroll dungeon-config">
       <TopBar title="던전" onBack={() => goTo('menu')} />
 
       {!totem && (
@@ -212,13 +223,16 @@ export function DungeonConfigScreen() {
             )}
           </div>
 
-          <div style={{ flex: 1 }} />
-
-          {/* 7. Enter dungeon */}
-          <button className="btn btn-primary btn-block" disabled={!canStart} onClick={handleStart}>
-            던전 입장
-          </button>
-          {!canStart && <p className="faint">두 역할 모두에 비어 있지 않은 주문 세트를 골라야 계속할 수 있습니다.</p>}
+          {/* 8. Enter dungeon. Pinned to the bottom of the screen rather than
+              placed after the settings: this screen grows every time a world
+              is added, and the button that starts the run is the one thing
+              that must never end up below the fold. */}
+          <div className="dungeon-start">
+            <button className="btn btn-primary btn-block" disabled={!canStart} onClick={handleStart}>
+              던전 입장
+            </button>
+            {!canStart && <p className="faint">두 역할 모두에 비어 있지 않은 주문 세트를 골라야 계속할 수 있습니다.</p>}
+          </div>
         </>
       )}
     </div>

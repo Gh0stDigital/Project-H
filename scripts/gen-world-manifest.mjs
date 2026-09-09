@@ -103,6 +103,21 @@ function inspect(id) {
   }
 }
 
+/**
+ * Two worlds sharing a display name is not fatal — they are addressed by
+ * folder id — but the picker then offers the player the same label twice,
+ * which is what happened when a new pack was started by copying another
+ * world.json and the name was left as it was.
+ */
+function duplicateNames(worlds) {
+  const byName = new Map()
+  for (const w of worlds) {
+    if (!byName.has(w.name)) byName.set(w.name, [])
+    byName.get(w.name).push(w.id)
+  }
+  return [...byName.entries()].filter(([, ids]) => ids.length > 1)
+}
+
 function build() {
   const ids = existsSync(WORLDS_DIR)
     ? readdirSync(WORLDS_DIR)
@@ -195,6 +210,13 @@ if (process.argv[1] && process.argv[1].endsWith('gen-world-manifest.mjs')) {
       console.warn(`gen-world-manifest: ${w.id} ✗ incomplete — missing:`)
       for (const m of w.missing) console.warn(`    ${m}`)
     }
+  }
+  for (const [name, ids] of duplicateNames(worlds)) {
+    console.warn(
+      `gen-world-manifest: ${ids.join(' and ')} are both called "${name}" — ` +
+        `the dungeon setup screen will offer that name twice. Set a different ` +
+        `"name" in one of their world.json files.`,
+    )
   }
   console.log(
     `gen-world-manifest: ${worlds.filter((w) => w.complete).length}/${worlds.length} worlds playable` +

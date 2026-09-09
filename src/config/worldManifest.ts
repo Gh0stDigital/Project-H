@@ -46,8 +46,8 @@ export const worldPacks: readonly WorldPack[] = [
   },
   {
     id: "parasite-garden",
-    name: "용왕의 던전",
-    description: "물에 잠긴 회랑과 금빛 보고. 깊은 곳에서 무언가가 기다립니다.",
+    name: "기생의 정원",
+    description: "빛이 드는 폐허를 덩굴과 이빨이 뒤덮었습니다. 자라나는 것들이 지켜보고 있습니다.",
     complete: true,
     missing: [],
     locations: ["battle1","battle2","bossRoom","corridor1","corridor2","corridor3","entrance","keyRoom","pathwayFork","restRoom","restRoom2","shrineRoom","trapRoom","treasureRoom"],
