@@ -1,4 +1,4 @@
-import type { AssetCategory } from '@/config/assets'
+
 import type { DungeonEventType } from '@/config/dungeonEvents'
 import type { ChallengeContext } from '@/domain/challenge'
 
@@ -12,8 +12,8 @@ export interface EventDefinition {
   type: DungeonEventType
   title: string
   bodyText: string[]
-  imageCategory: AssetCategory
-  imageKey: string
+  /** Slot inside the world's events/ folder. */
+  imageSlot: string
   /** Whether resolving this event runs a vocabulary prompt. */
   hasChallenge: boolean
   challengeContext: ChallengeContext
@@ -27,8 +27,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
       '튼튼한 상자가 돌무더기에 반쯤 파묻혀 있습니다.',
       '자물쇠는 낡았지만 아직 단단합니다. 단어를 말해 열어 보세요.',
     ],
-    imageCategory: 'treasure',
-    imageKey: 'locked',
+    imageSlot: 'treasureLocked',
     hasChallenge: true,
     challengeContext: 'treasure',
   },
@@ -36,8 +35,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
     type: 'trap',
     title: '함정이다!',
     bodyText: ['발밑에서 딸깍 소리가 납니다.', '장치가 다 감기기 전에 뜻을 떠올리세요!'],
-    imageCategory: 'traps',
-    imageKey: 'default',
+    imageSlot: 'trap1',
     hasChallenge: true,
     challengeContext: 'trap',
   },
@@ -48,8 +46,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
       '겹겹이 새겨진 문양의 문이 길을 막고 있습니다.',
       '한 단어가 문을 붙잡고 있습니다. 한 글자씩 밝혀내면 열립니다.',
     ],
-    imageCategory: 'treasure',
-    imageKey: 'shrine',
+    imageSlot: 'shrineDoor',
     hasChallenge: false,
     challengeContext: 'event',
   },
@@ -57,8 +54,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
     type: 'rest',
     title: '쉼터',
     bodyText: ['조용하고 마른, 안전한 구석입니다.', '상처를 돌볼 수 있는 곳입니다. 물론 값을 치러야 하지만요.'],
-    imageCategory: 'treasure',
-    imageKey: 'rest',
+    imageSlot: 'rest',
     hasChallenge: false,
     challengeContext: 'event',
   },
@@ -66,8 +62,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
     type: 'battle',
     title: '몬스터 조우!',
     bodyText: ['적대적인 생물이 길을 막아섭니다!', '전투를 준비하세요.'],
-    imageCategory: 'enemies',
-    imageKey: 'default',
+    imageSlot: 'trap1',
     hasChallenge: false,
     challengeContext: 'event',
   },
@@ -75,8 +70,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
     type: 'direction',
     title: '갈림길',
     bodyText: ['앞에서 길이 갈라집니다.', '어느 쪽이든 기회가 있고, 그만한 위험도 있습니다.'],
-    imageCategory: 'events',
-    imageKey: 'branch',
+    imageSlot: 'roadSign',
     hasChallenge: false,
     challengeContext: 'event',
   },
@@ -87,8 +81,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
       '거대한 검은 돌문이 길을 가득 메우고 있습니다.',
       '한가운데에 열쇠 구멍 하나가 있습니다. 돌아올 길을 표시해 둡니다.',
     ],
-    imageCategory: 'events',
-    imageKey: 'bossroom',
+    imageSlot: 'bossDoor',
     hasChallenge: false,
     challengeContext: 'event',
   },
@@ -99,8 +92,7 @@ export const eventDefinitions: Record<DungeonEventType, EventDefinition> = {
       '이 던전이 가르치려던 모든 단어를 마주했습니다.',
       '소박한 돌 받침 위에 묵직한 쇠 열쇠가 놓여 있습니다.',
     ],
-    imageCategory: 'events',
-    imageKey: 'special',
+    imageSlot: 'key',
     hasChallenge: false,
     challengeContext: 'event',
   },

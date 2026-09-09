@@ -2,12 +2,15 @@ import type { Totem } from '@/domain/totem'
 import type { RewardBundle } from '@/domain/dungeon'
 import type { RestNpc } from '@/systems/restNpcs'
 import { quoteRest } from '@/systems/restArea'
-import { AssetImage } from '@/ui/components/AssetImage'
+import type { WorldPack } from '@/config/worldManifest'
+import { WorldImage } from '@/ui/components/WorldImage'
 
 interface RestAreaViewProps {
   totem: Totem
   usesSoFar: number
   npcs: RestNpc[]
+  /** The run's world — NPC portraits come from its pack. */
+  world: WorldPack | undefined
   /** The last exchange, kept on screen until the player leaves. */
   said: { npcId: string; reward: RewardBundle } | null
   onTalk: (npcId: string) => void
@@ -20,7 +23,7 @@ interface RestAreaViewProps {
  * can be revisited from Standby; each use costs more than the last. Every
  * number shown here comes from the rest quote, never from the component.
  */
-export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onLeave }: RestAreaViewProps) {
+export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRest, onLeave }: RestAreaViewProps) {
   const quote = quoteRest(totem, usesSoFar)
   const speaking = said ? npcs.find((n) => n.id === said.npcId) : null
 
@@ -86,7 +89,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, said, onTalk, onRest, onL
                 onClick={() => onTalk(npc.id)}
                 disabled={npc.spoken}
               >
-                <AssetImage category="npcs" assetKey={npc.avatarKey} alt={npc.name} className="npc-portrait" />
+                <WorldImage world={world} folder="npcs" slot={npc.avatarKey} alt={npc.name} className="npc-portrait" />
                 <span className="npc-name">{npc.name}</span>
                 <span className="faint npc-state">{npc.spoken ? '대화함' : '대화'}</span>
               </button>

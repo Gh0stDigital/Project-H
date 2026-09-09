@@ -24,7 +24,7 @@ import { tickModifiers, addModifier as addModifierTo } from './directionModifier
 import { initWordStats, markIntroduced, recordAttempt, type AttemptKind } from './wordStats'
 import { transition } from './dungeonState'
 import { makeId } from './idGen'
-import { enemyArtFor } from './battleEngine'
+import { resolveWorld, pickSlot } from './worldRegistry'
 
 /**
  * Dungeon run orchestration — pure state transforms over DungeonRunState.
@@ -46,6 +46,7 @@ export function buildDungeonConfig(
   dungeonSpellSetId: string,
   dungeonSpellSetWordIds: string[],
   tier: DungeonTierDef,
+  worldId: string,
   rng: () => number = Math.random,
 ): DungeonConfig {
   let pool = [...dungeonSpellSetWordIds]
@@ -62,7 +63,7 @@ export function buildDungeonConfig(
     dungeonSpellSetId,
     tierId: tier.id,
     dungeonWordIds: pool,
-    locationKey: 'default',
+    worldId,
   }
 }
 
@@ -183,14 +184,18 @@ export function generateNextEvent(
   // same id means the encounter shows the foe the player is about to fight
   // rather than a generic placeholder.
   const eventId = makeId('evt')
+  const world = resolveWorld(run.config.worldId)
+  const enemySlot = world ? pickSlot(world.enemies, eventId) : null
 
   const event: DungeonEvent = {
     id: eventId,
     type,
     title: def.title,
     bodyText: def.bodyText,
-    imageCategory: def.imageCategory,
-    imageKey: type === 'battle' ? enemyArtFor(eventId) : def.imageKey,
+    image:
+      type === 'battle' && enemySlot
+        ? { folder: 'enemies', slot: enemySlot }
+        : { folder: 'events', slot: def.imageSlot },
     challenge,
     directionChoices: type === 'direction' ? buildDirectionChoices(rng) : null,
   }

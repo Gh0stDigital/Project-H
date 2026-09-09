@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { assetKeys, getAsset, hasAsset, resolveKey } from './assets'
+import { assetManifest } from './assetManifest'
 
 describe('asset registry', () => {
   it('discovers art from the folder rather than a hand-written list', () => {
@@ -22,15 +23,20 @@ describe('asset registry', () => {
   })
 
   it('resolveKey takes the first candidate that exists', () => {
-    expect(resolveKey('locations', ['dkp_nope', 'dkp_restRoom'])).toBe('dkp_restRoom')
-    expect(resolveKey('locations', ['dkp_nope', 'dkp_alsoNope'])).toBeNull()
+    expect(resolveKey('totems', ['no_such_totem', 'totem_ember'])).toBe('totem_ember')
+    expect(resolveKey('totems', ['no_such_totem', 'also_missing'])).toBeNull()
   })
 
   it('matches the real art regardless of how the key is written', () => {
-    // The art is named dkp_corridor1; a lookup should not care about case
-    // or separators. It should still refuse a genuinely different word.
-    expect(resolveKey('locations', ['dkp_CORRIDOR1'])).toBe('dkp_corridor1')
-    expect(resolveKey('locations', ['dkp-corridor-1'])).toBe('dkp_corridor1')
-    expect(resolveKey('locations', ['dkp_hallway1'])).toBeNull()
+    // Art arrives named by hand, so case and separators should not lose it.
+    expect(resolveKey('totems', ['TOTEM_EMBER'])).toBe('totem_ember')
+    expect(resolveKey('totems', ['totem-ember'])).toBe('totem_ember')
+    expect(resolveKey('totems', ['totem_flame'])).toBeNull()
+  })
+
+  it('holds only world-independent art now that worlds own the rest', () => {
+    // Locations, events, enemies and NPCs moved into public/worlds; a Totem
+    // is the player's character and can enter any world.
+    expect(Object.keys(assetManifest).sort()).toEqual(['spells', 'totems'])
   })
 })

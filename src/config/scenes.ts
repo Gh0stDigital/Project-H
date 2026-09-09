@@ -1,24 +1,16 @@
 /**
- * Dungeon backdrops (public/assets/locations).
+ * Which backdrop each dungeon situation uses.
  *
- * The scene window used to show one fixed image for a whole run, so the
- * dungeon looked identical whether you were in a corridor, a treasure room
- * or a boss door. Each situation now names its own art, and because the
- * backdrop is derived from the current event it changes every time the
- * player moves.
- *
- * Each situation lists several candidates rather than one filename:
- *   - The first that exists wins, so art can land one file at a time and
- *     anything still missing quietly falls back instead of breaking.
- *   - Spelling variants sit side by side (corridor / coridoor), and lookup
- *     ignores case and separators, so hand-named art resolves either way.
- *   - Where more than one candidate fits, the choice is seeded from the
- *     event, so a corridor varies between moves but never flickers within
- *     one event.
+ * Every world supplies the same set of rooms by slot name, so this maps a
+ * situation to a slot and the world supplies the picture. That replaces the
+ * old per-filename candidate lists: adding a world needs no change here, and
+ * a situation can never point at art a world does not have, because the pack
+ * format requires every slot listed below.
  */
 
-import { resolveKey } from './assets'
 import type { DungeonEventType } from './dungeonEvents'
+import type { WorldPack } from './worldManifest'
+import { resolveSlot, pickSlot } from '@/systems/worldRegistry'
 
 export type SceneKind =
   | 'standby'
@@ -32,42 +24,41 @@ export type SceneKind =
   | 'magic_room'
   | 'key_room'
   | 'direction'
+  | 'entrance'
 
-/** Plain corridors — the fallback for anything without dedicated art. */
-const CORRIDORS = ['dkp_corridor1', 'dkp_corridor2'] as const
+/** The plain corridors, used for anything without a room of its own. */
+const CORRIDORS = ['corridor1', 'corridor2'] as const
 
 /**
  * Situations whose candidates are peers rather than a first choice with
- * alternates. Standby is every plain corridor and the fight has two arena
- * backdrops, so both alternate evenly;
- * everywhere else the leading candidate is the room the event is actually
- * about and should usually be what you see.
+ * alternates: a corridor is a corridor, and a world with two battle
+ * backdrops means them equally.
  */
 const EVEN_ODDS: ReadonlySet<SceneKind> = new Set<SceneKind>(['standby', 'battle_screen'])
 
 /**
- * Candidates per situation, best fit first. Corridors trail most lists
- * because the artist called them usable for "various" moments: they are the
- * generic dungeon, not a wrong answer.
+ * Slots per situation, best fit first. Corridors trail most lists because
+ * they are the generic dungeon rather than a wrong answer — a trap met in a
+ * passage is still a trap.
  */
-const sceneCandidates: Record<SceneKind, readonly string[]> = {
+const sceneSlots: Record<SceneKind, readonly string[]> = {
+  entrance: ['entrance'],
   standby: CORRIDORS,
-  treasure: ['dkp_treasureRoom', 'dkp_keyRoom', ...CORRIDORS],
-  trap: ['dkp_trapRoom1', 'dkp_shrineRoom', ...CORRIDORS],
-  // The encounter, met in a corridor or at a shrine — varied.
-  battle: ['dkp_battle', 'dkp_battle2', 'dkp_shrineRoom', ...CORRIDORS],
-  // The fight itself. Always the battle backdrop: it is the arena, not a
-  // place you happened to walk through.
-  battle_screen: ['dkp_battle', 'dkp_battle2'],
-  boss_battle: ['dkp_bossBattle'],
-  boss_door: ['dkp_bossBattle'],
-  rest: ['dkp_restRoom'],
-  magic_room: ['dkp_shrineRoom'],
-  key_room: ['dkp_keyRoom', 'dkp_treasureRoom'],
-  direction: ['dkp_2way'],
+  treasure: ['treasureRoom', 'keyRoom', ...CORRIDORS],
+  trap: ['trapRoom', 'shrineRoom', ...CORRIDORS],
+  // The encounter, met in a corridor or at a shrine.
+  battle: ['battle', 'battle2', 'shrineRoom', ...CORRIDORS],
+  // The fight itself: the arena, not somewhere walked through. Falls back to
+  // a corridor for a world that ships no battle backdrop.
+  battle_screen: ['battle', 'battle2', ...CORRIDORS],
+  boss_battle: ['bossRoom'],
+  boss_door: ['bossRoom'],
+  rest: ['restRoom'],
+  magic_room: ['shrineRoom'],
+  key_room: ['keyRoom', 'treasureRoom'],
+  direction: ['pathwayFork'],
 }
 
-/** Which backdrop an event type belongs to. */
 const eventScene: Record<DungeonEventType, SceneKind> = {
   treasure: 'treasure',
   trap: 'trap',
@@ -90,30 +81,22 @@ function hash(seed: string): number {
 }
 
 /**
- * The art key for a situation, or null when none of its candidates exist
- * (callers then fall back to the run's own location art).
+ * The location slot for a situation in a given world, or null if the world
+ * somehow has none of its candidates.
  *
- * `seed` decides between equally valid candidates — pass something that
- * changes per move, such as the event id or turn number.
+ * `seed` decides between equally good options — pass something that changes
+ * per move, such as the event id or the turn number.
  */
-export function sceneKeyFor(kind: SceneKind, seed = ''): string | null {
-  const candidates = sceneCandidates[kind]
-  // Keep only art that actually exists, so the seed picks between real
-  // options rather than landing on a gap.
-  const available: string[] = []
-  for (const candidate of candidates) {
-    const key = resolveKey('locations', [candidate])
-    if (key && !available.includes(key)) available.push(key)
-  }
-  if (available.length === 0) return null
+export function sceneSlotFor(world: WorldPack, kind: SceneKind, seed = ''): string | null {
+  const available = sceneSlots[kind].filter((slot) => world.locations.includes(slot))
+  if (available.length === 0) return resolveSlot(world, 'locations', CORRIDORS)
   if (available.length === 1) return available[0]
 
   const h = hash(seed)
   if (EVEN_ODDS.has(kind)) return available[h % available.length]
 
-  // Show the room the event is about most of the time, and one of its
-  // alternates now and then, so a treasure event reads as treasure while
-  // the dungeon still varies. Picking uniformly made the dedicated art the
+  // Show the room the situation is about most of the time, and one of its
+  // alternates now and then. Picking uniformly made the dedicated art the
   // exception rather than the rule.
   const VARIATION_IN = 3
   if (h % VARIATION_IN !== 0) return available[0]
@@ -121,17 +104,7 @@ export function sceneKeyFor(kind: SceneKind, seed = ''): string | null {
   return alternates[Math.floor(h / VARIATION_IN) % alternates.length]
 }
 
-export interface SceneArt {
-  category: 'locations'
-  key: string
-}
-
-/**
- * The backdrop to draw, falling back to the run's own location art when a
- * situation has no scene art yet. Keeping the fallback here means callers
- * render one image and never branch on whether the art exists.
- */
-export function sceneArt(kind: SceneKind, seed: string, locationKey: string): SceneArt {
-  const key = sceneKeyFor(kind, seed)
-  return { category: 'locations', key: key ?? locationKey }
+/** Any location in the world, for callers that just need something sensible. */
+export function anyLocationSlot(world: WorldPack, seed: string): string | null {
+  return pickSlot(world.locations, seed)
 }

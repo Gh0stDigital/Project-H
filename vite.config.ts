@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import path from 'node:path'
 // @ts-expect-error - plain .mjs build script, no types
 import { generateAssetManifest, ASSETS_DIR } from './scripts/gen-asset-manifest.mjs'
+// @ts-expect-error - plain .mjs build script, no types
+import { generateWorldManifest, WORLDS_DIR } from './scripts/gen-world-manifest.mjs'
 
 /**
  * Keeps src/config/assetManifest.ts in step with public/assets.
@@ -23,6 +25,19 @@ function assetManifestPlugin(): Plugin {
         console.log(`[assets] manifest updated (${reason}): ${result.total} images, ${totems} totems`)
       }
       for (const w of result.warnings) console.warn(`[assets] ${w}`)
+
+      // World packs are compiled the same way, and report what a
+      // half-finished one is still missing rather than failing quietly.
+      const worlds = generateWorldManifest()
+      if (worlds.changed) {
+        const playable = worlds.worlds.filter((w: { complete: boolean }) => w.complete)
+        console.log(`[worlds] ${playable.length}/${worlds.worlds.length} playable (${reason})`)
+        for (const w of worlds.worlds) {
+          if (w.complete) continue
+          console.warn(`[worlds] ${w.id} is not playable yet — missing:`)
+          for (const m of w.missing) console.warn(`           ${m}`)
+        }
+      }
     } catch (err) {
       // Never take the dev server or the build down over this: the committed
       // manifest is still usable, it is just possibly behind.
@@ -41,9 +56,11 @@ function assetManifestPlugin(): Plugin {
       // without this a PNG added while the server is running is invisible
       // until a restart.
       server.watcher.add(ASSETS_DIR)
+      server.watcher.add(WORLDS_DIR)
       for (const event of ['add', 'unlink'] as const) {
         server.watcher.on(event, (file: string) => {
-          if (file.startsWith(ASSETS_DIR) && file.toLowerCase().endsWith('.png')) {
+          const watched = file.startsWith(ASSETS_DIR) || file.startsWith(WORLDS_DIR)
+          if (watched && /\.(png|json)$/i.test(file)) {
             regenerate(`${event} ${path.basename(file)}`)
           }
         })

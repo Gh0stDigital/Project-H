@@ -1,4 +1,4 @@
-import type { AssetCategory } from '@/config/assets'
+import type { WorldImageRef } from './dungeon'
 import type { Challenge } from './challenge'
 
 export type BattlePhase =
@@ -14,9 +14,7 @@ export type BattlePhase =
 export interface EnemyCombatant {
   kind: 'enemy' | 'boss' | 'mimic'
   name: string
-  imageCategory: AssetCategory
-  imageKey: string
-  battleBgKey: string
+  image: WorldImageRef
   maxHp: number
   currentHp: number
   damage: number

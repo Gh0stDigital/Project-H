@@ -1,7 +1,7 @@
 import type { Spell } from '@/domain/spell'
 import { hasSample } from '@/domain/spell'
 import { npcBalance } from '@/config/dungeonEvents'
-import { assetKeys } from '@/config/assets'
+
 
 /**
  * Rest Area NPCs.
@@ -60,9 +60,8 @@ function intBetween(min: number, max: number, rng: () => number): number {
  * none at all, they fall back to flavour rather than vanishing, so the Rest
  * Area does not look broken on a fresh Compendium.
  */
-export function buildRestNpcs(spells: Spell[], rng: () => number): RestNpc[] {
+export function buildRestNpcs(spells: Spell[], portraits: readonly string[], rng: () => number): RestNpc[] {
   const speakable = spells.filter(hasSample)
-  const portraits = assetKeys('npcs').filter((k) => k !== 'default')
   const count = intBetween(npcBalance.minCount, npcBalance.maxCount, rng)
 
   const usedNames = new Set<string>()
@@ -81,7 +80,7 @@ export function buildRestNpcs(spells: Spell[], rng: () => number): RestNpc[] {
     npcs.push({
       id: `npc-${i}-${Math.floor(rng() * 1e9).toString(36)}`,
       name,
-      avatarKey: portraits.length > 0 ? portraits[(Math.floor(rng() * portraits.length) + i) % portraits.length] : 'default',
+      avatarKey: portraits.length > 0 ? portraits[(Math.floor(rng() * portraits.length) + i) % portraits.length] : '',
       spellId: spell?.id ?? null,
       line: spell ? spell.sampleSentence.trim() : pick(FALLBACK_LINES, rng),
       translation: spell ? spell.sampleTranslation.trim() : '',

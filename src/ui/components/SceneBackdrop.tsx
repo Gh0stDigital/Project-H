@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { getAsset, type AssetCategory } from '@/config/assets'
+import type { WorldPack } from '@/config/worldManifest'
+import { worldAsset } from '@/systems/worldRegistry'
 
 interface SceneBackdropProps {
-  category: AssetCategory
-  assetKey: string
+  world: WorldPack | undefined
+  /** Location slot within the world, e.g. 'corridor1'. */
+  slot: string | null
   alt: string
 }
 
@@ -16,9 +18,9 @@ interface SceneBackdropProps {
  * fades the incoming one in over it, but only once it has actually loaded,
  * so a slow decode delays the transition instead of flashing blank.
  */
-export function SceneBackdrop({ category, assetKey, alt }: SceneBackdropProps) {
-  const src = getAsset(category, assetKey)
-  const [current, setCurrent] = useState(src)
+export function SceneBackdrop({ world, slot, alt }: SceneBackdropProps) {
+  const src = (world && slot && worldAsset(world, 'locations', slot)) || null
+  const [current, setCurrent] = useState(src ?? '')
   const [previous, setPrevious] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(true)
 
@@ -26,11 +28,15 @@ export function SceneBackdrop({ category, assetKey, alt }: SceneBackdropProps) {
   // is committed already transparent. Starting it visible and fading after
   // an effect would show one frame of the new image at full opacity, which
   // is the hard cut this component exists to remove.
-  if (src !== current) {
+  if (src && src !== current) {
     setPrevious(current)
     setCurrent(src)
     setLoaded(false)
   }
+
+  // Before a world resolves there is nothing to draw. Rendering an <img>
+  // with an empty src would make the browser refetch the whole page.
+  if (!current) return null
 
   return (
     <>

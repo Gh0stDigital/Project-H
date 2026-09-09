@@ -3,8 +3,9 @@ import type { DungeonState } from '@/domain/dungeon'
 import { useDungeonStore, challengedCount } from '@/state/dungeonStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { canEnterBoss } from '@/systems/dungeonSession'
-import { sceneArt, sceneKindForEvent } from '@/config/scenes'
-import { AssetImage } from '@/ui/components/AssetImage'
+import { sceneSlotFor, sceneKindForEvent } from '@/config/scenes'
+import { WorldImage } from '@/ui/components/WorldImage'
+import { resolveWorld } from '@/systems/worldRegistry'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { TypewriterText } from '@/ui/components/TypewriterText'
 import { Bar } from '@/ui/components/Bar'
@@ -136,12 +137,14 @@ export function ExploreView() {
   // The backdrop follows the situation rather than the run, so it changes
   // every move. Seeded by event id (stable for the length of an event) and,
   // in Standby, by turn — so consecutive corridors aren't the same picture.
-  const scene =
-    run.state === 'Rest'
-      ? sceneArt('rest', 'rest', run.config.locationKey)
+  const world = resolveWorld(run.config.worldId)
+  const sceneSlot = !world
+    ? null
+    : run.state === 'Rest'
+      ? sceneSlotFor(world, 'rest', 'rest')
       : event && !inStandby && !rolling
-        ? sceneArt(sceneKindForEvent(event.type), event.id, run.config.locationKey)
-        : sceneArt('standby', String(run.turn), run.config.locationKey)
+        ? sceneSlotFor(world, sceneKindForEvent(event.type), event.id)
+        : sceneSlotFor(world, 'standby', String(run.turn))
 
   return (
     <div
@@ -161,12 +164,12 @@ export function ExploreView() {
 
       {/* The scene window is always on screen — every state, every prompt. */}
       <div className="scene-window dungeon">
-        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="던전 배경" />
+        <SceneBackdrop world={world} slot={sceneSlot} alt="던전 배경" />
         {event && !inStandby && !rolling && (
           // Keyed by event so the entrance animation replays for each new
           // event rather than only the first.
-          <div key={event.id} className="explore-event-overlay" data-asset={event.imageKey}>
-            <AssetImage category={event.imageCategory} assetKey={event.imageKey} alt={event.title} />
+          <div key={event.id} className="explore-event-overlay" data-asset={event.image.slot}>
+            <WorldImage world={world} folder={event.image.folder} slot={event.image.slot} alt={event.title} />
           </div>
         )}
         <span className="scene-tag">{inStandby || rolling ? '대기' : (event?.title ?? '대기')}</span>
@@ -235,6 +238,7 @@ export function ExploreView() {
           totem={totem}
           usesSoFar={run.restUses}
           npcs={run.restNpcs}
+          world={world}
           said={npcSaid}
           onTalk={talkToNpc}
           onRest={buyRest}

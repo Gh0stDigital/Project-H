@@ -10,9 +10,10 @@
 // alone from then on.
 
 import { deflateSync } from 'node:zlib'
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { writeFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { REQUIRED_LOCATIONS, REQUIRED_EVENTS, MIN_NPCS, MIN_ENEMIES } from './worldSlots.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_ROOT = join(__dirname, '..', 'public', 'assets')
@@ -176,44 +177,15 @@ function drawPlaceholder({ bg, accent, shape }) {
 // folder (scripts/gen-asset-manifest.mjs), so a file added here — or dropped
 // in by hand — is picked up either way.
 
-const manifest = {
-  locations: {
-    palette: { bg: '#1b2a2f', accent: '#4fb0a5' },
-    items: {
-      default: 'square',
-      forest: 'triangle',
-      cave: 'diamond',
-      ruins: 'square',
-    },
-  },
-  events: {
-    palette: { bg: '#2a2440', accent: '#a58bd8' },
-    items: {
-      default: 'circle',
-      empty: 'circle',
-      branch: 'diamond',
-      discovery: 'card',
-      special: 'bolt',
-      bossroom: 'skull',
-    },
-  },
-  traps: {
-    palette: { bg: '#3a1f1f', accent: '#e0654f' },
-    items: {
-      default: 'bolt',
-      sprung: 'triangle',
-    },
-  },
-  treasure: {
-    palette: { bg: '#3a2f14', accent: '#e8c04a' },
-    items: {
-      default: 'chest',
-      locked: 'chest',
-      open: 'chest',
-      shrine: 'diamond',
-      rest: 'circle',
-    },
-  },
+// ---- what to fill in ---------------------------------------------------
+//
+// Two jobs. Global art (Totems, Spell cards) lives outside any world and is
+// listed by name. World art is filled by slot: any pack missing a required
+// location or event, or short of its NPC or enemy minimum, gets stand-ins so
+// it is playable while the real art is drawn. Nothing is ever overwritten,
+// so replacing a placeholder with real artwork is permanent.
+
+const globalManifest = {
   totems: {
     palette: { bg: '#1f2a3a', accent: '#5fa8e0' },
     items: {
@@ -222,43 +194,6 @@ const manifest = {
       totem_tide: 'circle',
       totem_stone: 'circle',
       totem_silverKnight: 'circle',
-    },
-  },
-  enemies: {
-    palette: { bg: '#251b2e', accent: '#c15fd0' },
-    items: {
-      default: 'skull',
-      slime: 'circle',
-      goblin: 'triangle',
-      wraith: 'diamond',
-    },
-  },
-  bosses: {
-    palette: { bg: '#2e1414', accent: '#f2453f' },
-    items: {
-      default: 'skull',
-      guardian: 'skull',
-    },
-  },
-  battlebg: {
-    palette: { bg: '#101820', accent: '#334455' },
-    items: {
-      default: 'square',
-      cave: 'diamond',
-      ruins: 'square',
-      boss: 'skull',
-    },
-  },
-  // Rest Area folk. Drop real portraits over these to replace them.
-  npcs: {
-    palette: { bg: '#1c2a22', accent: '#6fbf8f' },
-    items: {
-      default: 'circle',
-      npc_wanderer: 'circle',
-      npc_merchant: 'diamond',
-      npc_scholar: 'square',
-      npc_pilgrim: 'triangle',
-      npc_hunter: 'bolt',
     },
   },
   spells: {
@@ -274,38 +209,104 @@ const manifest = {
   },
 }
 
-// slightly vary accent per key so flavor variants are visually distinct
-const accentShift = {
-  forest: '#5fbf6a', cave: '#7d8fa0', ruins: '#c2a05a',
-  empty: '#8c7fd8', branch: '#a58bd8', discovery: '#d8b98b', special: '#e05fd0', bossroom: '#f24545',
-  sprung: '#e0654f',
-  locked: '#e8c04a', open: '#9adb6b', shrine: '#7fd8c8', rest: '#7fb8d8',
-  totem_ember: '#e0774f', totem_tide: '#4fb6e0', totem_stone: '#9a9a7f',
-  slime: '#6bdb8f', goblin: '#8fdb6b', wraith: '#9f8fe0',
-  guardian: '#f2453f',
-  cave2: '#334455', boss: '#f2453f',
-  npc_wanderer: '#6fbf8f', npc_merchant: '#e8c04a', npc_scholar: '#7fb8d8',
-  npc_pilgrim: '#c9a0dc', npc_hunter: '#e0904f',
-  fire: '#f2653f', water: '#4f9ef2', earth: '#8f6f3f', wind: '#bfe0f2', arcane: '#c15fe0',
+/** Shape and colour per world slot, so a stand-in still reads as its room. */
+const WORLD_STYLE = {
+  locations: {
+    palette: { bg: '#1b2a2f', accent: '#4fb0a5' },
+    shapes: {
+      entrance: 'triangle', corridor1: 'square', corridor2: 'square',
+      keyRoom: 'diamond', restRoom: 'circle', pathwayFork: 'triangle',
+      shrineRoom: 'diamond', treasureRoom: 'chest', trapRoom: 'bolt',
+      bossRoom: 'skull', battle: 'triangle', battle2: 'triangle',
+    },
+  },
+  events: {
+    palette: { bg: '#2a2440', accent: '#a58bd8' },
+    shapes: {
+      bossDoor: 'skull', roadSign: 'diamond', key: 'card',
+      trap1: 'bolt', trap2: 'bolt', treasureLocked: 'chest',
+      treasureOpened: 'chest', treasureMimic: 'skull',
+      rest: 'circle', shrineDoor: 'diamond',
+    },
+  },
+  npcs: { palette: { bg: '#1c2a22', accent: '#6fbf8f' }, shapes: {} },
+  enemies: { palette: { bg: '#251b2e', accent: '#c15fd0' }, shapes: {} },
 }
+
+// Slight per-key accent shifts, so stand-ins are told apart at a glance.
+const accentShift = {
+  entrance: '#5fbf6a', corridor1: '#6b7d99', corridor2: '#8090aa',
+  keyRoom: '#d8b98b', restRoom: '#7fb8d8', pathwayFork: '#a58bd8',
+  shrineRoom: '#7fd8c8', treasureRoom: '#e8c04a', trapRoom: '#e0654f',
+  bossRoom: '#f24545', battle: '#c15fd0', battle2: '#b04fc0',
+  bossDoor: '#f24545', roadSign: '#a58bd8', key: '#d8b98b',
+  trap1: '#e0654f', trap2: '#e07a5f', treasureLocked: '#e8c04a',
+  treasureOpened: '#9adb6b', treasureMimic: '#f2453f',
+  rest: '#7fb8d8', shrineDoor: '#7fd8c8',
+  totem_ember: '#e0774f', totem_tide: '#4fb6e0', totem_stone: '#9a9a7f',
+  totem_silverKnight: '#c9ced8',
+  fire: '#f2653f', water: '#4f9ef2', earth: '#8f6f3f', wind: '#bfe0f2', arcane: '#c15fe0',
+  prowler: '#c15fd0', shade: '#9f8fe0', brute: '#e0654f', crawler: '#6bdb8f', sentinel: '#8fa0c0',
+  wanderer: '#6fbf8f', merchant: '#e8c04a', scholar: '#7fb8d8', pilgrim: '#c9a0dc', hunter: '#e0904f',
+}
+
+/** Stand-in names used only to reach the NPC and enemy minimums. */
+const FILLER_NPCS = ['wanderer', 'merchant', 'scholar', 'pilgrim', 'hunter']
+const FILLER_ENEMIES = ['prowler', 'shade', 'brute', 'crawler', 'sentinel']
 
 let generated = 0
 let skipped = 0
-for (const [category, def] of Object.entries(manifest)) {
-  const dir = join(OUT_ROOT, category)
+
+function ensure(dir, key, palette, shape) {
   mkdirSync(dir, { recursive: true })
-  for (const [key, shape] of Object.entries(def.items)) {
-    const target = join(dir, `${key}.png`)
-    // Never clobber real artwork someone has dropped in to replace a
-    // placeholder — only fill in files that don't exist yet.
-    if (existsSync(target)) {
-      skipped++
-      continue
-    }
-    const accent = accentShift[key] || def.palette.accent
-    const png = drawPlaceholder({ bg: def.palette.bg, accent, shape })
-    writeFileSync(target, png)
-    generated++
+  const target = join(dir, `${key}.png`)
+  // Never clobber real artwork someone has dropped in to replace a
+  // placeholder — only fill in files that don't exist yet.
+  if (existsSync(target)) { skipped++; return }
+  const accent = accentShift[key] || palette.accent
+  writeFileSync(target, drawPlaceholder({ bg: palette.bg, accent, shape }))
+  generated++
+}
+
+// --- global art ---
+for (const [category, def] of Object.entries(globalManifest)) {
+  const dir = join(OUT_ROOT, category)
+  for (const [key, shape] of Object.entries(def.items)) ensure(dir, key, def.palette, shape)
+}
+
+// --- world packs ---
+const WORLDS_ROOT = join(__dirname, '..', 'public', 'worlds')
+const worldIds = existsSync(WORLDS_ROOT)
+  ? readdirSync(WORLDS_ROOT).filter((d) => statSync(join(WORLDS_ROOT, d)).isDirectory())
+  : []
+
+for (const id of worldIds) {
+  const root = join(WORLDS_ROOT, id)
+  const has = (folder) => {
+    const dir = join(root, folder)
+    return existsSync(dir)
+      ? readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.png')).map((f) => f.slice(0, -4))
+      : []
+  }
+
+  for (const slot of REQUIRED_LOCATIONS) {
+    ensure(join(root, 'locations'), slot, WORLD_STYLE.locations.palette, WORLD_STYLE.locations.shapes[slot] ?? 'square')
+  }
+  for (const slot of REQUIRED_EVENTS) {
+    ensure(join(root, 'events'), slot, WORLD_STYLE.events.palette, WORLD_STYLE.events.shapes[slot] ?? 'circle')
+  }
+  // Only top up to the minimum: a world with plenty of its own keeps them.
+  const npcs = has('npcs')
+  for (const name of FILLER_NPCS) {
+    if (has('npcs').length >= MIN_NPCS) break
+    if (npcs.includes(name)) continue
+    ensure(join(root, 'npcs'), name, WORLD_STYLE.npcs.palette, 'circle')
+  }
+  const enemies = has('enemies')
+  for (const name of FILLER_ENEMIES) {
+    if (has('enemies').length >= MIN_ENEMIES) break
+    if (enemies.includes(name)) continue
+    ensure(join(root, 'enemies'), name, WORLD_STYLE.enemies.palette, 'skull')
   }
 }
 

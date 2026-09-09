@@ -3,7 +3,8 @@ import { useUiStore } from '@/state/uiStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { useDungeonStore } from '@/state/dungeonStore'
 import { TopBar } from '@/ui/components/TopBar'
-import { AssetImage } from '@/ui/components/AssetImage'
+import { WorldImage } from '@/ui/components/WorldImage'
+import { playableWorlds, incompleteWorlds, resolveWorld } from '@/systems/worldRegistry'
 import { TotemPanel } from '@/ui/components/TotemPanel'
 import { dungeonTiers, type DungeonTierId } from '@/config/balance'
 import { buildDungeonConfig } from '@/systems/dungeonSession'
@@ -27,17 +28,26 @@ export function DungeonConfigScreen() {
   const [totemSetId, setTotemSetId] = useState<string | null>(totem?.equippedSpellSetId ?? lastSelection.totemSpellSetId)
   const [dungeonSetId, setDungeonSetId] = useState<string | null>(lastSelection.dungeonSpellSetId ?? totemSetId)
   const [tierId, setTierId] = useState<DungeonTierId>(lastSelection.tierId)
+  const [worldId, setWorldId] = useState<string | null>(() => playableWorlds()[0]?.id ?? null)
 
   const totemSet = spellSets.find((s) => s.id === totemSetId) ?? null
   const dungeonSet = spellSets.find((s) => s.id === dungeonSetId) ?? null
   const tier = dungeonTiers.find((t) => t.id === tierId)!
 
-  const canStart = !!totem && isUsable(totem) && !!totemSet && totemSet.spellIds.length > 0 && !!dungeonSet && dungeonSet.spellIds.length > 0
+  // Only worlds whose pack is complete can be entered. An unfinished one is
+  // listed below with what it still needs, so it reads as work in progress
+  // rather than as a bug.
+  const worlds = playableWorlds()
+  const unfinished = incompleteWorlds()
+  const world = resolveWorld(worldId)
+
+  const canStart =
+    !!totem && isUsable(totem) && !!totemSet && totemSet.spellIds.length > 0 && !!dungeonSet && dungeonSet.spellIds.length > 0 && !!world
 
   function handleStart() {
-    if (!totem || !totemSet || !dungeonSet) return
+    if (!totem || !totemSet || !dungeonSet || !world) return
     setLastSelection({ totemSpellSetId: totemSet.id, dungeonSpellSetId: dungeonSet.id, tierId })
-    const config = buildDungeonConfig(totem.id, totemSet.id, dungeonSet.id, dungeonSet.spellIds, tier)
+    const config = buildDungeonConfig(totem.id, totemSet.id, dungeonSet.id, dungeonSet.spellIds, tier, world.id)
     beginDungeon(config)
   }
 
@@ -69,7 +79,7 @@ export function DungeonConfigScreen() {
 
           {/* 2. Dungeon entrance image */}
           <div className="scene-window compact">
-            <AssetImage category="locations" assetKey="dkp_entrance" alt="던전 입구" />
+            <WorldImage world={world} folder="locations" slot="entrance" alt="던전 입구" />
             <span className="scene-tag">{tier.label}</span>
           </div>
 
@@ -103,7 +113,40 @@ export function DungeonConfigScreen() {
             </div>
           </div>
 
-          {/* 4. Dungeon tier selection */}
+          {/* 4. World selection */}
+          <div className="field">
+            <label>세계</label>
+            <div className="tier-card-list row">
+              {worlds.map((w) => (
+                <button
+                  key={w.id}
+                  className="tier-card"
+                  data-selected={world?.id === w.id}
+                  onClick={() => setWorldId(w.id)}
+                >
+                  <div className="tier-card-name">{w.name}</div>
+                  <div className="tier-card-meta faint">
+                    {w.enemies.length}종의 적 · {w.npcs.length}명의 인물
+                  </div>
+                </button>
+              ))}
+            </div>
+            {world?.description && <p className="faint">{world.description}</p>}
+            {unfinished.length > 0 && (
+              // Shown to whoever is building a world, not hidden away in a
+              // console they may never open.
+              <div className="world-unfinished">
+                {unfinished.map((w) => (
+                  <div key={w.id} className="world-unfinished-item">
+                    <span className="label">{w.name} — 미완성</span>
+                    <span className="faint">{w.missing.slice(0, 3).join(', ')}{w.missing.length > 3 ? ` 외 ${w.missing.length - 3}개` : ''}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 5. Dungeon tier selection */}
           <div className="field">
             <label>던전 등급</label>
             <div className="tier-card-list row">
@@ -121,7 +164,7 @@ export function DungeonConfigScreen() {
             </div>
           </div>
 
-          {/* 5. How English answers are given */}
+          {/* 6. How English answers are given */}
           <div className="field">
             <label>영어 답 입력 방식</label>
             <div className="answer-mode-row">
@@ -145,7 +188,7 @@ export function DungeonConfigScreen() {
             <p className="faint">한국어 답은 언제나 음절로 조합합니다.</p>
           </div>
 
-          {/* 6. Dungeon information display */}
+          {/* 7. Dungeon information display */}
           <div className="dungeon-info-panel">
             <p className="dungeon-info-desc">{tier.description}</p>
             <div className="stats-grid">

@@ -3,6 +3,10 @@ import type { Spell } from '@/domain/spell'
 import type { SpellSet } from '@/domain/spellSet'
 import type { Totem } from '@/domain/totem'
 import type { GameSettings } from '@/domain/settings'
+import type { SeenContent } from '@/systems/newContent'
+import { markSeen } from '@/systems/newContent'
+import { allWorlds } from '@/systems/worldRegistry'
+import { assetKeys } from '@/config/assets'
 import { defaultSettings } from '@/domain/settings'
 import type { InventoryEntry, ItemId } from '@/domain/item'
 import { itemBalance } from '@/config/items'
@@ -38,6 +42,8 @@ export interface PersistedData {
   settings: GameSettings
   lastDungeonSelection: DungeonSelectionDraft
   inventory: InventoryEntry[]
+  /** Worlds and Totems the player has already been told about. */
+  seenContent: SeenContent
 }
 
 const persistence = new PersistenceService<PersistedData>(localStorageAdapter)
@@ -52,6 +58,9 @@ function defaultData(): PersistedData {
     settings: defaultSettings,
     lastDungeonSelection: { totemSpellSetId: null, dungeonSpellSetId: null, tierId: 'tier10' },
     inventory: itemBalance.startingInventory.map((e) => ({ ...e })),
+    // A brand-new save has seen everything shipping with it: a first launch
+    // should not announce the whole catalogue as new.
+    seenContent: markSeen(allWorlds, assetKeys('totems')),
   }
 }
 
@@ -83,6 +92,11 @@ function loadInitial(): PersistedData {
     settings: { ...defaults.settings, ...saved.settings },
     lastDungeonSelection: { ...defaults.lastDungeonSelection, ...saved.lastDungeonSelection },
     inventory: saved.inventory ?? defaults.inventory,
+    // Saves written before this existed have seen nothing recorded, but they
+    // have plainly seen the worlds that shipped with them — treat an absent
+    // record as "everything current", so upgrading does not announce the
+    // whole catalogue.
+    seenContent: saved.seenContent ?? defaults.seenContent,
   }
 }
 
@@ -111,6 +125,8 @@ export interface PersistentStore extends PersistedData {
   replaceTotem(id: string, updater: (t: Totem) => Totem): void
 
   updateSettings(patch: Partial<GameSettings>): void
+  /** Records everything currently present as seen, dismissing the notice. */
+  acknowledgeNewContent(): void
   setLastDungeonSelection(sel: DungeonSelectionDraft): void
 
   grantItem(itemId: ItemId, quantity?: number): void
@@ -212,6 +228,10 @@ export const usePersistentStore = create<PersistentStore>()((set, get) => ({
   updateSettings(patch) {
     set((state) => ({ settings: { ...state.settings, ...patch } }))
   },
+
+  acknowledgeNewContent() {
+    set({ seenContent: markSeen(allWorlds, assetKeys('totems')) })
+  },
   setLastDungeonSelection(sel) {
     set({ lastDungeonSelection: sel })
   },
@@ -226,6 +246,6 @@ export const usePersistentStore = create<PersistentStore>()((set, get) => ({
 
 // Persist on every change. Simple + adequate for prototype scale.
 usePersistentStore.subscribe((state) => {
-  const { spells, spellSets, totems, activeTotemId, settings, lastDungeonSelection, inventory } = state
-  persistence.save({ spells, spellSets, totems, activeTotemId, settings, lastDungeonSelection, inventory })
+  const { spells, spellSets, totems, activeTotemId, settings, lastDungeonSelection, inventory, seenContent } = state
+  persistence.save({ spells, spellSets, totems, activeTotemId, settings, lastDungeonSelection, inventory, seenContent })
 })

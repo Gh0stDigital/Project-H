@@ -55,6 +55,7 @@ import { isFullyCleared } from '@/systems/bossPlateau'
 import { createPuzzle, guess as applyGuess, type HangmanPuzzle } from '@/systems/hangman'
 import { applyRest, quoteRest } from '@/systems/restArea'
 import { buildRestNpcs, rollNpcGift, markSpoken, findNpc } from '@/systems/restNpcs'
+import { resolveWorld } from '@/systems/worldRegistry'
 import { buildRunReport, type RunReport } from '@/systems/runResults'
 import type { AttemptKind } from '@/systems/wordStats'
 import { resolveChallenge } from '@/systems/challengeEngine'
@@ -200,7 +201,8 @@ function creditReward(totemId: string, reward: RewardBundle) {
 function withRestNpcs(run: DungeonRunState): DungeonRunState {
   if (run.restNpcs.length > 0) return run
   const spells = usePersistentStore.getState().spells
-  return { ...run, restNpcs: buildRestNpcs(spells, Math.random) }
+  const world = resolveWorld(run.config.worldId)
+  return { ...run, restNpcs: buildRestNpcs(spells, world?.npcs ?? [], Math.random) }
 }
 
 /** Rolls an item drop and folds it into a bundle, with its display line. */
@@ -372,7 +374,8 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
     if (!canEnterBoss(run)) return
 
     const tier = tierFor(run)
-    const boss = spawnBoss(`boss-${run.startedAt}`, tier, run.config.dungeonWordIds.length)
+    const world = resolveWorld(run.config.worldId)!
+    const boss = spawnBoss(world, `boss-${run.startedAt}`, tier, run.config.dungeonWordIds.length)
     const bossBattle = startBattle(boss, totemDeckIds(run), run.config.dungeonWordIds)
     const run2 = consumeKey(setState(run, 'BossBattle'))
     set({ run: { ...run2, currentEvent: null, standbyNotice: null }, battle: bossBattle, stage: 'intro', activePanel: null, confirmingBoss: false })
@@ -524,7 +527,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
 
     if (run.state === 'ResolvingEvent' && event?.type === 'battle') {
       const tier = tierFor(run)
-      const enemy = spawnEnemy(event.id, tier)
+      const enemy = spawnEnemy(resolveWorld(run.config.worldId)!, event.id, tier)
       set({
         run: setState(run, 'Battle'),
         battle: startBattle(enemy, totemDeckIds(run), null),
@@ -842,7 +845,7 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
   // A correctly opened chest may turn out to be a Mimic.
   if (Math.random() < treasureBalance.mimicChance) {
     const tier = tierFor(run)
-    const mimic = spawnMimic(run.currentEvent!.id, tier)
+    const mimic = spawnMimic(resolveWorld(run.config.worldId)!, run.currentEvent!.id, tier)
     set({
       run: setOutcomeText(setState(run, 'Battle'), mimicRevealText),
       battle: startBattle(mimic, totemDeckIds(run), null),

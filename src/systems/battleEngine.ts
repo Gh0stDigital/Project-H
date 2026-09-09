@@ -3,7 +3,8 @@ import type { BattleState, DefenseSequence, EnemyCombatant, PlateauRequirement }
 import type { Challenge } from '@/domain/challenge'
 import { battleBalance, type DungeonTierDef } from '@/config/balance'
 import { mimicBalance } from '@/config/dungeonEvents'
-import { pickFlavor } from '@/config/assets'
+import type { WorldPack } from '@/config/worldManifest'
+import { pickSlot, bossSlot, nameFromSlot } from './worldRegistry'
 import { buildDeck, playCard, visibleCards } from './deck'
 import { generateChallenge, resolveChallenge, type ChallengeResolution } from './challengeEngine'
 import { buildPlateau, clearRequirement, isFullyCleared } from './bossPlateau'
@@ -17,10 +18,6 @@ import { makeId } from './idGen'
  * never reads or writes the Compendium directly.
  */
 
-function keyOf(url: string): string {
-  return url.split('/').pop()!.replace('.png', '')
-}
-
 /**
  * Which foe a seed spawns, decided from the seed alone.
  *
@@ -29,30 +26,23 @@ function keyOf(url: string): string {
  * `enemies/default` placeholder while the fight spawned something else
  * entirely; sharing this function is what keeps the two honest.
  */
-export function enemyArtFor(seed: string): string {
-  return keyOf(pickFlavor('enemies', seed))
+export function enemyArtFor(world: WorldPack, seed: string): string | null {
+  return pickSlot(world.enemies, seed)
 }
 
 /** A readable name for a foe from its art: `wraith` -> "Wraith". */
-export function enemyNameFor(artKey: string): string {
-  if (!artKey || artKey === 'default') return '떠도는 적'
-  return artKey
-    .replace(/[_-]+/g, ' ')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ')
+export function enemyNameFor(slot: string | null): string {
+  if (!slot) return '떠도는 적'
+  return nameFromSlot(slot)
 }
 
-export function spawnEnemy(seed: string, tier: DungeonTierDef): EnemyCombatant {
+export function spawnEnemy(world: WorldPack, seed: string, tier: DungeonTierDef): EnemyCombatant {
   const hp = 26 + Math.round(tier.enemyDamageMultiplier * 10)
-  const art = enemyArtFor(seed)
+  const art = enemyArtFor(world, seed)
   return {
     kind: 'enemy',
     name: enemyNameFor(art),
-    imageCategory: 'enemies',
-    imageKey: art,
-    battleBgKey: keyOf(pickFlavor('battlebg', seed)),
+    image: { folder: 'enemies', slot: art ?? '' },
     maxHp: hp,
     currentHp: hp,
     damage: Math.round(battleBalance.baseEnemyDamage * tier.enemyDamageMultiplier),
@@ -63,29 +53,33 @@ export function spawnEnemy(seed: string, tier: DungeonTierDef): EnemyCombatant {
  * A Mimic: an ordinary foe's shape, but tougher, angrier and worth more.
  * Spawned only from an opened treasure chest.
  */
-export function spawnMimic(seed: string, tier: DungeonTierDef): EnemyCombatant {
-  const base = spawnEnemy(seed, tier)
+export function spawnMimic(world: WorldPack, seed: string, tier: DungeonTierDef): EnemyCombatant {
+  const base = spawnEnemy(world, seed, tier)
   const hp = Math.round(base.maxHp * mimicBalance.hpMultiplier)
   return {
     ...base,
     kind: 'mimic',
     name: 'Mimic',
-    imageCategory: 'treasure',
-    imageKey: 'open',
+    image: { folder: 'events', slot: 'treasureMimic' },
     maxHp: hp,
     currentHp: hp,
     damage: Math.round(base.damage * mimicBalance.damageMultiplier),
   }
 }
 
-export function spawnBoss(seed: string, tier: DungeonTierDef, wordCount: number): EnemyCombatant {
+export function spawnBoss(
+  world: WorldPack,
+  seed: string,
+  tier: DungeonTierDef,
+  wordCount: number,
+): EnemyCombatant {
   const hp = battleBalance.bossBaseHp + wordCount * battleBalance.bossHpPerWord
+  // A world may ship its own boss art; one that doesn't borrows an enemy.
+  const boss = bossSlot(world, seed)
   return {
     kind: 'boss',
     name: '보스 수호자',
-    imageCategory: 'bosses',
-    imageKey: keyOf(pickFlavor('bosses', seed)),
-    battleBgKey: 'boss',
+    image: boss ? { folder: boss.folder, slot: boss.slot } : { folder: 'enemies', slot: '' },
     maxHp: hp,
     currentHp: hp,
     damage: Math.round(battleBalance.baseEnemyDamage * 1.4 * tier.enemyDamageMultiplier),

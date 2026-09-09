@@ -126,10 +126,16 @@ console.log(`bundle-offline: dist/index.html is self-contained code (${kb(Buffer
 
 // --- Single-file variant, art and all -----------------------------------
 
-const assetsRoot = join(DIST, 'assets')
+// Both trees carry art: global assets, and the world packs. Missing the
+// second one would leave the offline builds without a single backdrop.
+const artRoots = [join(DIST, 'assets'), join(DIST, 'worlds')].filter((d) => existsSync(d))
+
+function allArt() {
+  return artRoots.flatMap((root) => walk(root))
+}
 const inline = {}
-if (existsSync(assetsRoot)) {
-  for (const file of walk(assetsRoot)) {
+{
+  for (const file of allArt()) {
     // Keyed by the path the app builds at runtime (config/assets.ts).
     inline[relative(DIST, file).split('\\').join('/')] = dataUri(file)
   }
@@ -172,7 +178,7 @@ const precache = [
   './index.html',
   './favicon.svg',
   './manifest.webmanifest',
-  ...(existsSync(assetsRoot) ? walk(assetsRoot).map((f) => `./${relative(DIST, f).split('\\').join('/')}`) : []),
+  ...allArt().map((f) => `./${relative(DIST, f).split('\\').join('/')}`),
 ]
 
 const version = createHash('sha256')

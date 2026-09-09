@@ -1,4 +1,8 @@
 import { useUiStore } from '@/state/uiStore'
+import { findNewContent, hasNewContent } from '@/systems/newContent'
+import { allWorlds } from '@/systems/worldRegistry'
+import { assetKeys } from '@/config/assets'
+import { nameFromSlot } from '@/systems/worldRegistry'
 import { usePersistentStore } from '@/state/persistentStore'
 import { AssetImage } from '@/ui/components/AssetImage'
 import { Bar } from '@/ui/components/Bar'
@@ -14,10 +18,29 @@ const menuItems = [
 export function MainMenuScreen() {
   const goTo = useUiStore((s) => s.goTo)
   const totem = usePersistentStore((s) => s.totems.find((t) => t.id === s.activeTotemId))
+  const seenContent = usePersistentStore((s) => s.seenContent)
+  const acknowledgeNewContent = usePersistentStore((s) => s.acknowledgeNewContent)
+
+  // What has appeared since the player last looked. The build already knows
+  // the full catalogue; this is only about what they have been told.
+  const fresh = findNewContent(allWorlds, assetKeys('totems'), seenContent)
   const spellCount = usePersistentStore((s) => s.spells.length)
 
   return (
     <div className="screen">
+      {hasNewContent(fresh) && (
+        <button className="new-content-notice" onClick={acknowledgeNewContent}>
+          <span className="new-content-title">✦ 새로운 내용이 추가되었습니다</span>
+          {fresh.worlds.length > 0 && (
+            <span className="new-content-line">새 세계 · {fresh.worlds.map((w) => w.name).join(', ')}</span>
+          )}
+          {fresh.totems.length > 0 && (
+            <span className="new-content-line">새 토템 · {fresh.totems.map(nameFromSlot).join(', ')}</span>
+          )}
+          <span className="faint new-content-dismiss">눌러서 확인</span>
+        </button>
+      )}
+
       <div className="menu-title">
         <span className="glyph">🔮</span>
         <h1>Project H</h1>

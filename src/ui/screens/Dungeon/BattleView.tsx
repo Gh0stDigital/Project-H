@@ -3,10 +3,11 @@ import { useDungeonStore } from '@/state/dungeonStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { attackCardClue, selectableSpellIds } from '@/systems/battleEngine'
 import { isFullyCleared, remainingCount } from '@/systems/bossPlateau'
-import { AssetImage } from '@/ui/components/AssetImage'
+import { WorldImage } from '@/ui/components/WorldImage'
+import { resolveWorld } from '@/systems/worldRegistry'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
-import { sceneArt } from '@/config/scenes'
+import { sceneSlotFor } from '@/config/scenes'
 import { Bar } from '@/ui/components/Bar'
 import { SpellCard } from '@/ui/components/SpellCard'
 import { TotemPanel } from '@/ui/components/TotemPanel'
@@ -74,11 +75,10 @@ export function BattleView() {
   const enemyHit = useDamageFlash(battle.enemy.currentHp)
 
   // A boss fight gets the boss room; ordinary fights get battle art.
-  const scene = sceneArt(
-    battle.isBoss ? 'boss_battle' : 'battle_screen',
-    battle.enemy.name,
-    run.config.locationKey,
-  )
+  const world = resolveWorld(run.config.worldId)
+  const sceneSlot = world
+    ? sceneSlotFor(world, battle.isBoss ? 'boss_battle' : 'battle_screen', battle.enemy.name)
+    : null
 
   return (
     <div className="screen" data-challenge={answering ? 'true' : undefined}>
@@ -94,13 +94,18 @@ export function BattleView() {
       <RunHud run={run} totem={totem} modeLabel={battle.isBoss ? '보스 전투' : '전투'} />
 
       <div className="scene-window battle">
-        <SceneBackdrop category={scene.category} assetKey={scene.key} alt="던전 배경" />
+        <SceneBackdrop world={world} slot={sceneSlot} alt="던전 배경" />
         <div
-          key={battle.enemy.imageKey}
+          key={battle.enemy.image.slot}
           className={`battle-enemy-overlay${enemyHit ? ' is-hit' : ''}`}
-          data-asset={battle.enemy.imageKey}
+          data-asset={battle.enemy.image.slot}
         >
-          <AssetImage category={battle.enemy.imageCategory} assetKey={battle.enemy.imageKey} alt={battle.enemy.name} />
+          <WorldImage
+            world={world}
+            folder={battle.enemy.image.folder}
+            slot={battle.enemy.image.slot}
+            alt={battle.enemy.name}
+          />
         </div>
         <span className="scene-tag">{battle.enemy.name}</span>
       </div>

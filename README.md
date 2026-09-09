@@ -93,36 +93,48 @@ each time as a portrait sitting in the folder that the game never offered.
 Placeholders are generated for any slot that has no file yet, and are never
 overwritten — committing real artwork over one is permanent.
 
-### Dungeon backdrops
+### Unwritten Worlds — adding a world
 
-`public/assets/locations/` holds the dungeon art, mapped to situations by
-`src/config/scenes.ts`. The backdrop is chosen per event, so it changes every
-time the player moves.
+A world is a folder of art under `public/worlds/`. Drop one in and it is
+compiled, checked and offered automatically: the dev server picks it up while
+running, and a build can never ship a world the game does not know about.
+There is no code to write and no list to register it in.
 
-| File | Used for |
-| --- | --- |
-| `dkp_entrance` | The dungeon setup screen |
-| `dkp_corridor1`, `dkp_corridor2` | Standby between events; also stands in for encounters and traps |
-| `dkp_treasureRoom` | Treasure events |
-| `dkp_trapRoom1` | Traps |
-| `dkp_battle` | Ordinary battles |
-| `dkp_bossBattle` | The boss door and the boss fight |
-| `dkp_restRoom` | Rest areas |
-| `dkp_shrineRoom` | Magic rooms; also traps and encounters |
-| `dkp_keyRoom` | The Key Room, and some treasure rooms |
-| `dkp_2way` | Direction forks |
+```
+public/worlds/<your-world-id>/
+  world.json            optional: { "name": "...", "description": "..." }
+  locations/            10 required
+    entrance  corridor1  corridor2  keyRoom  restRoom
+    pathwayFork  shrineRoom  treasureRoom  trapRoom  bossRoom
+    battle  battle2      optional extra arenas
+  events/               10 required
+    bossDoor  roadSign  key  trap1  trap2
+    treasureLocked  treasureOpened  treasureMimic  rest  shrineDoor
+  npcs/                 at least 3 — filenames become their names
+  enemies/              at least 4 — filenames become their names
+  bosses/               optional; without it the boss borrows an enemy
+```
 
-Where a situation lists more than one option, the room the event is about
-shows about two thirds of the time and an alternate the rest, so the dungeon
-varies without the backdrop looking wrong. Lookups ignore case and separators
-(`dkp_keyRoom` = `dkp-keyroom`), and anything missing falls back to the run's
-`locationKey` rather than breaking.
+Every file is a `.png` named exactly as above. A world is **playable only
+when every required slot is present**; until then it is listed on the dungeon
+setup screen with precisely what it still needs, and the dev server prints the
+same list. That is deliberate — an unfinished world should read as work in
+progress, never as a bug.
 
-> **Note on size.** This art is ~34 MB at full resolution, which makes the
-> single-file `dist/thoth-offline.html` about 52 MB. That is fine from a
-> desktop but heavy for a phone download. Downscaling the PNGs to roughly
-> 1290px wide (3x the 430px viewport) would cut it dramatically with no
-> visible loss.
+When a finished world or a new Totem appears, the main menu announces it once
+and remembers that it did.
+
+Totems and Spell card art stay global in `public/assets/`, since a Totem is
+the player's character rather than world content and can enter any world.
+
+Slot names are how the game addresses art, so `config/scenes.ts` maps a
+situation (a trap, a rest, the boss door) to a slot and the chosen world
+supplies the picture. Adding a world needs no change there.
+
+> **The one limit.** A browser cannot list a directory, so this is compiled at
+> build time rather than scanned at runtime. Everything is automatic on the
+> developer's side; a deployed copy still only gains a new world on its next
+> build.
 
 ## Project structure
 

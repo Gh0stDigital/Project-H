@@ -1,4 +1,4 @@
-import type { AssetCategory } from '@/config/assets'
+import type { WorldFolder } from '@/systems/worldRegistry'
 import type { DungeonEventType } from '@/config/dungeonEvents'
 import type { DungeonTierId } from '@/config/balance'
 import type { Challenge } from './challenge'
@@ -12,11 +12,11 @@ export interface DungeonConfig {
   /** Resolved word pool for this run (capped to the tier's word limit). */
   dungeonWordIds: string[]
   /**
-   * Fallback backdrop for the run. The scene shown is normally chosen per
-   * event (config/scenes.ts) so it changes as the player moves; this is what
-   * gets drawn when a situation has no scene art yet.
+   * Which world this run takes place in. Every backdrop, prop, foe and face
+   * comes from its pack, so the world is chosen once at setup and the rest
+   * follows from it.
    */
-  locationKey: string
+  worldId: string
 }
 
 /**
@@ -82,11 +82,17 @@ export interface DungeonEvent {
   title: string
   /** Sequential lines shown in the typewriter area. */
   bodyText: string[]
-  imageCategory: AssetCategory
-  imageKey: string
+  /** Art for this event, as a slot inside the run's world. */
+  image: WorldImageRef
   challenge: Challenge | null
   /** Direction paths offered, for `direction` events only. */
   directionChoices: DirectionChoice[] | null
+}
+
+/** A picture addressed by slot within the run's world. */
+export interface WorldImageRef {
+  folder: WorldFolder
+  slot: string
 }
 
 export interface DirectionChoice {

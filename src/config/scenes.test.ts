@@ -1,90 +1,62 @@
 import { describe, it, expect } from 'vitest'
-import { sceneArt, sceneKeyFor, sceneKindForEvent } from './scenes'
-import { assetManifest } from './assetManifest'
+import { sceneSlotFor, sceneKindForEvent } from './scenes'
+import { worldPacks } from './worldManifest'
+import { playableWorlds } from '@/systems/worldRegistry'
 
-const scenes: readonly string[] = assetManifest.locations
+const worlds = playableWorlds()
 
 describe('sceneKindForEvent', () => {
   it('maps every event type to a scene kind', () => {
-    const types = [
-      'treasure', 'trap', 'magic_room', 'rest',
-      'battle', 'direction', 'boss_door', 'key_room',
-    ] as const
-    for (const type of types) {
-      expect(sceneKindForEvent(type)).toBeTruthy()
-    }
+    const types = ['treasure','trap','magic_room','rest','battle','direction','boss_door','key_room'] as const
+    for (const type of types) expect(sceneKindForEvent(type)).toBeTruthy()
   })
 })
 
-describe('sceneKeyFor', () => {
-  it('picks art that actually exists', () => {
-    for (const kind of ['standby', 'treasure', 'trap', 'battle', 'rest', 'direction'] as const) {
-      const key = sceneKeyFor(kind, 'seed')
-      expect(key).not.toBeNull()
-      expect(scenes).toContain(key!)
-    }
+describe('sceneSlotFor', () => {
+  it('has at least one playable world to draw on', () => {
+    expect(worlds.length).toBeGreaterThan(0)
   })
 
-  it('gives the boss its own room', () => {
-    expect(sceneKeyFor('boss_battle', 'x')).toBe('dkp_bossBattle')
-  })
+  // Every world answers the same questions, so the checks run against all
+  // of them — a new pack is covered the moment it is added.
+  for (const world of worlds) {
+    describe(world.id, () => {
+      it('resolves every scene kind to a location the world actually has', () => {
+        const kinds = ['standby','treasure','trap','battle','battle_screen','boss_battle','boss_door','rest','magic_room','key_room','direction','entrance'] as const
+        for (const kind of kinds) {
+          const slot = sceneSlotFor(world, kind, 'seed')
+          expect(slot, `${world.id}/${kind}`).not.toBeNull()
+          expect(world.locations, `${world.id}/${kind}`).toContain(slot!)
+        }
+      })
 
-  it('sends rest events to the rest room', () => {
-    expect(sceneKeyFor('rest', 'x')).toBe('dkp_restRoom')
-  })
+      it('sends each situation to its own room', () => {
+        expect(sceneSlotFor(world, 'rest', 'x')).toBe('restRoom')
+        expect(sceneSlotFor(world, 'direction', 'x')).toBe('pathwayFork')
+        expect(sceneSlotFor(world, 'boss_battle', 'x')).toBe('bossRoom')
+        expect(sceneSlotFor(world, 'magic_room', 'x')).toBe('shrineRoom')
+      })
 
-  it('sends direction forks to the two-way', () => {
-    expect(sceneKeyFor('direction', 'x')).toBe('dkp_2way')
-  })
+      it('is stable for one seed and varies across them', () => {
+        expect(sceneSlotFor(world, 'standby', 'turn-4')).toBe(sceneSlotFor(world, 'standby', 'turn-4'))
+        const seen = new Set(Array.from({ length: 12 }, (_, i) => sceneSlotFor(world, 'standby', String(i))))
+        expect(seen.size).toBeGreaterThan(1)
+      })
 
-  it('is stable for one seed', () => {
-    expect(sceneKeyFor('standby', 'turn-4')).toBe(sceneKeyFor('standby', 'turn-4'))
-  })
-
-  it('varies across seeds where more than one backdrop fits', () => {
-    // Standby alternates between corridors, so a run of turns must not be
-    // one unchanging picture — that was the original complaint.
-    const seen = new Set(Array.from({ length: 12 }, (_, i) => sceneKeyFor('standby', String(i))))
-    expect(seen.size).toBeGreaterThan(1)
-  })
+      it('usually shows the room the event is about', () => {
+        const picks = Array.from({ length: 300 }, (_, i) => sceneSlotFor(world, 'treasure', `evt-${i}`))
+        const onTheme = picks.filter((k) => k === 'treasureRoom').length
+        expect(onTheme / picks.length).toBeGreaterThan(0.5)
+      })
+    })
+  }
 })
 
-describe('sceneArt', () => {
-  it('names the room the event is about', () => {
-    expect(sceneArt('rest', 'x', 'cave')).toEqual({ category: 'locations', key: 'dkp_restRoom' })
-  })
-
-  it('always names art that exists', () => {
-    // Either dedicated scene art, or the run's own location as fallback —
-    // never a key that would render as a broken image.
-    for (const kind of ['standby', 'treasure', 'trap', 'battle', 'boss_battle', 'rest'] as const) {
-      const art = sceneArt(kind, 'x', 'ruins')
-      expect(scenes).toContain(art.key)
+describe('world packs', () => {
+  it('reports incomplete packs rather than offering them', () => {
+    for (const w of worldPacks) {
+      if (w.complete) expect(w.missing).toHaveLength(0)
+      else expect(w.missing.length).toBeGreaterThan(0)
     }
-  })
-
-  it('finds the corridor art', () => {
-    expect(sceneKeyFor('standby', 'x')).toMatch(/^dkp_corridor[12]$/)
-  })
-})
-
-describe('scene weighting', () => {
-  it('usually shows the room the event is about', () => {
-    // Picking uniformly made a treasure event show a corridor most of the
-    // time, which read as "the backdrop is wrong" rather than "varied".
-    const picks = Array.from({ length: 300 }, (_, i) => sceneKeyFor('treasure', `evt-${i}`))
-    const onTheme = picks.filter((k) => k === 'dkp_treasureRoom').length
-    expect(onTheme / picks.length).toBeGreaterThan(0.5)
-  })
-
-  it('still varies', () => {
-    const picks = new Set(Array.from({ length: 300 }, (_, i) => sceneKeyFor('treasure', `evt-${i}`)))
-    expect(picks.size).toBeGreaterThan(1)
-  })
-
-  it('keeps standby corridors evenly mixed', () => {
-    const picks = Array.from({ length: 300 }, (_, i) => sceneKeyFor('standby', `turn-${i}`))
-    const first = picks.filter((k) => k === picks[0]).length
-    expect(first / picks.length).toBeLessThan(0.75)
   })
 })
