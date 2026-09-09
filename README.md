@@ -72,7 +72,7 @@ online once so the service worker can precache.
 
 ## Art
 
-Every PNG under `public/assets/<category>/` is registered automatically —
+Every image under `public/assets/<category>/` is registered automatically —
 `scripts/gen-asset-manifest.mjs` scans the folder and writes
 `src/config/assetManifest.ts`. **Dropping a file in is the whole job.** The
 generator runs by itself when the dev server starts, whenever art is added or
@@ -92,6 +92,29 @@ each time as a portrait sitting in the folder that the game never offered.
 
 Placeholders are generated for any slot that has no file yet, and are never
 overwritten — committing real artwork over one is permanent.
+
+### Keeping the art small
+
+Art arrives as full-size lossless PNG — around 3 MB for one backdrop. The game
+draws all of it into a 430 px-wide phone viewport and the single-file offline
+build inlines every image as base64, so 72 MB of PNG became a 98 MB HTML file
+that a phone could not be relied on to open.
+
+```
+npm run optimize:art              re-encode everything under public/ as WebP
+npm run optimize:art -- --dry-run  report what it would save, write nothing
+```
+
+It caps width at 1290 px (430 CSS px × a 3× screen — past that is detail the
+phone has no room for), encodes at WebP q88 with lossless alpha, and keeps the
+original whenever WebP would be bigger, which happens on small flat
+placeholders. Running it twice is a no-op.
+
+**Art is committed already optimized, so this is not part of the build.** It
+is a one-off to run over anything new — nothing breaks if you forget, the
+files are just larger than they need to be. Both manifests record the
+extension of each file, so a world dropped in as PNG plays exactly the same as
+the optimized ones, and the two can sit side by side.
 
 ### Unwritten Worlds — adding a world
 
@@ -115,7 +138,8 @@ public/worlds/<your-world-id>/
   bosses/               optional; without it the boss borrows an enemy
 ```
 
-Every file is a `.png` named exactly as above. A world is **playable only
+Files are named exactly as above; `.png`, `.jpg` and `.webp` all work, and
+the extension is recorded rather than assumed. A world is **playable only
 when every required slot is present**; until then it is listed on the dungeon
 setup screen with precisely what it still needs, and the dev server prints the
 same list. That is deliberate — an unfinished world should read as work in
@@ -200,19 +224,34 @@ scripts/
                          dist/index.html as a classic script, emits the
                          all-in-one dist/thoth-offline.html, and generates
                          dist/sw.js. Runs as part of `npm run build`.
-  gen-placeholders.mjs   Fills in any missing placeholder PNG under
-                         public/assets (no external deps — hand-rolled PNG
-                         encoder). Runs automatically via `npm install`'s
-                         postinstall hook, or manually with `npm run
-                         gen:assets`. Never overwrites a file that already
-                         exists, so replacing a placeholder with real
-                         artwork is permanent.
-public/assets/           Local art, committed to the repo, one folder per
-                         replaceable slot: locations, events, traps,
-                         treasure, totems, enemies, bosses, battlebg,
-                         spells. Drop a real PNG in with the matching
-                         filename to replace a placeholder — no code
-                         changes needed, and it won't be regenerated over.
+  worldSlots.mjs         The pack format itself — which slots a world must
+                         fill to be playable. The one place to change it.
+  artFiles.mjs           Which files count as art and how a filename becomes
+                         a slot name; the only code that knows about image
+                         extensions at all.
+  gen-asset-manifest.mjs Scans public/assets and writes
+                         src/config/assetManifest.ts.
+  gen-world-manifest.mjs Scans public/worlds, validates each pack against
+                         worldSlots.mjs, and writes
+                         src/config/worldManifest.ts. Both generators run on
+                         dev-server start, on every add or removal while it
+                         runs, and at the start of a build.
+  gen-placeholders.mjs   Fills any slot that has no art yet with a generated
+                         placeholder (no external deps — hand-rolled PNG
+                         encoder). Runs via `npm install`'s postinstall hook
+                         or `npm run gen:assets`. Never overwrites a file
+                         that exists in any format, so replacing a
+                         placeholder with real artwork is permanent.
+  optimize-art.mjs       Re-encodes art under public/ as WebP, capped at
+                         1290 px. Run by hand with `npm run optimize:art`;
+                         deliberately not part of the build, since the
+                         committed art is already optimized.
+public/assets/           Art that is not world content: totems (the player's
+                         character, which travels between worlds) and spell
+                         card art.
+public/worlds/<id>/      One folder per world — locations, events, npcs,
+                         enemies and an optional bosses. See "Unwritten
+                         Worlds" above.
 ```
 
 ## Notes on scope

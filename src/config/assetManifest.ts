@@ -6,3 +6,24 @@ export const assetManifest = {
   spells: ['default', 'arcane', 'earth', 'fire', 'water', 'wind'],
   totems: ['default', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'totem_ember', 'totem_silverKnight', 'totem_stone', 'totem_tide'],
 } as const
+
+/**
+ * The file extension behind each key, keyed "category/key". Art is stored as
+ * WebP once scripts/optimize-art.mjs has run and as whatever it arrived as
+ * before that, so the extension is recorded rather than assumed.
+ */
+export const assetExt: Readonly<Record<string, string>> = {
+  "spells/default": "webp",
+  "spells/arcane": "webp",
+  "spells/earth": "webp",
+  "spells/fire": "webp",
+  "spells/water": "webp",
+  "spells/wind": "webp",
+  "totems/default": "webp",
+  "totems/Magic_Parasite_Zoah": "webp",
+  "totems/parasite_hunter_Yaharl": "webp",
+  "totems/totem_ember": "webp",
+  "totems/totem_silverKnight": "webp",
+  "totems/totem_stone": "webp",
+  "totems/totem_tide": "webp"
+}

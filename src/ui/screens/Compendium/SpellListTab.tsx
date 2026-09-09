@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { usePersistentStore } from '@/state/persistentStore'
 import { Bar } from '@/ui/components/Bar'
 import { AssetImage } from '@/ui/components/AssetImage'
-import { pickFlavor } from '@/config/assets'
+import { pickFlavorKey } from '@/config/assets'
 import { SpellEditorForm } from './SpellEditorForm'
 import { SpellImportPanel } from './SpellImportPanel'
 import type { Spell } from '@/domain/spell'
@@ -63,7 +63,7 @@ export function SpellListTab() {
       )}
 
       {filtered.map((spell) => {
-        const artKey = pickFlavor('spells', spell.id).split('/').pop()!.replace('.png', '')
+        const artKey = pickFlavorKey('spells', spell.id)
         return (
           <div key={spell.id} className="spell-card-list-item">
             <div className="thumb">

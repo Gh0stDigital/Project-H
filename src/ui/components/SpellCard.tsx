@@ -1,6 +1,6 @@
 import type { Spell } from '@/domain/spell'
 import { damageForSpell } from '@/systems/spellProgression'
-import { pickFlavor } from '@/config/assets'
+import { pickFlavorKey } from '@/config/assets'
 import { elementDefFor } from '@/config/wordTypes'
 import { AssetImage } from './AssetImage'
 import { Bar } from './Bar'
@@ -22,7 +22,7 @@ interface SpellCardProps {
 
 /** A single battle-hand Spell card: word, level, charge, potential damage. */
 export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onClick }: SpellCardProps) {
-  const artKey = pickFlavor('spells', spell.id).split('/').pop()!.replace('.png', '')
+  const artKey = pickFlavorKey('spells', spell.id)
   const element = elementDefFor(spell.wordType)
   return (
     <div

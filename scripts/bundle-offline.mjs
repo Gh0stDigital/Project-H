@@ -54,7 +54,13 @@ function walk(dir) {
   return out
 }
 
-const MIME = { '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.webp': 'image/webp' }
+const MIME = {
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+}
 
 function dataUri(file) {
   const ext = file.slice(file.lastIndexOf('.')).toLowerCase()
@@ -131,7 +137,10 @@ console.log(`bundle-offline: dist/index.html is self-contained code (${kb(Buffer
 const artRoots = [join(DIST, 'assets'), join(DIST, 'worlds')].filter((d) => existsSync(d))
 
 function allArt() {
-  return artRoots.flatMap((root) => walk(root))
+  // Images only. The art folders also hold each world's world.json, which
+  // the app reads at build time, not at runtime — inlining it would put a
+  // file the page never asks for into the image map.
+  return artRoots.flatMap((root) => walk(root)).filter((f) => MIME[f.slice(f.lastIndexOf('.')).toLowerCase()])
 }
 const inline = {}
 {

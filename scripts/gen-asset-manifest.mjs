@@ -17,6 +17,7 @@
 import { readdirSync, statSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { artIn, extTable } from './artFiles.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -31,21 +32,22 @@ function build() {
     .sort()
 
   const manifest = {}
+  const ext = {}
   const warnings = []
   let total = 0
 
   for (const category of categories) {
-    const keys = readdirSync(join(ASSETS_DIR, category))
-      .filter((f) => f.toLowerCase().endsWith('.png'))
-      .map((f) => f.slice(0, -4))
+    const art = artIn(join(ASSETS_DIR, category))
       // 'default' first: it is every category's fallback, and listing it
       // first keeps it at the head of any picker built from this order.
-      .sort((a, b) => (a === 'default' ? -1 : b === 'default' ? 1 : a.localeCompare(b)))
-    if (keys.length === 0) continue
+      .sort((a, b) => (a.slot === 'default' ? -1 : b.slot === 'default' ? 1 : a.slot.localeCompare(b.slot)))
+    if (art.length === 0) continue
+    const keys = art.map((a) => a.slot)
     if (!keys.includes('default')) {
-      warnings.push(`${category}/ has no default.png — lookups fall back to its first key.`)
+      warnings.push(`${category}/ has no default image — lookups fall back to its first key.`)
     }
     manifest[category] = keys
+    Object.assign(ext, extTable(art, `${category}/`))
     total += keys.length
   }
 
@@ -60,6 +62,13 @@ function build() {
 export const assetManifest = {
 ${body}
 } as const
+
+/**
+ * The file extension behind each key, keyed "category/key". Art is stored as
+ * WebP once scripts/optimize-art.mjs has run and as whatever it arrived as
+ * before that, so the extension is recorded rather than assumed.
+ */
+export const assetExt: Readonly<Record<string, string>> = ${JSON.stringify(ext, null, 2)}
 `
   return { manifest, source, total, categories: Object.keys(manifest), warnings }
 }

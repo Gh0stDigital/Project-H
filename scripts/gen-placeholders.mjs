@@ -14,6 +14,7 @@ import { writeFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'nod
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { REQUIRED_LOCATIONS, REQUIRED_EVENTS, MIN_NPCS, MIN_ENEMIES } from './worldSlots.mjs'
+import { artIn, artPath } from './artFiles.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_ROOT = join(__dirname, '..', 'public', 'assets')
@@ -259,10 +260,11 @@ let skipped = 0
 
 function ensure(dir, key, palette, shape) {
   mkdirSync(dir, { recursive: true })
-  const target = join(dir, `${key}.png`)
   // Never clobber real artwork someone has dropped in to replace a
-  // placeholder — only fill in files that don't exist yet.
-  if (existsSync(target)) { skipped++; return }
+  // placeholder — only fill in slots that have no file yet, in any format.
+  // Checking for `.png` alone would bury optimized art under a placeholder.
+  if (artPath(dir, key)) { skipped++; return }
+  const target = join(dir, `${key}.png`)
   const accent = accentShift[key] || palette.accent
   writeFileSync(target, drawPlaceholder({ bg: palette.bg, accent, shape }))
   generated++
@@ -284,9 +286,7 @@ for (const id of worldIds) {
   const root = join(WORLDS_ROOT, id)
   const has = (folder) => {
     const dir = join(root, folder)
-    return existsSync(dir)
-      ? readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.png')).map((f) => f.slice(0, -4))
-      : []
+    return artIn(dir).map((a) => a.slot)
   }
 
   for (const slot of REQUIRED_LOCATIONS) {

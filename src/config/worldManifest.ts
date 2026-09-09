@@ -16,6 +16,12 @@ export interface WorldPack {
   npcs: readonly string[]
   enemies: readonly string[]
   bosses: readonly string[]
+  /**
+   * The file extension behind each slot, keyed "folder/slot". Worlds shipped
+   * here are WebP; one dropped in as PNG and not yet optimized is PNG, and
+   * both play the same.
+   */
+  ext: Readonly<Record<string, string>>
 }
 
 export const requiredLocations = ["entrance","corridor1","corridor2","keyRoom","restRoom","pathwayFork","shrineRoom","treasureRoom","trapRoom","bossRoom"] as const
@@ -36,6 +42,7 @@ export const worldPacks: readonly WorldPack[] = [
     npcs: ["hunter","merchant","pilgrim","scholar","wanderer"],
     enemies: ["goblin","slime","warden","wraith"],
     bosses: ["guardian"],
+    ext: {"locations/battle":"webp","locations/battle2":"webp","locations/bossRoom":"webp","locations/corridor1":"webp","locations/corridor2":"webp","locations/entrance":"webp","locations/keyRoom":"webp","locations/pathwayFork":"webp","locations/restRoom":"webp","locations/shrineRoom":"webp","locations/trapRoom":"webp","locations/treasureRoom":"webp","events/bossDoor":"webp","events/key":"webp","events/rest":"webp","events/roadSign":"webp","events/shrineDoor":"webp","events/trap1":"webp","events/trap2":"webp","events/treasureLocked":"webp","events/treasureMimic":"webp","events/treasureOpened":"webp","npcs/hunter":"png","npcs/merchant":"png","npcs/pilgrim":"webp","npcs/scholar":"webp","npcs/wanderer":"webp","enemies/goblin":"webp","enemies/slime":"webp","enemies/warden":"webp","enemies/wraith":"webp","bosses/guardian":"webp"},
   },
   {
     id: "starter",
@@ -49,5 +56,6 @@ export const worldPacks: readonly WorldPack[] = [
     npcs: ["merchant","scholar","wanderer"],
     enemies: ["brute","crawler","prowler","shade"],
     bosses: ["guardian"],
+    ext: {"locations/bossRoom":"webp","locations/corridor1":"webp","locations/corridor2":"webp","locations/entrance":"webp","locations/keyRoom":"webp","locations/pathwayFork":"webp","locations/restRoom":"webp","locations/shrineRoom":"webp","locations/trapRoom":"webp","locations/treasureRoom":"webp","events/bossDoor":"webp","events/key":"webp","events/rest":"webp","events/roadSign":"webp","events/shrineDoor":"webp","events/trap1":"webp","events/trap2":"webp","events/treasureLocked":"webp","events/treasureMimic":"webp","events/treasureOpened":"webp","npcs/merchant":"png","npcs/scholar":"png","npcs/wanderer":"webp","enemies/brute":"webp","enemies/crawler":"webp","enemies/prowler":"webp","enemies/shade":"webp","bosses/guardian":"webp"},
   },
 ]

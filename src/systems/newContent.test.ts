@@ -4,7 +4,7 @@ import type { WorldPack } from '@/config/worldManifest'
 
 const pack = (id: string, complete = true): WorldPack => ({
   id, name: id, description: '', complete, missing: complete ? [] : ['events/rest.png'],
-  locations: [], optionalLocations: [], events: [], npcs: [], enemies: [], bosses: [],
+  locations: [], optionalLocations: [], events: [], npcs: [], enemies: [], bosses: [], ext: {},
 })
 
 describe('findNewContent', () => {

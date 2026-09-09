@@ -1,18 +1,18 @@
 /**
  * Local asset configuration.
  *
- * All game art is bundled as local PNG files under /public/assets — nothing
+ * All game art is bundled as local image files under /public/assets — nothing
  * is ever fetched from the network. Every lookup here falls back to a
  * neutral placeholder so the game stays fully playable before final art
  * exists.
  *
  * The catalogue is generated from the folder itself (assetManifest.ts, via
- * scripts/gen-asset-manifest.mjs) rather than hand-listed. Dropping a PNG
+ * scripts/gen-asset-manifest.mjs) rather than hand-listed. Dropping an image
  * into public/assets/<category>/ is all it takes to make it usable — there
  * is no second place to remember to update.
  */
 
-import { assetManifest } from './assetManifest'
+import { assetExt, assetManifest } from './assetManifest'
 
 export type AssetCategory = keyof typeof assetManifest
 
@@ -31,7 +31,7 @@ function inlinedAssets(): Record<string, string> | undefined {
 function assetUrl(category: string, file: string): string {
   // Vite serves /public at the app root; base: './' in vite.config.ts keeps
   // this working when the built app is opened directly from disk.
-  const path = `${BASE}/${category}/${file}.png`
+  const path = `${BASE}/${category}/${file}.${assetExt[`${category}/${file}`] ?? 'png'}`
   return inlinedAssets()?.[path] ?? path
 }
 
@@ -79,15 +79,27 @@ export function getAsset(category: AssetCategory, key?: string | null): string {
   return table[fallbackKey(category)]
 }
 
-/** Deterministically pick a "random" flavor asset for a category from an id string. */
-export function pickFlavor(category: AssetCategory, seed: string): string {
+/**
+ * Deterministically pick a "random" flavor asset key for a category from an
+ * id string.
+ *
+ * Callers that want to name the art rather than draw it want the key, not a
+ * path: a path cannot be turned back into a key in the single-file offline
+ * build, where it is a data URI with no filename in it.
+ */
+export function pickFlavorKey(category: AssetCategory, seed: string): string {
   const table = registry[category]
   const fallback = fallbackKey(category)
   const keys = Object.keys(table).filter((k) => k !== fallback)
-  if (keys.length === 0) return table[fallback]
+  if (keys.length === 0) return fallback
   let hash = 0
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
-  return table[keys[hash % keys.length]]
+  return keys[hash % keys.length]
+}
+
+/** The same pick, as a drawable path. */
+export function pickFlavor(category: AssetCategory, seed: string): string {
+  return registry[category][pickFlavorKey(category, seed)]
 }
 
 export const assetRegistry = registry

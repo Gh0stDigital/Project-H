@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { assetManifest } from './assetManifest'
+import { artIn } from '../../scripts/artFiles.mjs'
+import { assetExt, assetManifest } from './assetManifest'
 
 const ASSETS = join(process.cwd(), 'public', 'assets')
 
 function onDisk(category: string): string[] {
-  return readdirSync(join(ASSETS, category))
-    .filter((f) => f.toLowerCase().endsWith('.png'))
-    .map((f) => f.slice(0, -4))
+  return artIn(join(ASSETS, category))
+    .map((a) => a.slot)
     .sort()
 }
 
@@ -39,5 +39,15 @@ describe('the committed manifest matches the art on disk', () => {
   it('offers the totems that exist, including newly added ones', () => {
     // Named explicitly: totems are the category people add to most often.
     expect([...assetManifest.totems].sort()).toEqual(onDisk('totems'))
+  })
+
+  it('records the extension every key is actually stored as', () => {
+    // The URL is built from this, so a stale entry is a missing image —
+    // the failure mode the whole manifest exists to prevent.
+    for (const category of categories) {
+      for (const art of artIn(join(ASSETS, category))) {
+        expect(assetExt[`${category}/${art.slot}`]).toBe(art.ext)
+      }
+    }
   })
 })

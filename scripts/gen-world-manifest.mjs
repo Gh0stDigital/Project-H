@@ -18,20 +18,14 @@ import {
   REQUIRED_EVENTS,
   MIN_NPCS,
   MIN_ENEMIES,
+  WORLD_FOLDERS,
 } from './worldSlots.mjs'
+import { artIn, extTable } from './artFiles.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 export const WORLDS_DIR = join(ROOT, 'public', 'worlds')
 const OUT = join(ROOT, 'src', 'config', 'worldManifest.ts')
-
-function pngsIn(dir) {
-  if (!existsSync(dir)) return []
-  return readdirSync(dir)
-    .filter((f) => f.toLowerCase().endsWith('.png'))
-    .map((f) => f.slice(0, -4))
-    .sort()
-}
 
 /** Reads optional world.json, falling back to a title made from the id. */
 function metaFor(id, dir) {
@@ -56,18 +50,29 @@ function metaFor(id, dir) {
 
 function inspect(id) {
   const dir = join(WORLDS_DIR, id)
-  const locations = pngsIn(join(dir, 'locations'))
-  const events = pngsIn(join(dir, 'events'))
-  const npcs = pngsIn(join(dir, 'npcs'))
-  const enemies = pngsIn(join(dir, 'enemies'))
-  const bosses = pngsIn(join(dir, 'bosses'))
+  const art = Object.fromEntries(
+    WORLD_FOLDERS.map((folder) => [folder, artIn(join(dir, folder))]),
+  )
+  const slots = (folder) => art[folder].map((a) => a.slot)
+  const locations = slots('locations')
+  const events = slots('events')
+  const npcs = slots('npcs')
+  const enemies = slots('enemies')
+  const bosses = slots('bosses')
+
+  // What extension each slot's file actually uses, so the app can build a
+  // URL for it without guessing. Keyed the way the app asks: "folder/slot".
+  const ext = Object.assign(
+    {},
+    ...WORLD_FOLDERS.map((folder) => extTable(art[folder], `${folder}/`)),
+  )
 
   const missing = []
   for (const slot of REQUIRED_LOCATIONS) {
-    if (!locations.includes(slot)) missing.push(`locations/${slot}.png`)
+    if (!locations.includes(slot)) missing.push(`locations/${slot}`)
   }
   for (const slot of REQUIRED_EVENTS) {
-    if (!events.includes(slot)) missing.push(`events/${slot}.png`)
+    if (!events.includes(slot)) missing.push(`events/${slot}`)
   }
   if (npcs.length < MIN_NPCS) missing.push(`npcs/ needs ${MIN_NPCS}, has ${npcs.length}`)
   if (enemies.length < MIN_ENEMIES) missing.push(`enemies/ needs ${MIN_ENEMIES}, has ${enemies.length}`)
@@ -83,6 +88,7 @@ function inspect(id) {
     npcs,
     enemies,
     bosses,
+    ext,
   }
 }
 
@@ -109,6 +115,7 @@ function build() {
     npcs: ${lit(w.npcs)},
     enemies: ${lit(w.enemies)},
     bosses: ${lit(w.bosses)},
+    ext: ${lit(w.ext)},
   },`,
     )
     .join('\n')
@@ -131,6 +138,12 @@ export interface WorldPack {
   npcs: readonly string[]
   enemies: readonly string[]
   bosses: readonly string[]
+  /**
+   * The file extension behind each slot, keyed "folder/slot". Worlds shipped
+   * here are WebP; one dropped in as PNG and not yet optimized is PNG, and
+   * both play the same.
+   */
+  ext: Readonly<Record<string, string>>
 }
 
 export const requiredLocations = ${lit(REQUIRED_LOCATIONS)} as const
