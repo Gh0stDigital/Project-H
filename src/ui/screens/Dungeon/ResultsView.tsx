@@ -46,7 +46,7 @@ export function ResultsView() {
       <div className={`panel totem-outcome ${report.totemDestroyed ? 'destroyed' : ''}`}>
         <div className="row">
           <span>❤️ {report.totemHp}/{report.totemMaxHp}</span>
-          <span>◆ {report.lifePointsRemaining} Life</span>
+          <span>◆ 생명력 {report.lifePointsRemaining}</span>
           {report.totemLevelAfter > report.totemLevelBefore && (
             <span className="faint">Lv {report.totemLevelBefore} → {report.totemLevelAfter}</span>
           )}

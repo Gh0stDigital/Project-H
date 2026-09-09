@@ -27,7 +27,7 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
         <div className="status-hero-body">
           <h2>{totem.name}</h2>
           <p className="muted">
-            Level {totem.level} · ◆ {totem.lifePoints}/{totem.maxLifePoints} Life
+            레벨 {totem.level} · ◆ 생명력 {totem.lifePoints}/{totem.maxLifePoints}
           </p>
           <div className="hp-row">
             <span>❤️ {totem.currentHp}/{totem.maxHp}</span>

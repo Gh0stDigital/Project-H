@@ -49,7 +49,7 @@ export interface PersistedData {
 const persistence = new PersistenceService<PersistedData>(localStorageAdapter)
 
 function defaultData(): PersistedData {
-  const totem = createTotem('Totem')
+  const totem = createTotem('토템')
   return {
     spells: [],
     spellSets: [],

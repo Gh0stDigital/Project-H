@@ -91,7 +91,7 @@ export function TotemScreen() {
           </h2>
         )}
 
-        <p className="muted">Level {totem.level}</p>
+        <p className="muted">레벨 {totem.level}</p>
 
         <div className="life-points" title="생명력">
           {Array.from({ length: totem.maxLifePoints }, (_, i) => (
@@ -180,7 +180,7 @@ export function TotemScreen() {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t.name}</div>
                   <div className="faint">
-                    Lv {t.level} · {t.destroyed ? 'destroyed' : `❤️ ${t.currentHp}/${t.maxHp} · ◆ ${t.lifePoints}/${t.maxLifePoints}`}
+                    Lv {t.level} · {t.destroyed ? '파괴됨' : `❤️ ${t.currentHp}/${t.maxHp} · ◆ ${t.lifePoints}/${t.maxLifePoints}`}
                   </div>
                 </div>
                 {t.id === totem.id ? <span style={{ color: 'var(--accent-gold)' }}>✓ 사용 중</span> : null}

@@ -53,7 +53,7 @@ export function StandbyActions({
       <div className="room-actions">
         <button className="room-action primary" onClick={handleMove}>
           <span className="label">
-            Move{hasDestinations && <span className="room-action-caret">▾</span>}
+            이동{hasDestinations && <span className="room-action-caret">▾</span>}
           </span>
           <span className="sub">
             {hasDestinations ? '계속 나아가거나, 찾아 둔 곳으로 갑니다' : '던전 안으로 나아갑니다'}

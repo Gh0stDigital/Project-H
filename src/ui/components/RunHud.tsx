@@ -20,7 +20,7 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
     <div className="run-hud">
       <div className="run-hud-row">
         <span className="run-hud-mode">{modeLabel}</span>
-        <span className="run-hud-turn">Turn {run.turn}</span>
+        <span className="run-hud-turn">{run.turn}턴</span>
         <span className="run-hud-life" title="생명력">
           {'◆'.repeat(Math.max(0, totem.lifePoints))}
           <span className="faint">{'◇'.repeat(Math.max(0, totem.maxLifePoints - totem.lifePoints))}</span>
