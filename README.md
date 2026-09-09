@@ -138,8 +138,17 @@ public/worlds/<your-world-id>/
   bosses/               optional; without it the boss borrows an enemy
 ```
 
-Files are named exactly as above; `.png`, `.jpg` and `.webp` all work, and
-the extension is recorded rather than assumed. A world is **playable only
+Files are named as above, but neither the extension nor the capitalisation
+has to match: `.png`, `.jpg` and `.webp` all work, and `Key.png` fills the
+`key` slot. Art gets named by hand, and a capital letter is not worth a
+missing image. The real filename is recorded in the manifest, so a
+case-sensitive host still serves the right file. Two files claiming one slot
+(`key.png` beside `Key.webp`) is reported rather than silently resolved.
+
+Free-form folders are the exception: an npc or enemy filename *is* its name,
+so `Man-Eater.webp` stays `Man-Eater`.
+
+A world is **playable only
 when every required slot is present**; until then it is listed on the dungeon
 setup screen with precisely what it still needs, and the dev server prints the
 same list. That is deliberate — an unfinished world should read as work in

@@ -187,15 +187,13 @@ function drawPlaceholder({ bg, accent, shape }) {
 // so replacing a placeholder with real artwork is permanent.
 
 const globalManifest = {
+  // Only `default` — every lookup falls back to it, so it has to exist.
+  // Named totems are content, not slots: nothing in the game requires a
+  // particular one, and generating a fixed list meant a placeholder someone
+  // deleted came back on the next build.
   totems: {
     palette: { bg: '#1f2a3a', accent: '#5fa8e0' },
-    items: {
-      default: 'circle',
-      totem_ember: 'circle',
-      totem_tide: 'circle',
-      totem_stone: 'circle',
-      totem_silverKnight: 'circle',
-    },
+    items: { default: 'circle' },
   },
   spells: {
     palette: { bg: '#1a1a2e', accent: '#f2c14e' },

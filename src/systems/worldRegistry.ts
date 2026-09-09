@@ -64,7 +64,7 @@ export function worldAsset(world: WorldPack, folder: WorldFolder, slot: string):
             ? world.enemies
             : world.bosses
   if (!available.includes(slot)) return null
-  const path = `${WORLD_BASE}/${world.id}/${folder}/${slot}.${world.ext[`${folder}/${slot}`] ?? 'png'}`
+  const path = `${WORLD_BASE}/${world.id}/${folder}/${world.files[`${folder}/${slot}`] ?? `${slot}.png`}`
   return inlined()?.[path] ?? path
 }
 

@@ -12,7 +12,7 @@
  * is no second place to remember to update.
  */
 
-import { assetExt, assetManifest } from './assetManifest'
+import { assetFiles, assetManifest } from './assetManifest'
 
 export type AssetCategory = keyof typeof assetManifest
 
@@ -31,7 +31,7 @@ function inlinedAssets(): Record<string, string> | undefined {
 function assetUrl(category: string, file: string): string {
   // Vite serves /public at the app root; base: './' in vite.config.ts keeps
   // this working when the built app is opened directly from disk.
-  const path = `${BASE}/${category}/${file}.${assetExt[`${category}/${file}`] ?? 'png'}`
+  const path = `${BASE}/${category}/${assetFiles[`${category}/${file}`] ?? `${file}.png`}`
   return inlinedAssets()?.[path] ?? path
 }
 

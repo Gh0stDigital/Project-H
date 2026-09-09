@@ -17,7 +17,7 @@
 import { readdirSync, statSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { artIn, extTable } from './artFiles.mjs'
+import { artIn, fileTable } from './artFiles.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -32,12 +32,12 @@ function build() {
     .sort()
 
   const manifest = {}
-  const ext = {}
+  const files = {}
   const warnings = []
   let total = 0
 
   for (const category of categories) {
-    const art = artIn(join(ASSETS_DIR, category))
+    const art = artIn(join(ASSETS_DIR, category), ['default'])
       // 'default' first: it is every category's fallback, and listing it
       // first keeps it at the head of any picker built from this order.
       .sort((a, b) => (a.slot === 'default' ? -1 : b.slot === 'default' ? 1 : a.slot.localeCompare(b.slot)))
@@ -47,7 +47,7 @@ function build() {
       warnings.push(`${category}/ has no default image — lookups fall back to its first key.`)
     }
     manifest[category] = keys
-    Object.assign(ext, extTable(art, `${category}/`))
+    Object.assign(files, fileTable(art, `${category}/`))
     total += keys.length
   }
 
@@ -64,11 +64,11 @@ ${body}
 } as const
 
 /**
- * The file extension behind each key, keyed "category/key". Art is stored as
- * WebP once scripts/optimize-art.mjs has run and as whatever it arrived as
- * before that, so the extension is recorded rather than assumed.
+ * The filename behind each key, keyed "category/key". Art may be any
+ * supported format and any capitalisation, so the name is recorded rather
+ * than reconstructed from the key.
  */
-export const assetExt: Readonly<Record<string, string>> = ${JSON.stringify(ext, null, 2)}
+export const assetFiles: Readonly<Record<string, string>> = ${JSON.stringify(files, null, 2)}
 `
   return { manifest, source, total, categories: Object.keys(manifest), warnings }
 }

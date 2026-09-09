@@ -20,7 +20,7 @@ import {
   MIN_ENEMIES,
   WORLD_FOLDERS,
 } from './worldSlots.mjs'
-import { artIn, extTable } from './artFiles.mjs'
+import { artIn, fileTable } from './artFiles.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -50,8 +50,17 @@ function metaFor(id, dir) {
 
 function inspect(id) {
   const dir = join(WORLDS_DIR, id)
+  // Required slots are matched ignoring case; npcs and enemies are named by
+  // their filenames, so nothing is canonical there.
+  const canonical = {
+    locations: [...REQUIRED_LOCATIONS, ...OPTIONAL_LOCATIONS],
+    events: REQUIRED_EVENTS,
+  }
   const art = Object.fromEntries(
-    WORLD_FOLDERS.map((folder) => [folder, artIn(join(dir, folder))]),
+    WORLD_FOLDERS.map((folder) => [folder, artIn(join(dir, folder), canonical[folder] ?? [])]),
+  )
+  const collisions = WORLD_FOLDERS.flatMap((folder) =>
+    (art[folder].collisions ?? []).map((c) => ({ ...c, folder })),
   )
   const slots = (folder) => art[folder].map((a) => a.slot)
   const locations = slots('locations')
@@ -60,11 +69,12 @@ function inspect(id) {
   const enemies = slots('enemies')
   const bosses = slots('bosses')
 
-  // What extension each slot's file actually uses, so the app can build a
-  // URL for it without guessing. Keyed the way the app asks: "folder/slot".
-  const ext = Object.assign(
+  // The file behind each slot, so the app can build a URL for it without
+  // guessing at either the extension or the capitalisation. Keyed the way the
+  // app asks: "folder/slot".
+  const files = Object.assign(
     {},
-    ...WORLD_FOLDERS.map((folder) => extTable(art[folder], `${folder}/`)),
+    ...WORLD_FOLDERS.map((folder) => fileTable(art[folder], `${folder}/`)),
   )
 
   const missing = []
@@ -88,7 +98,8 @@ function inspect(id) {
     npcs,
     enemies,
     bosses,
-    ext,
+    files,
+    collisions,
   }
 }
 
@@ -115,7 +126,7 @@ function build() {
     npcs: ${lit(w.npcs)},
     enemies: ${lit(w.enemies)},
     bosses: ${lit(w.bosses)},
-    ext: ${lit(w.ext)},
+    files: ${lit(w.files)},
   },`,
     )
     .join('\n')
@@ -139,11 +150,11 @@ export interface WorldPack {
   enemies: readonly string[]
   bosses: readonly string[]
   /**
-   * The file extension behind each slot, keyed "folder/slot". Worlds shipped
-   * here are WebP; one dropped in as PNG and not yet optimized is PNG, and
-   * both play the same.
+   * The filename behind each slot, keyed "folder/slot". Slot names are fixed
+   * and lower-camel; the file may be any supported format and any
+   * capitalisation, so the name is recorded rather than reconstructed.
    */
-  ext: Readonly<Record<string, string>>
+  files: Readonly<Record<string, string>>
 }
 
 export const requiredLocations = ${lit(REQUIRED_LOCATIONS)} as const
@@ -172,6 +183,12 @@ export function generateWorldManifest() {
 if (process.argv[1] && process.argv[1].endsWith('gen-world-manifest.mjs')) {
   const { worlds, changed } = generateWorldManifest()
   for (const w of worlds) {
+    for (const c of w.collisions ?? []) {
+      console.warn(
+        `gen-world-manifest: ${w.id}/${c.folder} has two files for the "${c.slot}" slot — ` +
+          `using ${c.used}, ignoring ${c.ignored}.`,
+      )
+    }
     if (w.complete) {
       console.log(`gen-world-manifest: ${w.id} ✓ complete (${w.enemies.length} enemies, ${w.npcs.length} NPCs)`)
     } else {

@@ -4,26 +4,24 @@
 
 export const assetManifest = {
   spells: ['default', 'arcane', 'earth', 'fire', 'water', 'wind'],
-  totems: ['default', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'totem_ember', 'totem_silverKnight', 'totem_stone', 'totem_tide'],
+  totems: ['default', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'totem_silverKnight', 'totem_stone'],
 } as const
 
 /**
- * The file extension behind each key, keyed "category/key". Art is stored as
- * WebP once scripts/optimize-art.mjs has run and as whatever it arrived as
- * before that, so the extension is recorded rather than assumed.
+ * The filename behind each key, keyed "category/key". Art may be any
+ * supported format and any capitalisation, so the name is recorded rather
+ * than reconstructed from the key.
  */
-export const assetExt: Readonly<Record<string, string>> = {
-  "spells/default": "webp",
-  "spells/arcane": "webp",
-  "spells/earth": "webp",
-  "spells/fire": "webp",
-  "spells/water": "webp",
-  "spells/wind": "webp",
-  "totems/default": "webp",
-  "totems/Magic_Parasite_Zoah": "webp",
-  "totems/parasite_hunter_Yaharl": "webp",
-  "totems/totem_ember": "webp",
-  "totems/totem_silverKnight": "webp",
-  "totems/totem_stone": "webp",
-  "totems/totem_tide": "webp"
+export const assetFiles: Readonly<Record<string, string>> = {
+  "spells/default": "default.webp",
+  "spells/arcane": "arcane.webp",
+  "spells/earth": "earth.webp",
+  "spells/fire": "fire.webp",
+  "spells/water": "water.webp",
+  "spells/wind": "wind.webp",
+  "totems/default": "default.webp",
+  "totems/Magic_Parasite_Zoah": "Magic_Parasite_Zoah.webp",
+  "totems/parasite_hunter_Yaharl": "parasite_hunter_Yaharl.webp",
+  "totems/totem_silverKnight": "totem_silverKnight.webp",
+  "totems/totem_stone": "totem_stone.webp"
 }

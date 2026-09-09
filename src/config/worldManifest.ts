@@ -17,11 +17,11 @@ export interface WorldPack {
   enemies: readonly string[]
   bosses: readonly string[]
   /**
-   * The file extension behind each slot, keyed "folder/slot". Worlds shipped
-   * here are WebP; one dropped in as PNG and not yet optimized is PNG, and
-   * both play the same.
+   * The filename behind each slot, keyed "folder/slot". Slot names are fixed
+   * and lower-camel; the file may be any supported format and any
+   * capitalisation, so the name is recorded rather than reconstructed.
    */
-  ext: Readonly<Record<string, string>>
+  files: Readonly<Record<string, string>>
 }
 
 export const requiredLocations = ["entrance","corridor1","corridor2","keyRoom","restRoom","pathwayFork","shrineRoom","treasureRoom","trapRoom","bossRoom"] as const
@@ -42,7 +42,21 @@ export const worldPacks: readonly WorldPack[] = [
     npcs: ["hunter","merchant","pilgrim","scholar","wanderer"],
     enemies: ["goblin","slime","warden","wraith"],
     bosses: ["guardian"],
-    ext: {"locations/battle":"webp","locations/battle2":"webp","locations/bossRoom":"webp","locations/corridor1":"webp","locations/corridor2":"webp","locations/entrance":"webp","locations/keyRoom":"webp","locations/pathwayFork":"webp","locations/restRoom":"webp","locations/shrineRoom":"webp","locations/trapRoom":"webp","locations/treasureRoom":"webp","events/bossDoor":"webp","events/key":"webp","events/rest":"webp","events/roadSign":"webp","events/shrineDoor":"webp","events/trap1":"webp","events/trap2":"webp","events/treasureLocked":"webp","events/treasureMimic":"webp","events/treasureOpened":"webp","npcs/hunter":"png","npcs/merchant":"png","npcs/pilgrim":"webp","npcs/scholar":"webp","npcs/wanderer":"webp","enemies/goblin":"webp","enemies/slime":"webp","enemies/warden":"webp","enemies/wraith":"webp","bosses/guardian":"webp"},
+    files: {"locations/battle":"battle.webp","locations/battle2":"battle2.webp","locations/bossRoom":"bossRoom.webp","locations/corridor1":"corridor1.webp","locations/corridor2":"corridor2.webp","locations/entrance":"entrance.webp","locations/keyRoom":"keyRoom.webp","locations/pathwayFork":"pathwayFork.webp","locations/restRoom":"restRoom.webp","locations/shrineRoom":"shrineRoom.webp","locations/trapRoom":"trapRoom.webp","locations/treasureRoom":"treasureRoom.webp","events/bossDoor":"bossDoor.webp","events/key":"key.webp","events/rest":"rest.webp","events/roadSign":"roadSign.webp","events/shrineDoor":"shrineDoor.webp","events/trap1":"trap1.webp","events/trap2":"trap2.webp","events/treasureLocked":"treasureLocked.webp","events/treasureMimic":"treasureMimic.webp","events/treasureOpened":"treasureOpened.webp","npcs/hunter":"hunter.png","npcs/merchant":"merchant.png","npcs/pilgrim":"pilgrim.webp","npcs/scholar":"scholar.webp","npcs/wanderer":"wanderer.webp","enemies/goblin":"goblin.webp","enemies/slime":"slime.webp","enemies/warden":"warden.webp","enemies/wraith":"wraith.webp","bosses/guardian":"guardian.webp"},
+  },
+  {
+    id: "parasite-garden",
+    name: "용왕의 던전",
+    description: "물에 잠긴 회랑과 금빛 보고. 깊은 곳에서 무언가가 기다립니다.",
+    complete: true,
+    missing: [],
+    locations: ["battle1","battle2","bossRoom","corridor1","corridor2","corridor3","entrance","keyRoom","pathwayFork","restRoom","restRoom2","shrineRoom","trapRoom","treasureRoom"],
+    optionalLocations: ["battle2"],
+    events: ["bossDoor","key","rest","roadSign","shrineDoor","trap1","trap2","treasureLocked","treasureMimic","treasureOpened"],
+    npcs: ["hunter","merchant","pilgrim","scholar","wanderer"],
+    enemies: ["Armatick","Man-Eater","Pseudoroid","Scalatick Runt"],
+    bosses: ["Zoah Awakend"],
+    files: {"locations/battle1":"battle1.webp","locations/battle2":"battle2.webp","locations/bossRoom":"bossRoom.webp","locations/corridor1":"corridor1.webp","locations/corridor2":"corridor2.webp","locations/corridor3":"corridor3.webp","locations/entrance":"entrance.webp","locations/keyRoom":"keyRoom.webp","locations/pathwayFork":"pathwayFork.webp","locations/restRoom":"restRoom.webp","locations/restRoom2":"restRoom2.webp","locations/shrineRoom":"shrineRoom.webp","locations/trapRoom":"trapRoom.webp","locations/treasureRoom":"treasureRoom.webp","events/bossDoor":"bossDoor.webp","events/key":"Key.webp","events/rest":"rest.webp","events/roadSign":"roadSign.webp","events/shrineDoor":"shrineDoor.webp","events/trap1":"trap1.webp","events/trap2":"trap2.webp","events/treasureLocked":"treasureLocked.webp","events/treasureMimic":"treasureMimic.webp","events/treasureOpened":"treasureOpened.webp","npcs/hunter":"hunter.png","npcs/merchant":"merchant.png","npcs/pilgrim":"pilgrim.webp","npcs/scholar":"scholar.webp","npcs/wanderer":"wanderer.webp","enemies/Armatick":"Armatick.webp","enemies/Man-Eater":"Man-Eater.webp","enemies/Pseudoroid":"Pseudoroid.webp","enemies/Scalatick Runt":"Scalatick Runt.webp","bosses/Zoah Awakend":"Zoah Awakend.webp"},
   },
   {
     id: "starter",
@@ -56,6 +70,6 @@ export const worldPacks: readonly WorldPack[] = [
     npcs: ["merchant","scholar","wanderer"],
     enemies: ["brute","crawler","prowler","shade"],
     bosses: ["guardian"],
-    ext: {"locations/bossRoom":"webp","locations/corridor1":"webp","locations/corridor2":"webp","locations/entrance":"webp","locations/keyRoom":"webp","locations/pathwayFork":"webp","locations/restRoom":"webp","locations/shrineRoom":"webp","locations/trapRoom":"webp","locations/treasureRoom":"webp","events/bossDoor":"webp","events/key":"webp","events/rest":"webp","events/roadSign":"webp","events/shrineDoor":"webp","events/trap1":"webp","events/trap2":"webp","events/treasureLocked":"webp","events/treasureMimic":"webp","events/treasureOpened":"webp","npcs/merchant":"png","npcs/scholar":"png","npcs/wanderer":"webp","enemies/brute":"webp","enemies/crawler":"webp","enemies/prowler":"webp","enemies/shade":"webp","bosses/guardian":"webp"},
+    files: {"locations/bossRoom":"bossRoom.webp","locations/corridor1":"corridor1.webp","locations/corridor2":"corridor2.webp","locations/entrance":"entrance.webp","locations/keyRoom":"keyRoom.webp","locations/pathwayFork":"pathwayFork.webp","locations/restRoom":"restRoom.webp","locations/shrineRoom":"shrineRoom.webp","locations/trapRoom":"trapRoom.webp","locations/treasureRoom":"treasureRoom.webp","events/bossDoor":"bossDoor.webp","events/key":"key.webp","events/rest":"rest.webp","events/roadSign":"roadSign.webp","events/shrineDoor":"shrineDoor.webp","events/trap1":"trap1.webp","events/trap2":"trap2.webp","events/treasureLocked":"treasureLocked.webp","events/treasureMimic":"treasureMimic.webp","events/treasureOpened":"treasureOpened.webp","npcs/merchant":"merchant.png","npcs/scholar":"scholar.png","npcs/wanderer":"wanderer.webp","enemies/brute":"brute.webp","enemies/crawler":"crawler.webp","enemies/prowler":"prowler.webp","enemies/shade":"shade.webp","bosses/guardian":"guardian.webp"},
   },
 ]

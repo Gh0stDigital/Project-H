@@ -5,7 +5,14 @@
 // is PNG until it is optimized, while the worlds shipped here are WebP. The
 // slot name is the filename without its extension either way, so the format
 // an image happens to be stored in never reaches the game's vocabulary —
-// only these two functions know about extensions at all.
+// only this module knows about extensions at all.
+//
+// Case is not part of the vocabulary either. `Key.png` fills the `key` slot,
+// because art is named by hand and a capital letter is not worth a missing
+// image — the same rule config/assets.ts already applies to global art. The
+// slot is reported under its canonical spelling and the real filename is
+// carried alongside it, since a case-sensitive host serves `Key.png` and
+// `key.png` as different files.
 
 import { existsSync, readdirSync } from 'node:fs'
 import { extname, join } from 'node:path'
@@ -17,40 +24,64 @@ export function isArtFile(file) {
   return ART_EXTENSIONS.includes(extname(file).toLowerCase())
 }
 
+const fold = (name) => name.toLowerCase()
+
 /**
- * Every art file in a folder as `{ slot, ext }`, sorted by slot.
+ * Every art file in a folder as `{ slot, file, ext }`, sorted by slot.
  *
- * One slot cannot be two files: if both `key.png` and `key.webp` are present
- * — which happens mid-conversion — the ART_EXTENSIONS order decides, so the
- * optimized copy wins and the leftover original is ignored rather than
- * producing a duplicate slot.
+ * `canonical` names the slots this folder is supposed to fill; a file whose
+ * name matches one of them apart from case is reported under the canonical
+ * spelling. Folders whose filenames are the content — npcs, enemies — pass
+ * nothing and keep their names exactly as they are.
+ *
+ * One slot cannot be two files. If a folder holds both `key.png` and
+ * `Key.webp`, ART_EXTENSIONS order decides and the loser is returned in
+ * `collisions` so the generator can say so rather than silently dropping it.
  */
-export function artIn(dir) {
+export function artIn(dir, canonical = []) {
   if (!existsSync(dir)) return []
+  const canonicalBy = new Map(canonical.map((slot) => [fold(slot), slot]))
   const bySlot = new Map()
-  for (const file of readdirSync(dir)) {
+  const collisions = []
+
+  for (const file of readdirSync(dir).sort()) {
     if (!isArtFile(file)) continue
     const ext = extname(file).toLowerCase()
-    const slot = file.slice(0, -ext.length)
-    const rank = ART_EXTENSIONS.indexOf(ext)
+    const name = file.slice(0, -ext.length)
+    const slot = canonicalBy.get(fold(name)) ?? name
+    const entry = { slot, file, ext: ext.slice(1), rank: ART_EXTENSIONS.indexOf(ext) }
     const seen = bySlot.get(slot)
-    if (!seen || rank < seen.rank) bySlot.set(slot, { slot, ext: ext.slice(1), rank })
+    if (!seen) {
+      bySlot.set(slot, entry)
+    } else if (entry.rank < seen.rank) {
+      bySlot.set(slot, entry)
+      collisions.push({ slot, ignored: seen.file, used: entry.file })
+    } else {
+      collisions.push({ slot, ignored: entry.file, used: seen.file })
+    }
   }
-  return [...bySlot.values()]
-    .map(({ slot, ext }) => ({ slot, ext }))
+
+  const out = [...bySlot.values()]
+    .map(({ slot, file, ext }) => ({ slot, file, ext }))
     .sort((a, b) => a.slot.localeCompare(b.slot))
+  out.collisions = collisions
+  return out
 }
 
-/** Same, as a plain `{ slot: ext }` table for embedding in a manifest. */
-export function extTable(entries, prefix = '') {
-  return Object.fromEntries(entries.map(({ slot, ext }) => [`${prefix}${slot}`, ext]))
+/** A folder's art as a `{ "<prefix><slot>": filename }` table for a manifest. */
+export function fileTable(entries, prefix = '') {
+  return Object.fromEntries(entries.map(({ slot, file }) => [`${prefix}${slot}`, file]))
 }
 
-/** Path to a folder's art file for one slot, or null. */
+/** Path to a folder's art for one slot, ignoring case, or null. */
 export function artPath(dir, slot) {
+  if (!existsSync(dir)) return null
+  const want = fold(slot)
   for (const ext of ART_EXTENSIONS) {
-    const file = join(dir, slot + ext)
-    if (existsSync(file)) return file
+    for (const file of readdirSync(dir)) {
+      if (extname(file).toLowerCase() !== ext) continue
+      if (fold(file.slice(0, -ext.length)) === want) return join(dir, file)
+    }
   }
   return null
 }

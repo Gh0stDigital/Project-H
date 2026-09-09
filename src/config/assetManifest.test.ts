@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { artIn } from '../../scripts/artFiles.mjs'
-import { assetExt, assetManifest } from './assetManifest'
+import { assetFiles, assetManifest } from './assetManifest'
 
 const ASSETS = join(process.cwd(), 'public', 'assets')
 
@@ -41,12 +41,12 @@ describe('the committed manifest matches the art on disk', () => {
     expect([...assetManifest.totems].sort()).toEqual(onDisk('totems'))
   })
 
-  it('records the extension every key is actually stored as', () => {
+  it('records the file every key is actually stored as', () => {
     // The URL is built from this, so a stale entry is a missing image —
     // the failure mode the whole manifest exists to prevent.
     for (const category of categories) {
-      for (const art of artIn(join(ASSETS, category))) {
-        expect(assetExt[`${category}/${art.slot}`]).toBe(art.ext)
+      for (const art of artIn(join(ASSETS, category), ['default'])) {
+        expect(assetFiles[`${category}/${art.slot}`]).toBe(art.file)
       }
     }
   })
