@@ -10,7 +10,7 @@ export function TreasureChoice({ onAttempt, onLeave }: { onAttempt: () => void; 
   return (
     <>
       <button className="btn btn-primary btn-block" onClick={onAttempt}>
-        🔓 Attempt the lock
+        🔓 자물쇠를 열어 보기
       </button>
       <button className="btn btn-ghost btn-block" onClick={onLeave}>
         그냥 두기
@@ -33,7 +33,7 @@ export function DirectionChoices({
           <span className="direction-name">{c.label}</span>
           {/* Thematic clue only — never the raw weights. */}
           <span className="direction-flavor faint">{c.flavor}</span>
-          <span className="direction-duration faint">Lasts {c.durationMoves} moves</span>
+          <span className="direction-duration faint">{c.durationMoves}번 이동 동안 지속</span>
         </button>
       ))}
     </div>
@@ -60,7 +60,7 @@ export function BossDoorNotice({ keyFound, onContinue }: { keyFound: boolean; on
           : '열쇠 구멍이 비어 있습니다. 던전 열쇠가 필요합니다.'}
       </div>
       <button className="btn btn-primary btn-block" onClick={onContinue}>
-        Mark it and continue →
+        표시해 두고 계속 →
       </button>
     </>
   )
@@ -84,7 +84,7 @@ export function RewardSummary({ reward, onContinue }: { reward: RewardBundle; on
         </div>
       </div>
       <button className="btn btn-primary btn-block" onClick={onContinue}>
-        Continue →
+        계속 →
       </button>
     </>
   )

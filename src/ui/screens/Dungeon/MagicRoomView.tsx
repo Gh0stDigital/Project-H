@@ -38,7 +38,7 @@ export function MagicRoomView({ puzzle, onGuess, onFinish }: MagicRoomViewProps)
           {'♥'.repeat(remaining)}
           <span className="faint">{'♡'.repeat(puzzle.mistakes)}</span>
         </span>
-        <span className="faint">{remaining} mistake{remaining === 1 ? '' : 's'} left</span>
+        <span className="faint">기회 {remaining}번 남음</span>
       </div>
 
       {done ? (
@@ -73,7 +73,7 @@ export function MagicRoomView({ puzzle, onGuess, onFinish }: MagicRoomViewProps)
             })}
           </div>
           {misses.length > 0 && (
-            <p className="faint">Wrong so far: {misses.join(' · ')}</p>
+            <p className="faint">틀린 글자: {misses.join(' · ')}</p>
           )}
         </>
       )}

@@ -7,7 +7,7 @@ export function createSpellSet(sets: SpellSet[], name: string, spellIds: string[
   const now = new Date().toISOString()
   const set: SpellSet = {
     id: makeId('set'),
-    name: name.trim() || 'Untitled Set',
+    name: name.trim() || '제목 없는 세트',
     spellIds: [...new Set(spellIds)],
     createdAt: now,
     modifiedAt: now,

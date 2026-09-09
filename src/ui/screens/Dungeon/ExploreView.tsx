@@ -268,13 +268,13 @@ export function ExploreView() {
               <RewardSummary reward={run.pendingReward} onContinue={acknowledgeEvent} />
             ) : (
               <button className="btn btn-primary btn-block" onClick={acknowledgeEvent}>
-                Continue →
+                계속 →
               </button>
             ))}
 
           {stage === 'trap_result' && (
             <button className="btn btn-primary btn-block" onClick={acknowledgeEvent}>
-              Continue →
+              계속 →
             </button>
           )}
 
@@ -310,10 +310,10 @@ export function ExploreView() {
           <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
             <h2>보스의 문으로 들어갈까요?</h2>
             <p className="muted">
-              The key turns once. You cannot return to exploring this dungeon — the run ends in victory or defeat.
+              열쇠는 한 번만 돌아갑니다. 이 던전 탐험으로는 돌아올 수 없고, 승리 아니면 패배로 끝납니다.
             </p>
             <button className="btn btn-danger btn-block" onClick={enterBossDoor}>
-              ⚔️ Enter
+              ⚔️ 들어가기
             </button>
             <button className="btn btn-ghost btn-block" onClick={cancelEnterBossDoor}>
               아직 아님

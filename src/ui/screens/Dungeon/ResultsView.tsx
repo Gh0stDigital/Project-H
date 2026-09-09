@@ -38,7 +38,7 @@ export function ResultsView() {
         <span className="glyph">{glyph}</span>
         <h1>{report.title}</h1>
         <p className="muted">
-          {report.turns} turn{report.turns === 1 ? '' : 's'} · {pct(report.totalAccuracy)} accuracy
+          {report.turns}턴 · 정확도 {pct(report.totalAccuracy)}
         </p>
       </div>
 
@@ -76,7 +76,7 @@ export function ResultsView() {
           <Accuracy label="방어" value={report.defenseAccuracy} />
         </div>
         <div className="faint" style={{ textAlign: 'center' }}>
-          {report.totalCorrect} correct · {report.totalIncorrect} wrong
+          정답 {report.totalCorrect} · 오답 {report.totalIncorrect}
         </div>
       </div>
 

@@ -292,12 +292,12 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
     // silently defaulting, since it decides the entry's Element.
     let message: string | undefined
     if (rawType.trim() && !wordType) {
-      message = `Unknown word type "${rawType}" — defaulting. Fix it after importing.`
+      message = `알 수 없는 품사 "${rawType}" — 기본값으로 넣습니다. 가져온 뒤 고치세요.`
     }
 
     const key = korean.toLowerCase()
     if (existingKorean.has(key) || seenInBatch.has(key)) {
-      rows.push({ ...base, status: 'duplicate', message: 'Already in your Compendium — will be skipped.' })
+      rows.push({ ...base, status: 'duplicate', message: '이미 도감에 있습니다 — 건너뜁니다.' })
       return
     }
 

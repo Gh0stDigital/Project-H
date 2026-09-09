@@ -86,7 +86,7 @@ export function BattleView() {
         <span className="faint">{battle.isBoss ? '⚔️ 보스 전투' : `⚔️ ${battle.enemy.name}`}</span>
         {!answering && (
           <button className="btn btn-ghost btn-sm" onClick={toggleWordInfo}>
-            ℹ️ Words
+            ℹ️ 단어
           </button>
         )}
       </div>
@@ -124,15 +124,15 @@ export function BattleView() {
 
       {barrierUp && (
         <div className="plateau-banner">
-          🛡️ Barrier active — {barrierLeft} of {barrierTotal} word{barrierTotal === 1 ? '' : 's'} left. Use each word
-          correctly (attacking or defending) to break it.
+          🛡️ 방벽 발동 — 단어 {barrierTotal}개 중 {barrierLeft}개 남음. 각 단어를 공격이나 방어에서
+          정확히 사용해야 방벽이 깨집니다.
         </div>
       )}
 
       {/* Multi-prompt attacks show which word of the volley you're on. */}
       {battle.phase === 'enemy_challenge' && battle.defense && battle.defense.challenges.length > 1 && (
         <div className="defense-progress">
-          Word {battle.defense.index + 1} of {battle.defense.challenges.length}
+          단어 {battle.defense.challenges.length}개 중 {battle.defense.index + 1}번째
           <span className="defense-dots">
             {battle.defense.challenges.map((c, i) => (
               <span
@@ -164,7 +164,7 @@ export function BattleView() {
       {battle.phase === 'player_select' && (
         <>
           <p className="muted" style={{ textAlign: 'center' }}>
-            Choose a Spellword to attack with:
+            공격에 사용할 주문 단어를 고르세요
           </p>
           <div className="hand-scroll">
             {handSpells.map((spell) => {
@@ -212,7 +212,7 @@ export function BattleView() {
         <>
           <div className={`feedback-banner ${battle.lastResult ?? ''}`}>{lastLog}</div>
           <button className="btn btn-primary btn-block" onClick={continueAfterPlayerResolve}>
-            Continue →
+            계속 →
           </button>
         </>
       )}
@@ -221,7 +221,7 @@ export function BattleView() {
         <>
           <div className={`feedback-banner ${battle.lastResult ?? ''}`}>{lastLog}</div>
           <button className="btn btn-primary btn-block" onClick={continueAfterEnemyResolve}>
-            Continue →
+            계속 →
           </button>
         </>
       )}
@@ -229,10 +229,10 @@ export function BattleView() {
       {battle.phase === 'victory' && (
         <>
           <div className="feedback-banner correct">
-            🎉 {battle.enemy.name} is defeated!
+            🎉 {battle.enemy.name}을(를) 물리쳤습니다!
           </div>
           <button className="btn btn-primary btn-block" onClick={continueAfterVictory}>
-            Continue →
+            계속 →
           </button>
         </>
       )}

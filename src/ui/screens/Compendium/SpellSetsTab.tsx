@@ -20,7 +20,7 @@ export function SpellSetsTab() {
   return (
     <div className="list">
       <button className="btn btn-primary btn-block" onClick={() => setEditing('new')}>
-        + New Spell Set
+        + 새 주문 세트
       </button>
 
       {spellSets.length === 0 && (
@@ -34,7 +34,7 @@ export function SpellSetsTab() {
         <button key={set.id} className="card row" onClick={() => setEditing(set)} style={{ width: '100%', textAlign: 'left' }}>
           <div>
             <div style={{ fontWeight: 700 }}>{set.name}</div>
-            <div className="faint">{set.spellIds.length} Spells</div>
+            <div className="faint">주문 {set.spellIds.length}개</div>
           </div>
           <span className="faint">편집 →</span>
         </button>

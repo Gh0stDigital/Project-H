@@ -42,8 +42,8 @@ export interface SpellValidationError {
  */
 export function validateNewSpell(input: SpellContentInput): SpellValidationError[] {
   const errors: SpellValidationError[] = []
-  if (!input.korean.trim()) errors.push({ field: 'korean', message: 'Korean word is required.' })
-  if (!input.english.trim()) errors.push({ field: 'english', message: 'Definition 1 is required.' })
+  if (!input.korean.trim()) errors.push({ field: 'korean', message: '한국어 단어를 입력하세요.' })
+  if (!input.english.trim()) errors.push({ field: 'english', message: '뜻 1을 입력하세요.' })
   return errors
 }
 

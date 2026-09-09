@@ -25,7 +25,7 @@ function downloadTextFile(filename: string, content: string, mime: string) {
 const PLACEHOLDER = `안녕하세요, hello
 감사합니다, thank you
 사랑	love (noun)
-# lines starting with # are ignored`
+# 이렇게 #으로 시작하는 줄은 무시됩니다`
 
 interface SpellImportPanelProps {
   onDone: () => void
@@ -64,7 +64,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
     if (result.ok.length === 0) return
     const created = bulkCreateSpells(importRowsToInputs(result.ok))
     if (makeSet && created.length > 0) {
-      const name = setName.trim() || `Imported Set (${created.length})`
+      const name = setName.trim() || `가져온 세트 (${created.length})`
       createSpellSet(name, created.map((s) => s.id))
     }
     setImported(created.length)
@@ -100,10 +100,10 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           placeholder={PLACEHOLDER}
         />
         <p className="faint">
-          Quick form: one word per line, Korean first then the definition — comma, tab or pipe separated. Pasting
-          straight from a spreadsheet works too. Add a header row (word, word type, definition 1, definition 2,
-          sample sentence, present, past, future…) to fill in the full entry; columns can be in any order. Element is
-          worked out from the Word Type, so an Element column is ignored.
+          간단한 형식: 한 줄에 단어 하나, 한국어를 먼저 쓰고 뜻을 씁니다 — 쉼표, 탭, 세로줄로 구분합니다.
+          스프레드시트에서 그대로 붙여 넣어도 됩니다. 머리글 행(단어, 품사, 뜻 1, 뜻 2, 예문, 현재형, 과거형,
+          미래형…)을 넣으면 전체 항목을 채울 수 있고, 열 순서는 상관없습니다. 속성은 품사에서 정해지므로
+          속성 열은 무시됩니다.
         </p>
       </div>
 
@@ -112,27 +112,27 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           className="btn btn-ghost btn-sm"
           onClick={() => downloadTextFile('thoth-vocab-template.csv', IMPORT_TEMPLATE_CSV, 'text/csv')}
         >
-          ⬇️ Full Template
+          ⬇️ 전체 서식
         </button>
         <button className="btn btn-ghost btn-sm" onClick={() => setText(IMPORT_TEMPLATE_CSV)}>
-          👁️ Preview
+          👁️ 미리 보기
         </button>
       </div>
       <div className="btn-row">
         <button className="btn btn-ghost btn-sm" onClick={() => setText(IMPORT_TEMPLATE_SIMPLE_CSV)}>
-          ✏️ Simple Form
+          ✏️ 간단한 형식
         </button>
         <button
           className="btn btn-ghost btn-sm"
           disabled={spells.length === 0}
           onClick={() => downloadTextFile('thoth-vocab-export.csv', exportSpellsToCsv(spells), 'text/csv')}
         >
-          ⬆️ Export My Words
+          ⬆️ 내 단어 내보내기
         </button>
       </div>
       <div className="btn-row">
         <button className="btn btn-ghost btn-sm" onClick={() => fileInputRef.current?.click()}>
-          📄 Load .txt / .csv file
+          📄 .txt / .csv 파일 열기
         </button>
         {hasContent && (
           <button className="btn btn-ghost btn-sm" onClick={() => setText('')}>
@@ -145,11 +145,11 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
       {hasContent && (
         <>
           <div className="import-summary">
-            <span className="import-count ok">✓ {result.ok.length} ready</span>
+            <span className="import-count ok">✓ 준비됨 {result.ok.length}</span>
             {result.duplicates.length > 0 && (
-              <span className="import-count duplicate">⚠ {result.duplicates.length} duplicate</span>
+              <span className="import-count duplicate">⚠ 중복 {result.duplicates.length}</span>
             )}
-            {result.errors.length > 0 && <span className="import-count error">✕ {result.errors.length} error</span>}
+            {result.errors.length > 0 && <span className="import-count error">✕ 오류 {result.errors.length}</span>}
           </div>
 
           <div className="import-preview">
@@ -190,7 +190,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
                 type="text"
                 value={setName}
                 onChange={(e) => setSetName(e.target.value)}
-                placeholder={`Imported Set (${result.ok.length})`}
+                placeholder={`가져온 세트 (${result.ok.length})`}
               />
             )}
           </div>
@@ -199,7 +199,7 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
 
       <div className="btn-row">
         <button className="btn btn-primary btn-block" onClick={handleImport} disabled={result.ok.length === 0}>
-          Import {result.ok.length > 0 ? result.ok.length : ''} Word{result.ok.length === 1 ? '' : 's'}
+          {result.ok.length > 0 ? `단어 ${result.ok.length}개 가져오기` : '가져오기'}
         </button>
       </div>
       <button className="btn btn-ghost btn-block" onClick={onCancel}>

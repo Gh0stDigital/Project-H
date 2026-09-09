@@ -51,6 +51,18 @@ export const maxRepeatEventStreak = 2
  */
 export const onceOnlyEvents: DungeonEventType[] = ['boss_door', 'key_room']
 
+/** What each event type is called on screen. */
+export const eventTypeLabels: Record<DungeonEventType, string> = {
+  treasure: '보물',
+  trap: '함정',
+  magic_room: '마법실',
+  rest: '휴식',
+  battle: '전투',
+  direction: '갈림길',
+  boss_door: '보스의 문',
+  key_room: '열쇠의 방',
+}
+
 // ---------------------------------------------------------------------------
 // Direction modifiers
 // ---------------------------------------------------------------------------

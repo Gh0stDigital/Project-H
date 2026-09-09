@@ -344,7 +344,7 @@ export function resolveDefensePrompt(
     resolution.correct
       ? `"${challenge.prompt}"을(를) 제때 떠올렸습니다.`
       : timedOut
-        ? `Too slow! "${challenge.prompt}" goes unanswered.`
+        ? `너무 늦었습니다! "${challenge.prompt}"에 답하지 못했습니다.`
         : `"${challenge.prompt}"의 뜻이 틀렸습니다.`,
   ]
 

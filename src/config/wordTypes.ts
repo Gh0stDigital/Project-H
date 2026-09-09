@@ -57,7 +57,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   noun: {
     id: 'noun',
     label: '명사',
-    shortLabel: 'Noun',
+    shortLabel: '명사',
     element: 'earth',
     conjugates: false,
     allowsDerivedVerb: true,
@@ -67,7 +67,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   action_verb: {
     id: 'action_verb',
     label: '동사',
-    shortLabel: 'Action',
+    shortLabel: '동사',
     element: 'fire',
     conjugates: true,
     allowsDerivedVerb: false,
@@ -77,7 +77,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   descriptive_verb: {
     id: 'descriptive_verb',
     label: '형용사',
-    shortLabel: 'Descriptive',
+    shortLabel: '형용사',
     element: 'water',
     conjugates: true,
     allowsDerivedVerb: false,
@@ -87,7 +87,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   adverb: {
     id: 'adverb',
     label: '부사',
-    shortLabel: 'Adverb',
+    shortLabel: '부사',
     element: 'wind',
     conjugates: false,
     allowsDerivedVerb: false,
@@ -97,7 +97,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   expression: {
     id: 'expression',
     label: '표현 / 관용구',
-    shortLabel: 'Phrase',
+    shortLabel: '관용구',
     element: 'lightning',
     conjugates: false,
     allowsDerivedVerb: true,
@@ -107,7 +107,7 @@ export const wordTypeDefs: Record<WordType, WordTypeDef> = {
   grammar: {
     id: 'grammar',
     label: '문법 / 조사',
-    shortLabel: 'Grammar',
+    shortLabel: '문법',
     element: 'metal',
     conjugates: false,
     allowsDerivedVerb: false,

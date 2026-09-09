@@ -1,6 +1,6 @@
 import type { ActiveModifier, DirectionChoice } from '@/domain/dungeon'
 import type { DungeonEventType } from '@/config/dungeonEvents'
-import { directionBalance } from '@/config/dungeonEvents'
+import { directionBalance, eventTypeLabels } from '@/config/dungeonEvents'
 
 /**
  * Temporary Direction biases on event generation.
@@ -56,11 +56,10 @@ export function applyModifiers(
   return out
 }
 
-/** Short "Treasure ×2 · 3 moves left"-style summary for the HUD. */
+/** Short "↑ 보물 · ↓ 함정"-style summary for the HUD. */
 export function describeModifier(mod: ActiveModifier): string {
   const parts = (Object.entries(mod.weightDeltas) as [DungeonEventType, number][]).map(([type, delta]) => {
-    const name = type.replace('_', ' ')
-    return `${delta > 0 ? '↑' : '↓'} ${name}`
+    return `${delta > 0 ? '↑' : '↓'} ${eventTypeLabels[type]}`
   })
   return parts.join(' · ')
 }

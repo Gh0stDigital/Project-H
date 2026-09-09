@@ -10,14 +10,14 @@ export function ProgressMeter({ challenged, total, bossUnlocked, onOpenWordInfo 
   return (
     <div className="progress-meter">
       <span>
-        Words seen: <b>{challenged}/{total}</b>
+        접한 단어 <b>{challenged}/{total}</b>
       </span>
       <span className={`boss-status ${bossUnlocked ? 'open' : 'locked'}`}>
         {bossUnlocked ? '🗝️ 열쇠 있음' : '🔒 열쇠 없음'}
       </span>
       {onOpenWordInfo && (
         <button className="btn btn-ghost btn-sm" onClick={onOpenWordInfo}>
-          ℹ️ Words
+          ℹ️ 단어
         </button>
       )}
     </div>

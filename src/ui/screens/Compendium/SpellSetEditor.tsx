@@ -43,10 +43,10 @@ export function SpellSetEditor({ existing, onDone, onCancel }: SpellSetEditorPro
     <div className="list">
       <div className="field">
         <label htmlFor="set-name">세트 이름</label>
-        <input id="set-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Chapter 1 Verbs" />
+        <input id="set-name" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 1과 동사" />
       </div>
 
-      <h3>Spells in this set ({selected.size})</h3>
+      <h3>이 세트의 주문 ({selected.size})</h3>
       {spells.length === 0 && <p className="faint">먼저 주문 단어를 만든 뒤 여기에서 세트에 추가하세요.</p>}
       <div className="list">
         {spells.map((s) => (

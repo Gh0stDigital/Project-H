@@ -11,7 +11,7 @@ export function TopBar({ title, onBack, right }: TopBarProps) {
     <div className="top-bar">
       {onBack && (
         <button className="btn btn-ghost btn-sm" onClick={onBack}>
-          ← Back
+          ← 뒤로
         </button>
       )}
       <h1>{title}</h1>

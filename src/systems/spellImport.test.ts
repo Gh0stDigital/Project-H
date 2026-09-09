@@ -97,7 +97,9 @@ describe('structured import', () => {
     const bad = ['word,word type,definition 1', '학교,Wizard,school'].join('\n')
     const row = parseImportText(bad, NONE).ok[0]
     expect(row.status).toBe('ok')
-    expect(row.message).toMatch(/unknown word type/i)
+    // Names the type it did not recognise, so the fix is obvious after import.
+    expect(row.message).toMatch(/알 수 없는 품사/)
+    expect(row.message).toContain('Wizard')
     expect(row.input.wordType).toBeUndefined()
   })
 

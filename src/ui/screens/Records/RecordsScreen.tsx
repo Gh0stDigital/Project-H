@@ -95,7 +95,7 @@ export function RecordsScreen() {
               </div>
               <div>
                 <b>{spell.experience}</b>
-                XP
+                경험치
               </div>
               <div>
                 <b>{spell.correctAnswers}</b>
@@ -124,7 +124,7 @@ export function RecordsScreen() {
             </div>
 
             <p className="faint">
-              Last practiced: {spell.lastPracticedAt ? new Date(spell.lastPracticedAt).toLocaleDateString() : 'never'}
+              마지막 연습: {spell.lastPracticedAt ? new Date(spell.lastPracticedAt).toLocaleDateString() : '없음'}
             </p>
           </div>
         ))}

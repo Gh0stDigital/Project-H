@@ -106,13 +106,13 @@ export function TotemScreen() {
 
         {totem.destroyed && (
           <div className="feedback-banner incorrect">
-            💀 This Totem has been destroyed and can no longer enter a dungeon.
+            💀 이 토템은 파괴되어 더 이상 던전에 들어갈 수 없습니다.
           </div>
         )}
 
         <div style={{ margin: '6px 0' }}>
           <Bar value={totem.experience} max={xpNeeded} kind="xp" />
-          <p className="faint">{totem.experience}/{xpNeeded} XP to next level</p>
+          <p className="faint">다음 레벨까지 경험치 {totem.experience}/{xpNeeded}</p>
         </div>
 
         <div className="row" style={{ marginTop: 10 }}>
@@ -147,7 +147,7 @@ export function TotemScreen() {
         <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setRosterOpen(true)}>
           <div>
             <div style={{ fontWeight: 700 }}>
-              {totems.length} raised{usable.length < totems.length ? ` · ${usable.length} still standing` : ''}
+              {totems.length} raised{usable.length < totems.length ? ` · ${usable.length}기 살아 있음` : ''}
             </div>
             <div className="faint">다른 토템으로 바꾸거나, 새로 기릅니다</div>
           </div>
@@ -214,8 +214,8 @@ export function TotemScreen() {
       {avatarPickerOpen && (
         <SlidePanel title="초상화 고르기" onClose={() => setAvatarPickerOpen(false)}>
           <p className="faint">
-            Every portrait in <code>public/assets/totems</code>. Purely cosmetic — nothing else about the Totem
-            changes.
+            <code>public/assets/totems</code>에 있는 모든 초상화입니다. 겉모습만 바뀌고 토템의 다른 것은
+            그대로입니다.
           </p>
           <div className="avatar-grid">
             {assetKeys('totems').map((key) => (
@@ -261,7 +261,7 @@ export function TotemScreen() {
               >
                 <div>
                   <div style={{ fontWeight: 700 }}>{set.name}</div>
-                  <div className="faint">{set.spellIds.length} Spells</div>
+                  <div className="faint">주문 {set.spellIds.length}개</div>
                 </div>
                 {set.id === totem.equippedSpellSetId ? (
                   <span style={{ color: 'var(--accent-gold)' }}>✓ 장착됨</span>

@@ -470,7 +470,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
       money: treasureBalance.magicRoomMoney,
       totemXp: treasureBalance.magicRoomTotemXp,
       itemIds: [],
-      lines: [`💰 ${treasureBalance.magicRoomMoney}`, `✨ ${treasureBalance.magicRoomTotemXp} Totem XP`],
+      lines: [`💰 ${treasureBalance.magicRoomMoney}`, `✨ 토템 경험치 ${treasureBalance.magicRoomTotemXp}`],
     }
     reward = addItemDrop(reward, treasureBalance.magicRoomItemChance)
     creditReward(run.config.totemId, reward)
@@ -665,7 +665,7 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
         money: rewardBalance.bossMoneyReward,
         totemXp: totemBalance.xpPerBossWin,
         itemIds: [],
-        lines: [`💰 ${rewardBalance.bossMoneyReward}`, `✨ ${totemBalance.xpPerBossWin} Totem XP`],
+        lines: [`💰 ${rewardBalance.bossMoneyReward}`, `✨ 토템 경험치 ${totemBalance.xpPerBossWin}`],
       }
       for (let i = 0; i < itemBalance.bossDropCount; i++) reward = addItemDrop(reward, 1)
       creditReward(totemId, reward)
@@ -690,14 +690,14 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
       money,
       totemXp: xp,
       itemIds: [],
-      lines: [`💰 ${money}`, `✨ ${xp} Totem XP`],
+      lines: [`💰 ${money}`, `✨ 토템 경험치 ${xp}`],
     }
     reward = addItemDrop(reward, battleBalance.enemyItemDropChance)
     if (wasMimic && Math.random() < mimicBalance.exclusiveDropChance) {
       reward = {
         ...reward,
         money: reward.money + mimicBalance.exclusiveDropMoney,
-        lines: [...reward.lines, `🎁 Mimic hoard: 💰 ${mimicBalance.exclusiveDropMoney}`],
+        lines: [...reward.lines, `🎁 미믹의 보물: 💰 ${mimicBalance.exclusiveDropMoney}`],
       }
     }
     creditReward(totemId, reward)

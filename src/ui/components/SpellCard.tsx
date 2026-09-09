@@ -53,7 +53,7 @@ export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onC
       )}
       <div className="meta">
         <span title={element.label}>{element.icon} Lv {spell.level}</span>
-        <span>{damageForSpell(spell)} dmg</span>
+        <span>피해 {damageForSpell(spell)}</span>
       </div>
       <Bar value={spell.charge} max={spell.maxCharge} kind="charge" thin />
     </div>

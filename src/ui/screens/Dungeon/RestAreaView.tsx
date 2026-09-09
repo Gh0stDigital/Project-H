@@ -57,7 +57,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
         <span>
           ❤️ {totem.currentHp}/{totem.maxHp}
         </span>
-        <span className="faint">Rested {usesSoFar}×</span>
+        <span className="faint">{usesSoFar}번 휴식함</span>
       </div>
 
       {quote.blockedReason === 'full_hp' && <p className="faint">이미 체력이 가득합니다.</p>}
@@ -78,7 +78,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
       {npcs.length > 0 && (
         <div className="npc-section">
           <div className="npc-heading">
-            Others here <span className="faint">· {npcs.filter((n) => !n.spoken).length} to speak to</span>
+            이곳의 사람들 <span className="faint">· {npcs.filter((n) => !n.spoken).length}명과 대화 가능</span>
           </div>
 
           <div className="npc-row">

@@ -124,7 +124,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           spellCheck
           value={english}
           onChange={(e) => setEnglish(e.target.value)}
-          placeholder="e.g. to deliver"
+          placeholder="예: to deliver"
         />
         {errors.english && <span className="field-error">{errors.english}</span>}
       </div>
@@ -138,7 +138,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           spellCheck
           value={definition2}
           onChange={(e) => setDefinition2(e.target.value)}
-          placeholder="e.g. to convey"
+          placeholder="예: to convey"
         />
       </div>
 
@@ -151,7 +151,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           spellCheck
           value={definition3}
           onChange={(e) => setDefinition3(e.target.value)}
-          placeholder="e.g. to pass along"
+          placeholder="예: to pass along"
         />
         <span className="faint">입력된 뜻은 무엇이든 정답으로 인정됩니다.</span>
       </div>
@@ -178,7 +178,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           spellCheck
           value={sampleTranslation}
           onChange={(e) => setSampleTranslation(e.target.value)}
-          placeholder="e.g. I passed the information along."
+          placeholder="예: I passed the information along."
         />
       </div>
 

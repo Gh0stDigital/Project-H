@@ -59,7 +59,7 @@ export function DungeonConfigScreen() {
         <div className="empty-state">
           <span className="glyph">🗿</span>
           <p>
-            No Totem can enter a dungeon right now. Raise a new one from the Totem screen.
+            지금 던전에 들어갈 수 있는 토템이 없습니다. 토템 화면에서 새로 기르세요.
           </p>
         </div>
       )}
@@ -198,7 +198,7 @@ export function DungeonConfigScreen() {
               </div>
               <div className="stat-tile">
                 <div className="faint">보스 해금</div>
-                <div className="value">~{tier.minEventsBeforeBossEligible} evts</div>
+                <div className="value">~{tier.minEventsBeforeBossEligible}개 사건</div>
               </div>
               <div className="stat-tile">
                 <div className="faint">적 피해</div>
@@ -207,7 +207,7 @@ export function DungeonConfigScreen() {
             </div>
             {dungeonSet && (
               <p className="faint">
-                Pool: {Math.min(dungeonSet.spellIds.length, tier.wordLimit)} of {dungeonSet.spellIds.length} words used.
+                단어 {dungeonSet.spellIds.length}개 중 {Math.min(dungeonSet.spellIds.length, tier.wordLimit)}개를 사용합니다.
               </p>
             )}
           </div>

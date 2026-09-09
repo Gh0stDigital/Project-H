@@ -39,10 +39,10 @@ export function SpellListTab() {
     <div className="list">
       <div className="btn-row">
         <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => setEditing('new')}>
-          + New Spell Word
+          + 새 주문 단어
         </button>
         <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setEditing('import')}>
-          📥 Batch Import
+          📥 일괄 가져오기
         </button>
       </div>
 
@@ -88,7 +88,7 @@ export function SpellListTab() {
             <button
               className="btn btn-ghost btn-sm"
               onClick={() => {
-                if (confirm(`Delete "${spell.korean}"? This cannot be undone.`)) deleteSpell(spell.id)
+                if (confirm(`"${spell.korean}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)) deleteSpell(spell.id)
               }}
             >
               🗑️
