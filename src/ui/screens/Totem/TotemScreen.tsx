@@ -53,7 +53,10 @@ export function TotemScreen() {
   const xpNeeded = totemBalance.xpToNextLevel(totem.level)
 
   return (
-    <div className="screen">
+    // Scrolls: the portrait grows with the screen, and this is a screen you
+    // read rather than play. Nothing below it may end up out of reach the
+    // way the dungeon setup screen's start button once did.
+    <div className="screen screen-scroll">
       <TopBar title="토템" onBack={() => goTo('menu')} />
 
       <div className="panel" style={{ textAlign: 'center' }}>

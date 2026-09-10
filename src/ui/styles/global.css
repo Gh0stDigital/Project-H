@@ -803,9 +803,25 @@ select:focus {
    using object-fit: contain (not the shared .avatar-img cover) so the
    whole character is always visible, never cropped at the edges. */
 .totem-hero-frame {
-  width: 62%;
-  max-width: 220px;
+  /* A centring box, not a size. The portrait sizes itself inside it — see
+     the caps below — so the frame ends up the shape of the character rather
+     than a square with the character adrift in it. */
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
   margin: 0 auto 12px;
+}
+
+.totem-hero-frame .avatar-img {
+  aspect-ratio: auto;
+  width: auto;
+  height: auto;
+  /* Whichever cap it reaches first decides. The height cap is in dvh so a
+     short phone keeps roughly the portrait it already had, while a tall one
+     gives the character the room it deserves. */
+  max-width: min(68%, 260px);
+  max-height: clamp(186px, 29dvh, 292px);
 }
 
 .avatar-hero {
