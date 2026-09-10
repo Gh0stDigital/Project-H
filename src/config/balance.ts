@@ -134,7 +134,7 @@ export const dungeonTiers: DungeonTierDef[] = [
     id: 'tier50',
     name: '심연의 보고',
     label: '50단어 던전',
-    description: 'The deep end — a full vocabulary gauntlet for the well-prepared.',
+    description: '가장 깊은 곳 — 충분히 준비한 사람을 위한 어휘의 시험대입니다.',
     wordLimit: 50,
     minEventsBeforeBossEligible: 20,
     enemyDamageMultiplier: 1.6,

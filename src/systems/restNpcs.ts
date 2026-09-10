@@ -33,8 +33,8 @@ export interface NpcGift {
 }
 
 const NAMES = [
-  'Hana', 'Jisoo', 'Minho', 'Yuna', 'Daeun', 'Sora',
-  'Taeyang', 'Bomi', 'Kyung', 'Nari', 'Seojun', 'Eunbi',
+  '하나', '지수', '민호', '유나', '다은', '소라',
+  '태양', '보미', '경', '나리', '서준', '은비',
 ]
 
 /** Said when the player has no sample sentences to draw on yet. */

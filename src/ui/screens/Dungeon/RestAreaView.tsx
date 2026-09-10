@@ -71,7 +71,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
           disabled={quote.blockedReason !== null}
           onClick={onRest}
         >
-          Rest — 💰 {quote.price}
+          휴식 — 💰 {quote.price}
         </button>
       </div>
 
@@ -107,7 +107,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
               {speaking.translation && <p className="npc-translation faint">{speaking.translation}</p>}
               <div className="npc-gift">
                 {said && (said.reward.money > 0 || said.reward.lines.length > 0) ? (
-                  <>Gave you {said.reward.lines.join(' · ')}</>
+                  <>{said.reward.lines.join(' · ')}을(를) 주었습니다</>
                 ) : (
                   <span className="faint">나눠 줄 것이 없었습니다.</span>
                 )}

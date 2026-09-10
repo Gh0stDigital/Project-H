@@ -50,7 +50,7 @@ export function MagicRoomView({ puzzle, onGuess, onFinish }: MagicRoomViewProps)
           </div>
           <div className="tile-actions">
             <button className="btn btn-primary btn-sm" onClick={onFinish}>
-              Continue →
+              계속 →
             </button>
           </div>
         </>

@@ -214,7 +214,7 @@ export function ExploreView() {
             finishRoll()
           }}
         >
-          {rollSettled ? '계속 →' : 'Rolling…'}
+          {rollSettled ? '계속 →' : '주사위를 굴립니다…'}
         </button>
       )}
 

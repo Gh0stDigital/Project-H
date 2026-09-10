@@ -59,7 +59,7 @@ export function spawnMimic(world: WorldPack, seed: string, tier: DungeonTierDef)
   return {
     ...base,
     kind: 'mimic',
-    name: 'Mimic',
+    name: '미믹',
     image: { folder: 'events', slot: 'treasureMimic' },
     maxHp: hp,
     currentHp: hp,

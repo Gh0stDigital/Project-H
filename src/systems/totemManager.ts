@@ -8,6 +8,9 @@ import { makeId } from './idGen'
  * already named after the art rather than as another "토템".
  */
 export function nameFromAvatarKey(avatarKey: string): string {
+  // The fallback portrait is a code concept, not somebody's artwork, so it
+  // is the one key here that gets a name of our own rather than its filename.
+  if (avatarKey.toLowerCase() === 'default') return '토템'
   const base = avatarKey.replace(/^totem[_-]?/i, '')
   const words = base
     .replace(/[_-]+/g, ' ')

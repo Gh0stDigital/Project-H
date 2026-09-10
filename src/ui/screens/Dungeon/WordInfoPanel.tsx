@@ -43,7 +43,7 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
       )}
 
       <section>
-        <h3>Dungeon Spell Set{dungeonSet ? ` — ${dungeonSet.name}` : ''}</h3>
+        <h3>던전 주문 세트{dungeonSet ? ` — ${dungeonSet.name}` : ''}</h3>
         <div className="list">
           {dungeonSpells.map((spell) => (
             <div key={spell!.id} className="word-chip">
@@ -62,7 +62,7 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
       </section>
 
       <section>
-        <h3>Totem Spell Set{totemSet ? ` — ${totemSet.name}` : ''}</h3>
+        <h3>토템 주문 세트{totemSet ? ` — ${totemSet.name}` : ''}</h3>
         <div className="list">
           {totemSpells.map((spell) => (
             <div key={spell!.id} className="word-chip">

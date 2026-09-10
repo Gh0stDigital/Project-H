@@ -195,7 +195,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
             placeholder="예: 검토하다"
           />
           <span className="faint">
-            A related 하다 verb, if this word has one. Adding it unlocks the conjugation fields below.
+            이 단어에 대응하는 하다 동사가 있다면 적어 주세요. 적으면 아래 활용형 칸이 열립니다.
           </span>
         </div>
       )}
@@ -204,7 +204,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       {showForms && (
         <div className="conjugation-block">
           <div className="conjugation-head">
-            Conjugations
+            활용형
             {formsSubject && <span className="faint"> — {formsSubject}</span>}
           </div>
 

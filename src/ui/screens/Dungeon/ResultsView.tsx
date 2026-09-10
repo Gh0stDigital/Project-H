@@ -83,10 +83,10 @@ export function ResultsView() {
       {/* ---- Everything long lives behind a modal ---- */}
       <div className="btn-row">
         <button className="btn btn-ghost" onClick={() => setPanel('words')}>
-          📖 Words ({attempted}/{report.words.length})
+          📖 단어 ({attempted}/{report.words.length})
         </button>
         <button className="btn btn-ghost" disabled={haulCount === 0} onClick={() => setPanel('haul')}>
-          🎁 Haul ({haulCount})
+          🎁 전리품 ({haulCount})
         </button>
       </div>
 
@@ -203,8 +203,8 @@ function WordRow({ word }: { word: WordReportRow }) {
           ) : (
             <>
               {word.correct}✓ / {word.incorrect}✗ · {pct(word.accuracy)}
-              {word.attackTotal > 0 && ` · atk ${pct(word.attackAccuracy)}`}
-              {word.defenseTotal > 0 && ` · def ${pct(word.defenseAccuracy)}`}
+              {word.attackTotal > 0 && ` · 공격 ${pct(word.attackAccuracy)}`}
+              {word.defenseTotal > 0 && ` · 방어 ${pct(word.defenseAccuracy)}`}
             </>
           )}
         </div>

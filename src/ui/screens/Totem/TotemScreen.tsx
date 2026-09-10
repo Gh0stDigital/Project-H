@@ -139,7 +139,7 @@ export function TotemScreen() {
         <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setPickerOpen(true)}>
           <div>
             <div style={{ fontWeight: 700 }}>{equippedSet ? equippedSet.name : '장착 없음'}</div>
-            <div className="faint">{equippedSet ? `${equippedSet.spellIds.length} Spells` : '눌러서 주문 세트를 고르세요'}</div>
+            <div className="faint">{equippedSet ? `주문 ${equippedSet.spellIds.length}개` : '눌러서 주문 세트를 고르세요'}</div>
           </div>
           <span className="faint">변경</span>
         </button>
@@ -150,7 +150,7 @@ export function TotemScreen() {
         <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setRosterOpen(true)}>
           <div>
             <div style={{ fontWeight: 700 }}>
-              {totems.length} raised{usable.length < totems.length ? ` · ${usable.length}기 살아 있음` : ''}
+              {totems.length}기 기름{usable.length < totems.length ? ` · ${usable.length}기 살아 있음` : ''}
             </div>
             <div className="faint">다른 토템으로 바꾸거나, 새로 기릅니다</div>
           </div>
@@ -163,7 +163,7 @@ export function TotemScreen() {
       {rosterOpen && (
         <SlidePanel title="내 토템들" onClose={() => setRosterOpen(false)}>
           <p className="faint">
-            Each Totem is its own character — its own level, experience, HP, money, 생명력 and record.
+            토템은 저마다 하나의 인물입니다 — 레벨, 경험치, HP, 돈, 생명력, 기록을 각자 따로 가집니다.
             Switching changes who you play as; it is not a change of portrait.
           </p>
 
@@ -193,8 +193,8 @@ export function TotemScreen() {
 
           <h3>새 토템 기르기</h3>
           <p className="faint">
-            Starts at level 1 with a full set of 생명력, named after its portrait. Every portrait in{' '}
-            <code>public/assets/totems</code> is available.
+            생명력을 가득 채운 레벨 1로 시작하며, 이름은 초상화에서 따옵니다.{' '}
+            <code>public/assets/totems</code>에 있는 모든 초상화를 쓸 수 있습니다.
           </p>
           <div className="avatar-grid">
             {assetKeys('totems').map((key) => (

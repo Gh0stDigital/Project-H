@@ -48,7 +48,7 @@ export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onC
       )}
       {barrierCleared !== undefined && (
         <div className={`card-barrier ${barrierCleared ? 'done' : 'pending'}`}>
-          {barrierCleared ? '🛡️ cleared' : '🛡️ needed'}
+          {barrierCleared ? '🛡️ 해제됨' : '🛡️ 필요함'}
         </div>
       )}
       <div className="meta">
