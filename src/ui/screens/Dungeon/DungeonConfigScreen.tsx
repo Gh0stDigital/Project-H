@@ -95,7 +95,9 @@ export function DungeonConfigScreen() {
           </div>
 
           {/* 3. Active Totem — avatar + info, plus which deck it fights with */}
-          <TotemPanel totem={totem} compact />
+          {/* Not compact here: this is the screen where you take in who you
+              are about to play as, not a status strip beside a scene. */}
+          <TotemPanel totem={totem} />
 
           <div className="config-row">
             <div className="field">

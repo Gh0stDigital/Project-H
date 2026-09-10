@@ -1835,6 +1835,57 @@ select:focus {
   text-align: center;
 }
 
+/* ---- Your Totem, on the screen where you choose it ----------------------
+
+   The portrait used to sit in a square frame with object-fit: contain, and
+   the art is not square: the tall portraits (768x1376) filled the height and
+   left 44% of the width empty, so the character drew far smaller than the
+   frame suggested. Nothing was cropped — there was just a lot of nothing
+   around it.
+
+   So the frame follows the art rather than the other way round: fix the
+   height, let the width fall out of the image's own shape, and cap it so a
+   tall one cannot run away with the row. A tall character gets a tall narrow
+   portrait, a wide one gets a wide short portrait, and both draw at the size
+   the space allows instead of the size a square permits.
+
+   Only here. In the run the same panel is a status readout competing with
+   the scene window, and it stays compact. */
+
+.dungeon-config .totem-panel {
+  padding: 16px 16px 14px;
+  gap: 16px;
+}
+
+.dungeon-config .totem-panel .avatar-img {
+  /* Caps, not a size: the image takes its own shape and stops at whichever
+     limit it reaches first, so the frame hugs the character in both
+     directions rather than padding one of them out. */
+  aspect-ratio: auto;
+  width: auto;
+  height: auto;
+  max-height: clamp(132px, 21dvh, 196px);
+  max-width: 48%;
+  min-width: 0;
+  object-fit: contain;
+  padding: 6px;
+  /* Lit from within, so the character reads as the one you are taking in
+     rather than as another icon on a form. */
+  background:
+    radial-gradient(ellipse at 50% 62%, rgba(79, 227, 240, 0.16), transparent 68%),
+    var(--bg-panel-raised);
+  border-color: var(--accent-cyan-dim);
+  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 30px -18px var(--accent-cyan);
+}
+
+.dungeon-config .totem-panel .name-row {
+  font-size: 18px;
+}
+
+.dungeon-config .totem-panel .stats {
+  gap: 8px;
+}
+
 .scene-window.compact {
   height: 19dvh;
 }
