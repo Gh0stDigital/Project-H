@@ -1,5 +1,5 @@
 import type { Totem } from '@/domain/totem'
-import { AssetImage } from './AssetImage'
+import { AvatarFrame } from './AvatarFrame'
 import { Bar } from './Bar'
 import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
 
@@ -18,12 +18,7 @@ export function TotemPanel({ totem, effectText, compact }: TotemPanelProps) {
   return (
     <div className={`totem-panel${compact ? ' compact' : ''}${hit ? ' is-hit' : ''}`}>
       <span className="totem-panel-tag">내 토템</span>
-      <AssetImage
-        category="totems"
-        assetKey={totem.avatarKey}
-        alt={totem.name}
-        className={`avatar-img avatar-hero${hit ? ' is-hit' : ''}`}
-      />
+      <AvatarFrame assetKey={totem.avatarKey} alt={totem.name} size={compact ? 'hud' : 'setup'} hit={hit} />
       <div className="stats">
         <div className="name-row">
           <span className="name">{totem.name}</span>

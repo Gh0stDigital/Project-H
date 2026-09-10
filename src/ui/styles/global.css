@@ -786,18 +786,7 @@ select:focus {
   text-transform: uppercase;
 }
 
-.totem-panel .avatar-img {
-  /* The player's own character gets real presence in the dungeon HUD —
-     its own framed cell, sized as a share of the panel so it scales with
-     the screen instead of staying a fixed thumbnail. */
-  width: 38%;
-  max-width: 132px;
-  min-width: 96px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-strong);
-  padding: 4px;
-}
+
 
 /* The big character portrait on the Totem screen — sized generously and
    using object-fit: contain (not the shared .avatar-img cover) so the
@@ -813,21 +802,73 @@ select:focus {
   margin: 0 auto 12px;
 }
 
-.totem-hero-frame .avatar-img {
-  aspect-ratio: auto;
-  width: auto;
-  height: auto;
-  /* Whichever cap it reaches first decides. The height cap is in dvh so a
-     short phone keeps roughly the portrait it already had, while a tall one
-     gives the character the room it deserves. */
-  max-width: min(68%, 260px);
-  max-height: clamp(186px, 29dvh, 292px);
+
+
+/* ---- The Totem portrait window -----------------------------------------
+
+   Fixed size; only the art inside it changes. Totem files come in two
+   shapes — tall 768x1376 portraits and wide 1200x896 sprites — and fitting
+   either into a box drew the same character at wildly different sizes.
+
+   Measuring the art settles it: the character fills 91-96% of its file's own
+   *height* in every one of them, while the side margins run anywhere from 8%
+   to 51%. So the image is sized by height and the window trims the margin.
+   Every Totem is drawn the same height, whatever its file's proportions.
+
+   1.3 is the widest ratio in the art, so nothing is ever cut off — a sprite
+   that fills its file edge to edge still keeps its sword. */
+
+.avatar-frame {
+  --avatar-h: 108px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--avatar-h);
+  width: calc(var(--avatar-h) * 1.3);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-cyan-dim);
+  background:
+    radial-gradient(ellipse at 50% 64%, rgba(79, 227, 240, 0.14), transparent 70%),
+    var(--bg-panel-raised);
+  box-shadow: 0 0 18px -8px var(--glow-cyan), inset 0 0 26px -18px var(--accent-cyan);
 }
 
-.avatar-hero {
-  object-fit: contain;
-  background: var(--bg-panel-raised);
+/* Sized by height, and free of every square-thumbnail rule .avatar-img
+   carries for its other uses. */
+.avatar-frame .avatar-img {
+  /* flex: none is load-bearing. As a flex item the image would be shrunk to
+     the window's width instead of overflowing it, which is the whole point:
+     a wide sprite has to be allowed past the edges so its height can match
+     everyone else's. */
+  flex: none;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
 }
+
+.avatar-frame-tile { --avatar-h: 68px; }
+/* In the run the panel shares the screen with the scene window and four
+   action buttons, and the panel's height *is* the window's height. 112px is
+   what a 932px screen has left over; a shorter one gets the 76px the layout
+   already needed before any of this, at the same 900px breakpoint the rest
+   of the run HUD uses. The character still reads far larger there than it
+   did, because it now fills the window's height instead of being letterboxed
+   inside a square. */
+.avatar-frame-hud { --avatar-h: 112px; }
+
+@media (max-height: 900px) {
+  .avatar-frame-hud { --avatar-h: 76px; }
+}
+.avatar-frame-setup { --avatar-h: 150px; }
+.avatar-frame-hero { --avatar-h: clamp(170px, 27dvh, 260px); }
 
 .totem-panel .stats {
   flex: 1;
@@ -1873,25 +1914,8 @@ select:focus {
   gap: 16px;
 }
 
-.dungeon-config .totem-panel .avatar-img {
-  /* Caps, not a size: the image takes its own shape and stops at whichever
-     limit it reaches first, so the frame hugs the character in both
-     directions rather than padding one of them out. */
-  aspect-ratio: auto;
-  width: auto;
-  height: auto;
-  max-height: clamp(132px, 21dvh, 196px);
-  max-width: 48%;
-  min-width: 0;
-  object-fit: contain;
-  padding: 6px;
-  /* Lit from within, so the character reads as the one you are taking in
-     rather than as another icon on a form. */
-  background:
-    radial-gradient(ellipse at 50% 62%, rgba(79, 227, 240, 0.16), transparent 68%),
-    var(--bg-panel-raised);
-  border-color: var(--accent-cyan-dim);
-  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 30px -18px var(--accent-cyan);
+.dungeon-config .avatar-frame {
+  --avatar-h: clamp(120px, 19dvh, 168px);
 }
 
 .dungeon-config .totem-panel .name-row {
@@ -1909,12 +1933,6 @@ select:focus {
 .totem-panel.compact {
   padding: 10px 12px 8px;
   gap: 12px;
-}
-
-.totem-panel.compact .avatar-img {
-  width: 36%;
-  max-width: 108px;
-  min-width: 78px;
 }
 
 .totem-panel.compact .name-row {
@@ -2220,11 +2238,6 @@ select:focus {
 
   .totem-panel.compact {
     padding: 8px 10px 6px;
-  }
-
-  .totem-panel.compact .avatar-img {
-    max-width: 76px;
-    min-width: 60px;
   }
 
   .room-flavor h3 {
@@ -3647,7 +3660,9 @@ button.totem-hero-frame {
    which is what makes the flash visible at all. */
 .battle-enemy-overlay.is-hit .asset-img,
 .explore-event-overlay.is-hit .asset-img,
-.totem-panel .avatar-hero.is-hit {
+.avatar-frame.is-hit {
+  /* The window shakes, not the sprite: a sprite that fills the window would
+     otherwise slide against the edge that clips it. */
   animation: hit-shake 400ms ease, hit-flash 400ms ease;
 }
 
@@ -3674,7 +3689,7 @@ button.totem-hero-frame {
 @media (prefers-reduced-motion: reduce) {
   .battle-enemy-overlay.is-hit .asset-img,
   .explore-event-overlay.is-hit .asset-img,
-  .totem-panel .avatar-hero.is-hit,
+  .avatar-frame.is-hit,
   .totem-panel.is-hit {
     animation: none;
   }

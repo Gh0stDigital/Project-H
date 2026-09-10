@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useUiStore } from '@/state/uiStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { TopBar } from '@/ui/components/TopBar'
-import { AssetImage } from '@/ui/components/AssetImage'
+import { AvatarFrame } from '@/ui/components/AvatarFrame'
 import { Bar } from '@/ui/components/Bar'
 import { SlidePanel } from '@/ui/components/SlidePanel'
 import { totemBalance } from '@/config/balance'
@@ -61,7 +61,7 @@ export function TotemScreen() {
 
       <div className="panel" style={{ textAlign: 'center' }}>
         <button className="totem-hero-frame" onClick={() => setRosterOpen(true)} title="토템 교체">
-          <AssetImage category="totems" assetKey={totem.avatarKey} alt={totem.name} className="avatar-img avatar-hero" />
+          <AvatarFrame assetKey={totem.avatarKey} alt={totem.name} size="hero" />
         </button>
         {/* Below the frame, not over the art. Switching is the primary
             action — each Totem is its own character, with its own level and
@@ -179,7 +179,7 @@ export function TotemScreen() {
                   setRosterOpen(false)
                 }}
               >
-                <AssetImage category="totems" assetKey={t.avatarKey} alt={t.name} className="avatar-img" />
+                <AvatarFrame assetKey={t.avatarKey} alt={t.name} size="tile" />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{t.name}</div>
                   <div className="faint">
@@ -206,7 +206,7 @@ export function TotemScreen() {
                   setRosterOpen(false)
                 }}
               >
-                <AssetImage category="totems" assetKey={key} alt={key} className="avatar-img" />
+                <AvatarFrame assetKey={key} alt={key} size="tile" />
                 <span className="avatar-option-name">{nameFromAvatarKey(key)}</span>
               </button>
             ))}
@@ -230,7 +230,7 @@ export function TotemScreen() {
                   setAvatarPickerOpen(false)
                 }}
               >
-                <AssetImage category="totems" assetKey={key} alt={key} className="avatar-img" />
+                <AvatarFrame assetKey={key} alt={key} size="tile" />
                 <span className="avatar-option-name">{key}</span>
               </button>
             ))}
