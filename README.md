@@ -138,11 +138,37 @@ ship falls back to the global track. A cue with no file is silent, not broken.
 `scripts/gen-audio-placeholders.mjs` writes a plain synthesised tone for any
 cue with no file yet, so the whole chain can be heard and checked before real
 audio exists. It never overwrites a real file, so replacing a tone is
-permanent. **They are uncompressed WAV and should not ship** — real audio
-wants to arrive compressed (`.m4a`, `.mp3` and `.ogg` all work), and music
-especially: the single-file offline build inlines every sound as base64, so a
-90-second loop at a low bitrate is the difference between a phone build that
-opens and one that does not.
+permanent.
+
+### Ship mp3, and run the optimizer
+
+```
+npm run optimize:audio                re-encode anything above target
+npm run optimize:audio -- --dry-run   report, write nothing
+npm run optimize:audio -- --music 128 a different music bitrate
+```
+
+Two reasons, both about the phone.
+
+**Format.** Every browser on iOS is WebKit, and WebKit only learned to decode
+Ogg Vorbis in Safari 17.4 — so an `.ogg` is silence on an older iPhone with
+nothing in the console to explain it. mp3 decodes anywhere Web Audio exists at
+all. The optimizer converts to mp3 whatever you drop in.
+
+**Size.** The single-file build inlines every sound as base64. Music arriving
+at 256-287 kb/s stereo took that build from 29 MB to 57 MB; re-encoded to
+112 kb/s mono it is 40 MB. That bitrate is chosen for a loop under a game on a
+phone speaker, not for headphones — raise it with `--music` if you disagree,
+and note the originals are in git either way.
+
+Ambience is targeted lower still (80 kb/s) because it arrives as 64 kb/s
+Vorbis, which is *more* efficient than mp3 at that end: matching its bitrate
+would make the files bigger.
+
+One consequence of mp3 worth knowing: the format adds a few hundred samples of
+silence at each end, so looping a bed plays that gap every cycle — audible on a
+short one. The engine measures each bed's real edges and sets its loop points
+inside them, capped at 50 ms so a genuine fade-in is never cut into.
 
 ### How it avoids the usual problems
 
@@ -302,6 +328,9 @@ scripts/
                          or `npm run gen:assets`. Never overwrites a file
                          that exists in any format, so replacing a
                          placeholder with real artwork is permanent.
+  optimize-audio.mjs     Re-encodes sound under public/audio as mp3 at a
+                         bitrate a phone can carry. Run by hand with
+                         `npm run optimize:audio`.
   optimize-art.mjs       Re-encodes art under public/ as WebP, capped at
                          1290 px. Run by hand with `npm run optimize:art`;
                          deliberately not part of the build, since the
@@ -314,8 +343,10 @@ scripts/
                          no file yet (hand-rolled WAV, no dependencies).
                          Never overwrites real audio.
 public/assets/           Art that is not world content: totems (the player's
-                         character, which travels between worlds) and spell
-                         card art.
+                         character, which travels between worlds), spell card
+                         art, and ui/ for interface art such as the main menu
+                         logo. Anything under ui/ is optional — the menu falls
+                         back to its written title without one.
 public/worlds/<id>/      One folder per world — locations, events, npcs,
                          enemies and an optional bosses. See "Unwritten
                          Worlds" above.

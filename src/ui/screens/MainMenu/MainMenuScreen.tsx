@@ -1,7 +1,7 @@
 import { useUiStore } from '@/state/uiStore'
 import { findNewContent, hasNewContent } from '@/systems/newContent'
 import { allWorlds } from '@/systems/worldRegistry'
-import { assetKeys } from '@/config/assets'
+import { assetKeys, optionalAsset } from '@/config/assets'
 import { nameFromSlot } from '@/systems/worldRegistry'
 import { usePersistentStore } from '@/state/persistentStore'
 import { AssetImage } from '@/ui/components/AssetImage'
@@ -26,6 +26,7 @@ export function MainMenuScreen() {
   // the full catalogue; this is only about what they have been told.
   const fresh = findNewContent(allWorlds, assetKeys('totems'), seenContent)
   const spellCount = usePersistentStore((s) => s.spells.length)
+  const titleArt = optionalAsset('ui', 'title')
 
   return (
     <div className="screen">
@@ -42,11 +43,20 @@ export function MainMenuScreen() {
         </button>
       )}
 
-      <div className="menu-title">
-        <span className="glyph">🔮</span>
-        <h1>Project H</h1>
-        <p className="muted">언어 학습 던전 크롤러</p>
-      </div>
+      {/* The logo replaces the icon and the text title outright. Until the
+          art exists the menu keeps its written title, so a missing file is a
+          plainer menu rather than a blank one. */}
+      {titleArt ? (
+        <div className="menu-title has-art">
+          <img src={titleArt} alt="Project H" className="menu-title-art" draggable={false} />
+        </div>
+      ) : (
+        <div className="menu-title">
+          <span className="glyph">🔮</span>
+          <h1>Project H</h1>
+          <p className="muted">언어 학습 던전 크롤러</p>
+        </div>
+      )}
 
       {totem && (
         <button className="totem-banner" onClick={() => goTo('totem')}>

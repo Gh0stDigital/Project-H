@@ -77,6 +77,47 @@ function bytesFromDataUri(uri: string): ArrayBuffer {
   return bytes.buffer
 }
 
+/**
+ * Where a bed should loop, in seconds.
+ *
+ * mp3 carries encoder delay and padding — a few hundred samples of silence at
+ * each end that are an artefact of the format, not the recording. Looping the
+ * whole buffer therefore plays that silence every cycle, which on a 4.6-second
+ * wind bed is an audible tick roughly every four seconds.
+ *
+ * So the loop points skip it. Only a little: the trim is capped, because past
+ * that a quiet edge is the recording rather than the encoder, and cutting into
+ * it would be worse than the tick.
+ */
+const LOOP_SILENCE = 0.0015 // about -56 dB
+/**
+ * An mp3's encoder delay is around 1100-2300 samples, so 50 ms covers it with
+ * room to spare. It was 250 ms first, and that was wrong: the menu theme
+ * fades in, so the trim ate a quarter-second of real music. Past this the
+ * quiet is the recording and gets left alone.
+ */
+const MAX_TRIM_SECONDS = 0.05
+
+export function loopPoints(buffer: AudioBuffer): { start: number; end: number } {
+  const whole = { start: 0, end: buffer.duration }
+  // Anything unexpected about the buffer costs the trim, not the sound.
+  if (typeof buffer.getChannelData !== 'function') return whole
+  const data = buffer.getChannelData(0)
+  const rate = buffer.sampleRate
+  if (!data?.length || !rate) return whole
+  const limit = Math.floor(MAX_TRIM_SECONDS * rate)
+
+  let first = 0
+  while (first < limit && first < data.length && Math.abs(data[first]) < LOOP_SILENCE) first++
+
+  let last = data.length - 1
+  const floor = data.length - 1 - limit
+  while (last > floor && last > first && Math.abs(data[last]) < LOOP_SILENCE) last--
+
+  if (first >= last) return whole
+  return { start: first / rate, end: (last + 1) / rate }
+}
+
 export class AudioEngine {
   private ctx: AudioContextLike | null = null
   private master: GainNode | null = null
@@ -312,12 +353,17 @@ export class AudioEngine {
     const source = ctx.createBufferSource()
     source.buffer = buf
     source.loop = true
+    // Skip the encoder's padding, and begin where the loop begins so the
+    // first cycle sounds like every one after it.
+    const { start, end } = loopPoints(buf)
+    source.loopStart = start
+    source.loopEnd = end
     const gain = ctx.createGain()
     gain.gain.value = 0
     gain.gain.linearRampToValueAtTime?.(target, ctx.currentTime + fade)
     source.connect(gain)
     gain.connect(bus)
-    source.start()
+    source.start(0, start)
     return { source, gain, cue }
   }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { AudioEngine, type AudioContextLike } from './audioEngine'
+import { AudioEngine, loopPoints, type AudioContextLike } from './audioEngine'
 
 /**
  * A stand-in for AudioContext. Web Audio cannot run under the test runner, and
@@ -7,7 +7,7 @@ import { AudioEngine, type AudioContextLike } from './audioEngine'
  * keep a missing or slow file from breaking the game.
  */
 function fakeContext() {
-  const started: { buffer: unknown; loop: boolean; rate: number }[] = []
+  const started: { buffer: unknown; loop: boolean; rate: number; loopStart: number; loopEnd: number }[] = []
   const ctx = {
     currentTime: 0,
     state: 'running' as AudioContextState,
@@ -30,12 +30,22 @@ function fakeContext() {
         loop: false,
         playbackRate: { value: 1 },
         connect() {},
-        start() { started.push({ buffer: node.buffer, loop: node.loop, rate: node.playbackRate.value }) },
+        loopStart: 0,
+        loopEnd: 0,
+        start() { started.push({ buffer: node.buffer, loop: node.loop, rate: node.playbackRate.value, loopStart: node.loopStart, loopEnd: node.loopEnd }) },
         stop() {},
       }
       return node
     },
-    decodeAudioData: async () => ({ duration: 1 }),
+    // A decoded buffer the engine can actually inspect: the loop trimming
+    // reads its samples, so a double without them tests nothing.
+    decodeAudioData: async () => ({
+      duration: 1,
+      sampleRate: 44100,
+      length: 44100,
+      numberOfChannels: 1,
+      getChannelData: () => new Float32Array(44100).fill(0.4),
+    }),
   }
   // The double implements what the engine touches, not all of GainNode and
   // friends, so it is asserted into place once here rather than at every use.
@@ -150,6 +160,17 @@ describe('audio engine', () => {
     expect(started.filter((s) => s.loop)).toHaveLength(1)
   })
 
+  it('gives a bed real loop points rather than looping the raw buffer', async () => {
+    const { ctx, started } = fakeContext()
+    const engine = new AudioEngine(() => ctx)
+    engine.unlock()
+    engine.setAmbience(['wind'])
+    await flush()
+    const bed = started.find((s) => s.loop)!
+    expect(bed.loopEnd).toBeGreaterThan(0)
+    expect(bed.loopEnd).toBeLessThanOrEqual(1)
+  })
+
   it('makes no sound at all when muted', async () => {
     const { ctx, started } = fakeContext()
     const engine = new AudioEngine(() => ctx)
@@ -159,5 +180,38 @@ describe('audio engine', () => {
     const before = started.length
     engine.play('confirm')
     expect(started.length).toBe(before)
+  })
+})
+
+describe('loop points', () => {
+  const make = (samples: number[], rate = 44100): AudioBuffer =>
+    ({ getChannelData: () => Float32Array.from(samples), sampleRate: rate, duration: samples.length / rate }) as unknown as AudioBuffer
+
+  it('skips the silence an mp3 encoder adds at each end', () => {
+    const pad = new Array(200).fill(0) // ~4.5ms, the shape of encoder delay
+    const body = new Array(1000).fill(0.5)
+    const { start, end } = loopPoints(make([...pad, ...body, ...pad]))
+    expect(start).toBeCloseTo(200 / 44100, 5)
+    expect(end).toBeCloseTo(1200 / 44100, 5)
+  })
+
+  it('loops the whole buffer when there is nothing to trim', () => {
+    const { start, end } = loopPoints(make(new Array(500).fill(0.4)))
+    expect(start).toBe(0)
+    expect(end).toBeCloseTo(500 / 44100, 5)
+  })
+
+  it('refuses to eat a fade-in', () => {
+    // Half a second of near-silence is the recording, not the encoder — the
+    // menu theme fades in, and an earlier cap cut a quarter-second off it.
+    const quiet = new Array(22050).fill(0)
+    const { start } = loopPoints(make([...quiet, ...new Array(1000).fill(0.5)]))
+    expect(start).toBeLessThanOrEqual(0.05)
+  })
+
+  it('does not divide by zero on a silent buffer', () => {
+    const { start, end } = loopPoints(make(new Array(1000).fill(0)))
+    expect(start).toBe(0)
+    expect(end).toBeGreaterThan(0)
   })
 })

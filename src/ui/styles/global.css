@@ -1892,6 +1892,36 @@ select:focus {
   text-align: center;
 }
 
+/* ---- Title art ----------------------------------------------------------
+
+   The logo is brush calligraphy on white, so it is knocked out to sit on the
+   dark menu rather than being shown in a box. Sized by height against the
+   viewport so it scales with the phone instead of a fixed pixel width. */
+
+.menu-title.has-art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 4px 0 2px;
+}
+
+.menu-title-art {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: clamp(96px, 17dvh, 168px);
+  object-fit: contain;
+  aspect-ratio: auto;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  image-rendering: auto;
+  /* The artwork's own red reads dark against the panel; a soft glow lifts it
+     off the background the way the rest of the menu is lit. */
+  filter: drop-shadow(0 0 18px rgba(226, 42, 42, 0.28)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
 /* ---- Sound controls ----------------------------------------------------- */
 
 .audio-settings {

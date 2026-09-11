@@ -26,6 +26,9 @@ const ROOT = join(__dirname, '..')
 export const ASSETS_DIR = join(ROOT, 'public', 'assets')
 const OUT = join(ROOT, 'src', 'config', 'assetManifest.ts')
 
+/** Categories with no fallback image, by design. */
+const NO_DEFAULT_NEEDED = ['ui']
+
 function build() {
   const categories = readdirSync(ASSETS_DIR)
     .filter((d) => statSync(join(ASSETS_DIR, d)).isDirectory())
@@ -43,7 +46,10 @@ function build() {
       .sort((a, b) => (a.slot === 'default' ? -1 : b.slot === 'default' ? 1 : a.slot.localeCompare(b.slot)))
     if (art.length === 0) continue
     const keys = art.map((a) => a.slot)
-    if (!keys.includes('default')) {
+    // Interface art is read through optionalAsset(), which returns null and
+    // lets the caller fall back in its own way — so it has no use for a
+    // `default` and should not be nagged about missing one.
+    if (!NO_DEFAULT_NEEDED.includes(category) && !keys.includes('default')) {
       warnings.push(`${category}/ has no default image — lookups fall back to its first key.`)
     }
     manifest[category] = keys

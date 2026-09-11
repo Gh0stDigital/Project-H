@@ -105,6 +105,23 @@ export function pickFlavor(category: AssetCategory, seed: string): string {
 export const assetRegistry = registry
 
 /**
+ * Art that the game works without.
+ *
+ * The manifest only lists categories that have files in them, so a category
+ * the game references before any art exists for it — interface art, which is
+ * the whole point of this — cannot be named in AssetCategory yet. Returning
+ * null rather than a placeholder is what lets a caller fall back to something
+ * else, the way the main menu keeps its written title until a logo is added.
+ */
+export function optionalAsset(category: string, key: string): string | null {
+  const table = (registry as Record<string, Record<string, string> | undefined>)[category]
+  if (!table) return null
+  if (table[key]) return table[key]
+  const match = (loose as Record<string, Record<string, string> | undefined>)[category]?.[normalize(key)]
+  return match ? table[match] : null
+}
+
+/**
  * Every key a category offers, in registry order. This is the list the UI
  * picks from, so anything dropped into public/assets/<category>/ becomes
  * selectable with no other change.
