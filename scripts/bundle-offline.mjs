@@ -60,6 +60,14 @@ const MIME = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
+  // Audio rides in the same map. From file:// the app cannot fetch a sound
+  // any more than it can fetch a picture, so both are inlined and both are
+  // decoded straight from the data URI.
+  '.m4a': 'audio/mp4',
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.wav': 'audio/wav',
+  '.webm': 'audio/webm',
 }
 
 function dataUri(file) {
@@ -132,15 +140,16 @@ console.log(`bundle-offline: dist/index.html is self-contained code (${kb(Buffer
 
 // --- Single-file variant, art and all -----------------------------------
 
-// Both trees carry art: global assets, and the world packs. Missing the
-// second one would leave the offline builds without a single backdrop.
-const artRoots = [join(DIST, 'assets'), join(DIST, 'worlds')].filter((d) => existsSync(d))
+// Every tree the app loads media from: global art, the sound folder, and the
+// world packs, which carry both. Missing one leaves the offline build without
+// its backdrops or without its sound.
+const mediaRoots = [join(DIST, 'assets'), join(DIST, 'audio'), join(DIST, 'worlds')].filter((d) => existsSync(d))
 
 function allArt() {
-  // Images only. The art folders also hold each world's world.json, which
+  // Media only. The world folders also hold each world's world.json, which
   // the app reads at build time, not at runtime — inlining it would put a
-  // file the page never asks for into the image map.
-  return artRoots.flatMap((root) => walk(root)).filter((f) => MIME[f.slice(f.lastIndexOf('.')).toLowerCase()])
+  // file the page never asks for into the map.
+  return mediaRoots.flatMap((root) => walk(root)).filter((f) => MIME[f.slice(f.lastIndexOf('.')).toLowerCase()])
 }
 const inline = {}
 {
@@ -170,7 +179,7 @@ const singlePath = join(DIST, 'thoth-offline.html')
 writeFileSync(singlePath, single)
 console.log(
   `bundle-offline: dist/thoth-offline.html is one self-contained file ` +
-    `(${kb(Buffer.byteLength(single))}, ${Object.keys(inline).length} images inlined)`,
+    `(${kb(Buffer.byteLength(single))}, ${Object.keys(inline).length} media files inlined)`,
 )
 
 // --- Service worker, for the hosted / installed case --------------------

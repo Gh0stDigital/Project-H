@@ -116,6 +116,57 @@ files are just larger than they need to be. Both manifests record the
 extension of each file, so a world dropped in as PNG plays exactly the same as
 the optimized ones, and the two can sit side by side.
 
+## Sound
+
+Every cue is a file under `public/audio/`, named after the cue. Dropping one
+in replaces the stand-in tone that is there now — same contract as the art.
+
+```
+public/audio/
+  music/      menu  dungeon  battle  boss  rest  results
+  ambient/    wind  drip  night          looping beds, layered under the music
+  sfx/        damage playerAttack enemyAttack battleStart enemyAppear
+              victory defeat correct wrong trapTrigger chestOpen discovery
+              shrine bossDoor reward npcTalk move diceRoll confirm cancel
+              itemUse levelUp
+public/worlds/<id>/music/   dungeon  battle  boss   optional, overrides the above
+```
+
+A world may ship its own dungeon, battle or boss music; anything it does not
+ship falls back to the global track. A cue with no file is silent, not broken.
+
+`scripts/gen-audio-placeholders.mjs` writes a plain synthesised tone for any
+cue with no file yet, so the whole chain can be heard and checked before real
+audio exists. It never overwrites a real file, so replacing a tone is
+permanent. **They are uncompressed WAV and should not ship** — real audio
+wants to arrive compressed (`.m4a`, `.mp3` and `.ogg` all work), and music
+especially: the single-file offline build inlines every sound as base64, so a
+90-second loop at a low bitrate is the difference between a phone build that
+opens and one that does not.
+
+### How it avoids the usual problems
+
+- **No latency.** Every cue is decoded once into an `AudioBuffer`; playing it
+  starts a fresh source node. `<audio>` elements and `play()` are not used
+  anywhere — that is where the 50-200ms of lag in most web games comes from.
+- **Overlap is free.** A node per play off one shared buffer, so five hits can
+  ring at once. Repeats get a small random pitch spread and a minimum gap so
+  they do not machine-gun or stack into one click.
+- **Nothing waits on sound.** `play()` never throws and is never awaited. A
+  cue whose file is missing, still decoding or undecodable is silent, and the
+  game does not notice.
+- **It works offline.** `fetch()` is blocked at `file://`, so the usual
+  fetch-then-decode recipe gives sound when hosted and silence on the phone.
+  Audio is inlined like the art and decoded straight from base64, which is one
+  code path for both builds.
+- **Autoplay.** The context is created and resumed on the first real gesture,
+  with a silent buffer played once for older iOS. Music asked for before then
+  is remembered and started when the gesture arrives.
+
+`src/config/audio.ts` is where a cue's level, minimum gap and pitch spread
+live — the file to edit when something is too loud or too eager.
+`src/ui/hooks/useSoundtrack.ts` is the whole map from game state to sound.
+
 ### Unwritten Worlds — adding a world
 
 A world is a folder of art under `public/worlds/`. Drop one in and it is
@@ -255,6 +306,13 @@ scripts/
                          1290 px. Run by hand with `npm run optimize:art`;
                          deliberately not part of the build, since the
                          committed art is already optimized.
+  audioSlots.mjs         The sound pack: every cue the game can play.
+  gen-audio-manifest.mjs Scans public/audio and each world's optional music,
+                         and writes src/config/audioManifest.ts.
+  gen-audio-placeholders.mjs
+                         Writes a synthesised stand-in tone for any cue with
+                         no file yet (hand-rolled WAV, no dependencies).
+                         Never overwrites real audio.
 public/assets/           Art that is not world content: totems (the player's
                          character, which travels between worlds) and spell
                          card art.

@@ -1,4 +1,7 @@
 import { useUiStore } from '@/state/uiStore'
+import { useGameAudio } from '@/ui/hooks/useGameAudio'
+import { useSoundtrack } from '@/ui/hooks/useSoundtrack'
+import { useUiSounds } from '@/ui/hooks/useUiSounds'
 import { MainMenuScreen } from '@/ui/screens/MainMenu/MainMenuScreen'
 import { CompendiumScreen } from '@/ui/screens/Compendium/CompendiumScreen'
 import { TotemScreen } from '@/ui/screens/Totem/TotemScreen'
@@ -7,6 +10,12 @@ import { RecordsScreen } from '@/ui/screens/Records/RecordsScreen'
 
 export default function App() {
   const screen = useUiStore((s) => s.screen)
+
+  // Sound is mounted once, here. None of it can throw, and none of it is
+  // awaited: the game runs identically with the speakers off.
+  useGameAudio()
+  useSoundtrack()
+  useUiSounds()
 
   return (
     <div className="app-shell">

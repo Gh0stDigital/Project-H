@@ -5,6 +5,7 @@ import path from 'node:path'
 import { generateAssetManifest, ASSETS_DIR } from './scripts/gen-asset-manifest.mjs'
 // @ts-expect-error - plain .mjs build script, no types
 import { generateWorldManifest, WORLDS_DIR } from './scripts/gen-world-manifest.mjs'
+import { generateAudioManifest, AUDIO_DIR } from './scripts/gen-audio-manifest.mjs'
 
 /**
  * Keeps src/config/assetManifest.ts in step with public/assets.
@@ -38,6 +39,16 @@ function assetManifestPlugin(): Plugin {
           for (const m of w.missing) console.warn(`           ${m}`)
         }
       }
+
+      // Sound is compiled the same way. A cue with no file behind it is not
+      // an error — it is simply silent — so this reports rather than warns.
+      const sounds = generateAudioManifest()
+      if (sounds.changed) {
+        console.log(`[audio] ${sounds.total} cues (${reason})`)
+        if (sounds.missing.length > 0) {
+          console.log(`[audio] silent, no file yet: ${sounds.missing.join(', ')}`)
+        }
+      }
     } catch (err) {
       // Never take the dev server or the build down over this: the committed
       // manifest is still usable, it is just possibly behind.
@@ -57,10 +68,12 @@ function assetManifestPlugin(): Plugin {
       // until a restart.
       server.watcher.add(ASSETS_DIR)
       server.watcher.add(WORLDS_DIR)
+      server.watcher.add(AUDIO_DIR)
       for (const event of ['add', 'unlink'] as const) {
         server.watcher.on(event, (file: string) => {
-          const watched = file.startsWith(ASSETS_DIR) || file.startsWith(WORLDS_DIR)
-          if (watched && /\.(png|json)$/i.test(file)) {
+          const watched =
+            file.startsWith(ASSETS_DIR) || file.startsWith(WORLDS_DIR) || file.startsWith(AUDIO_DIR)
+          if (watched && /\.(png|jpe?g|webp|json|m4a|mp3|ogg|wav|webm)$/i.test(file)) {
             regenerate(`${event} ${path.basename(file)}`)
           }
         })

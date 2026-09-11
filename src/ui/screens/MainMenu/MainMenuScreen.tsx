@@ -7,6 +7,7 @@ import { usePersistentStore } from '@/state/persistentStore'
 import { AssetImage } from '@/ui/components/AssetImage'
 import { Bar } from '@/ui/components/Bar'
 import { totemBalance } from '@/config/balance'
+import { AudioSettings } from '@/ui/components/AudioSettings'
 
 const menuItems = [
   { screen: 'compendium' as const, icon: '📖', label: '주문 불러오기 / 도감', desc: '주문 단어와 주문 세트를 만들고 정리합니다.' },
@@ -93,6 +94,7 @@ export function MainMenuScreen() {
       </div>
 
       <div style={{ flex: 1 }} />
+      <AudioSettings />
       <p className="faint" style={{ textAlign: 'center' }}>
         완전 오프라인 · 진행 상황은 이 기기에 저장됩니다
       </p>

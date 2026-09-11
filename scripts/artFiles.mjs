@@ -20,6 +20,12 @@ import { extname, join } from 'node:path'
 /** Formats a browser will draw, in the order the optimizer prefers them. */
 export const ART_EXTENSIONS = ['.webp', '.png', '.jpg', '.jpeg']
 
+/**
+ * Formats a browser will decode, best first. Placeholder tones are written as
+ * WAV because it needs no encoder; real audio arrives compressed.
+ */
+export const AUDIO_EXTENSIONS = ['.m4a', '.mp3', '.ogg', '.webm', '.wav']
+
 export function isArtFile(file) {
   return ART_EXTENSIONS.includes(extname(file).toLowerCase())
 }
@@ -38,18 +44,18 @@ const fold = (name) => name.toLowerCase()
  * `Key.webp`, ART_EXTENSIONS order decides and the loser is returned in
  * `collisions` so the generator can say so rather than silently dropping it.
  */
-export function artIn(dir, canonical = []) {
+export function artIn(dir, canonical = [], exts = ART_EXTENSIONS) {
   if (!existsSync(dir)) return []
   const canonicalBy = new Map(canonical.map((slot) => [fold(slot), slot]))
   const bySlot = new Map()
   const collisions = []
 
   for (const file of readdirSync(dir).sort()) {
-    if (!isArtFile(file)) continue
     const ext = extname(file).toLowerCase()
+    if (!exts.includes(ext)) continue
     const name = file.slice(0, -ext.length)
     const slot = canonicalBy.get(fold(name)) ?? name
-    const entry = { slot, file, ext: ext.slice(1), rank: ART_EXTENSIONS.indexOf(ext) }
+    const entry = { slot, file, ext: ext.slice(1), rank: exts.indexOf(ext) }
     const seen = bySlot.get(slot)
     if (!seen) {
       bySlot.set(slot, entry)
@@ -74,10 +80,10 @@ export function fileTable(entries, prefix = '') {
 }
 
 /** Path to a folder's art for one slot, ignoring case, or null. */
-export function artPath(dir, slot) {
+export function artPath(dir, slot, exts = ART_EXTENSIONS) {
   if (!existsSync(dir)) return null
   const want = fold(slot)
-  for (const ext of ART_EXTENSIONS) {
+  for (const ext of exts) {
     for (const file of readdirSync(dir)) {
       if (extname(file).toLowerCase() !== ext) continue
       if (fold(file.slice(0, -ext.length)) === want) return join(dir, file)

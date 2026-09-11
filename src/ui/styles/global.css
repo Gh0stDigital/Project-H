@@ -1892,6 +1892,45 @@ select:focus {
   text-align: center;
 }
 
+/* ---- Sound controls ----------------------------------------------------- */
+
+.audio-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+}
+
+.audio-settings .field {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+/* The mute button sits with the sliders rather than as a full-height row of
+   its own: the menu has no spare vertical space to give it. */
+.audio-settings .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.audio-settings label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.audio-settings input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent-cyan);
+}
+
 /* ---- Your Totem, on the screen where you choose it ----------------------
 
    The portrait used to sit in a square frame with object-fit: contain, and

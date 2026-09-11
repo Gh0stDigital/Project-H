@@ -6,6 +6,7 @@ import { usePersistentStore } from './state/persistentStore'
 import { useDungeonStore } from './state/dungeonStore'
 import { useUiStore } from './state/uiStore'
 import { registerOfflineCache } from './systems/offlineCache'
+import { audio } from './systems/audioEngine'
 
 // Exposes the game's state stores for local debugging / QA scripting. This
 // is an offline single-player prototype with no auth or remote data, so
@@ -16,10 +17,11 @@ declare global {
       usePersistentStore: typeof usePersistentStore
       useDungeonStore: typeof useDungeonStore
       useUiStore: typeof useUiStore
+      audio: typeof audio
     }
   }
 }
-window.__thoth = { usePersistentStore, useDungeonStore, useUiStore }
+window.__thoth = { usePersistentStore, useDungeonStore, useUiStore, audio }
 
 // Makes a hosted copy survive going offline. A no-op when the game is
 // opened from disk, which needs no cache to begin with.
