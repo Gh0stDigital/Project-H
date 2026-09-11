@@ -1636,6 +1636,22 @@ select:focus {
   font-family: var(--font-mono);
 }
 
+/* A card with more than a name and one number has to stack: the row layout
+   above squeezes the name into a one-character column and pushes the rest
+   off the side. Used by the setup sheets, where each option carries its
+   description. */
+.tier-card.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.tier-card.stacked .tier-card-meta {
+  flex-shrink: 1;
+  white-space: normal;
+  line-height: 1.45;
+}
+
 .dungeon-info-panel {
   background: var(--bg-panel);
   border: 1px solid var(--border-soft);
@@ -1798,6 +1814,22 @@ select:focus {
 .tier-card-meta {
   flex-shrink: 0;
   font-family: var(--font-mono);
+}
+
+/* A card with more than a name and one number has to stack: the row layout
+   above squeezes the name into a one-character column and pushes the rest
+   off the side. Used by the setup sheets, where each option carries its
+   description. */
+.tier-card.stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.tier-card.stacked .tier-card-meta {
+  flex-shrink: 1;
+  white-space: normal;
+  line-height: 1.45;
 }
 
 .dungeon-info-panel {
@@ -4323,3 +4355,140 @@ button.totem-hero-frame {
   .curtain-battle::after { display: none; }
   .curtain-label { animation: none; opacity: 0.8; }
 }
+
+/* ---- Boss barrier roulette ---- */
+
+.barrier-roulette {
+  text-align: center;
+  padding: 14px 12px 12px;
+}
+
+.barrier-roulette-label {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+/* A single window onto the reel. Fixed height so the panel does not resize
+   as the clue behind it changes width. */
+.barrier-reel {
+  position: relative;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent-cyan-dim);
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(79, 227, 240, 0.12), transparent 70%),
+    linear-gradient(180deg, #0e131c 0%, #0a0d14 100%);
+  overflow: hidden;
+}
+
+/* The bands above and below narrow the window to a slot, so the clue reads
+   as one face of a wheel rather than text in a box. */
+.barrier-reel::before,
+.barrier-reel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 22px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 7, 12, 0.92), transparent);
+}
+
+.barrier-reel::after {
+  bottom: 0;
+  transform: scaleY(-1);
+}
+
+.barrier-reel::before { top: 0; }
+
+.barrier-reel-clue {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--accent-gold);
+  text-shadow: 0 0 18px var(--glow-gold);
+}
+
+.barrier-reel.is-spinning .barrier-reel-clue {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 14px var(--glow-cyan, rgba(79, 227, 240, 0.5));
+  opacity: 0.85;
+}
+
+.barrier-reel.is-landed {
+  border-color: var(--accent-gold);
+  animation: barrier-land 420ms ease-out;
+}
+
+@keyframes barrier-land {
+  0% { transform: scale(1.06); box-shadow: 0 0 0 rgba(242, 193, 78, 0); }
+  40% { box-shadow: 0 0 26px rgba(242, 193, 78, 0.45); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(242, 193, 78, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barrier-reel.is-landed { animation: none; }
+}
+
+/* ---- Dungeon setup options ---- */
+
+/* Two per row, so five settings are three rows rather than five stacked
+   sections — the screen used to grow by a whole block every time a world or
+   a tier was added, and the button that starts the run went with it. */
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.setup-option {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 12px;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, #131822 0%, #0e131c 100%);
+}
+
+.setup-option.wide { grid-column: 1 / -1; }
+
+.setup-option:active { border-color: var(--accent-cyan); }
+
+/* A setting the run cannot start without. Marked where the choice is made
+   rather than only in a line of text under the start button. */
+.setup-option[data-warn='true'] {
+  border-color: var(--accent-gold);
+}
+
+.setup-option-label {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.setup-option-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setup-summary {
+  text-align: center;
+  margin: 2px 0 0;
+}
+

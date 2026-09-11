@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { useDungeonStore } from '@/state/dungeonStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { attackCardClue, selectableSpellIds } from '@/systems/battleEngine'
-import { isFullyCleared, remainingCount } from '@/systems/bossPlateau'
+import { isFullyCleared, remainingCount, uncleared } from '@/systems/bossPlateau'
 import { WorldImage } from '@/ui/components/WorldImage'
 import { resolveWorld } from '@/systems/worldRegistry'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
+import { BarrierRoulette } from '@/ui/components/BarrierRoulette'
 import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
 import { sceneSlotFor } from '@/config/scenes'
 import { Bar } from '@/ui/components/Bar'
@@ -22,6 +23,7 @@ export function BattleView() {
   const toggleWordInfo = useDungeonStore((s) => s.toggleWordInfo)
   const closePanel = useDungeonStore((s) => s.closePanel)
   const selectCard = useDungeonStore((s) => s.selectCard)
+  const spinBarrier = useDungeonStore((s) => s.spinBarrier)
   const submitAttackAnswer = useDungeonStore((s) => s.submitAttackAnswer)
   const continueAfterPlayerResolve = useDungeonStore((s) => s.continueAfterPlayerResolve)
   const tickBattleTimer = useDungeonStore((s) => s.tickBattleTimer)
@@ -69,6 +71,12 @@ export function BattleView() {
   const barrierUp = battle.isBoss && battle.plateau && !isFullyCleared(battle.plateau)
   const barrierLeft = battle.plateau ? remainingCount(battle.plateau) : 0
   const barrierTotal = battle.plateau?.length ?? 0
+  // The reel's faces: the requirements still standing, in set order.
+  const barrierWords = battle.plateau
+    ? uncleared(battle.plateau)
+        .map((id) => spells.find((sp) => sp.id === id))
+        .filter((sp): sp is (typeof spells)[number] => !!sp)
+    : []
   const lastLog = battle.log[battle.log.length - 1] ?? ''
   const answering = battle.phase === 'player_challenge' || battle.phase === 'enemy_challenge'
 
@@ -152,7 +160,19 @@ export function BattleView() {
         </div>
       )}
 
-      {battle.phase === 'player_select' && (
+      {/* The barrier chooses for you. A fifty-word Dungeon Set turned the
+          hand into a list too long to read, and this is the one fight where
+          every word is selectable at once — so it becomes a spin instead. */}
+      {battle.phase === 'player_select' && barrierUp && (
+        <BarrierRoulette
+          candidates={barrierWords}
+          total={barrierTotal}
+          onSpin={spinBarrier}
+          onLanded={selectCard}
+        />
+      )}
+
+      {battle.phase === 'player_select' && !barrierUp && (
         <>
           <p className="muted" style={{ textAlign: 'center' }}>
             공격에 사용할 주문 단어를 고르세요

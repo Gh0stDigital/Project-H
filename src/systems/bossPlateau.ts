@@ -21,3 +21,23 @@ export function remainingCount(plateau: PlateauRequirement[]): number {
 export function isFullyCleared(plateau: PlateauRequirement[]): boolean {
   return plateau.every((r) => r.cleared)
 }
+
+export function uncleared(plateau: PlateauRequirement[]): string[] {
+  return plateau.filter((r) => !r.cleared).map((r) => r.spellId)
+}
+
+/**
+ * Which word the barrier demands next.
+ *
+ * Drawn only from the requirements still standing, so every spin can
+ * advance the barrier — offering a word already cleared would be a turn the
+ * player could not win. Returns null once nothing is left to clear.
+ */
+export function pickBarrierWord(
+  plateau: PlateauRequirement[],
+  rng: () => number = Math.random,
+): string | null {
+  const left = uncleared(plateau)
+  if (left.length === 0) return null
+  return left[Math.min(left.length - 1, Math.floor(rng() * left.length))]
+}

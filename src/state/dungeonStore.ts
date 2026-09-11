@@ -52,7 +52,7 @@ import {
   markRewardsGranted,
   selectableSpellIds,
 } from '@/systems/battleEngine'
-import { isFullyCleared } from '@/systems/bossPlateau'
+import { isFullyCleared, pickBarrierWord } from '@/systems/bossPlateau'
 import { createPuzzle, guess as applyGuess, type HangmanPuzzle } from '@/systems/hangman'
 import { applyRest, quoteRest } from '@/systems/restArea'
 import { buildRestNpcs, rollNpcGift, markSpoken, findNpc } from '@/systems/restNpcs'
@@ -164,6 +164,8 @@ interface DungeonStore {
 
   // Battle
   selectCard(spellId: string): void
+  /** The word the barrier demands next, or null when it is down. */
+  spinBarrier(): string | null
   submitAttackAnswer(text: string): void
   continueAfterPlayerResolve(): void
   tickBattleTimer(deltaSeconds: number): void
@@ -591,6 +593,12 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
   // -------------------------------------------------------------------------
   // Battle
   // -------------------------------------------------------------------------
+
+  spinBarrier() {
+    const { battle } = get()
+    if (!battle || battle.phase !== 'player_select' || !battle.plateau) return null
+    return pickBarrierWord(battle.plateau)
+  },
 
   selectCard(spellId) {
     const { battle } = get()

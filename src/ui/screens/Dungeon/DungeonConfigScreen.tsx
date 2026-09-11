@@ -6,6 +6,7 @@ import { TopBar } from '@/ui/components/TopBar'
 import { WorldImage } from '@/ui/components/WorldImage'
 import { playableWorlds, incompleteWorlds, resolveWorld } from '@/systems/worldRegistry'
 import { TotemPanel } from '@/ui/components/TotemPanel'
+import { SlidePanel } from '@/ui/components/SlidePanel'
 import { dungeonTiers, type DungeonTierId } from '@/config/balance'
 import { buildDungeonConfig } from '@/systems/dungeonSession'
 import { isUsable } from '@/systems/totemManager'
@@ -43,6 +44,20 @@ export function DungeonConfigScreen() {
   )
   const [tierId, setTierId] = useState<DungeonTierId>(lastSelection.tierId)
   const [worldId, setWorldId] = useState<string | null>(() => playableWorlds()[0]?.id ?? null)
+
+  /**
+   * Which setting is open, if any.
+   *
+   * Every choice used to be laid out at once, which made the screen longer
+   * every time a world or a tier was added — eight stacked sections to
+   * scroll past to reach the button that starts the run. They are buttons
+   * now: the screen shows what is currently chosen, and a tap opens the
+   * choice over the top of it.
+   */
+  const [openSetting, setOpenSetting] = useState<
+    null | 'world' | 'tier' | 'totemSet' | 'dungeonSet' | 'answerMode'
+  >(null)
+  const close = () => setOpenSetting(null)
 
   const totemSet = spellSets.find((s) => s.id === totemSetId) ?? null
   const dungeonSet = spellSets.find((s) => s.id === dungeonSetId) ?? null
@@ -97,146 +112,184 @@ export function DungeonConfigScreen() {
 
       {totem && spellSets.length > 0 && (
         <>
-          {/* 1. Dungeon name — the flavorful headline for the currently
-              selected tier, updates live as the tier picker below changes. */}
+          {/* What this run is: where you are going, and who with. Every
+              other choice is a button below, so this screen stays one
+              screenful however many worlds and tiers exist. */}
           <h2 className="dungeon-name">{tier.name}</h2>
 
-          {/* 2. Dungeon entrance image */}
           <div className="scene-window compact">
             <WorldImage world={world} folder="locations" slot="entrance" alt="던전 입구" />
-            <span className="scene-tag">{tier.label}</span>
+            <span className="scene-tag">{world?.name ?? tier.label}</span>
           </div>
 
-          {/* 3. Active Totem — avatar + info, plus which deck it fights with */}
-          {/* Not compact here: this is the screen where you take in who you
-              are about to play as, not a status strip beside a scene. */}
           <TotemPanel totem={totem} />
 
-          <div className="config-row">
-            <div className="field">
-              <label htmlFor="totem-set-select">전투 덱</label>
-              <select id="totem-set-select" value={totemSetId ?? ''} onChange={(e) => setTotemSetId(e.target.value || null)}>
-                <option value="">— 선택 —</option>
-                {spellSets.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.spellIds.length})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 6. Dungeon Tendency — the word pool this run draws from */}
-            <div className="field">
-              <label htmlFor="dungeon-set-select">성향 (단어)</label>
-              <select id="dungeon-set-select" value={dungeonSetId ?? ''} onChange={(e) => setDungeonSetId(e.target.value || null)}>
-                <option value="">— 선택 —</option>
-                {spellSets.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.spellIds.length})
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="setup-grid">
+            <button className="setup-option" onClick={() => setOpenSetting('world')}>
+              <span className="setup-option-label">세계</span>
+              <span className="setup-option-value">{world?.name ?? '— 선택 —'}</span>
+            </button>
+            <button className="setup-option" onClick={() => setOpenSetting('tier')}>
+              <span className="setup-option-label">던전 등급</span>
+              <span className="setup-option-value">{tier.label}</span>
+            </button>
+            <button
+              className="setup-option"
+              data-warn={totemSet && totemSet.spellIds.length > 0 ? undefined : true}
+              onClick={() => setOpenSetting('totemSet')}
+            >
+              <span className="setup-option-label">전투 덱</span>
+              <span className="setup-option-value">
+                {totemSet ? `${totemSet.name} (${totemSet.spellIds.length})` : '— 선택 —'}
+              </span>
+            </button>
+            <button
+              className="setup-option"
+              data-warn={dungeonSet && dungeonSet.spellIds.length > 0 ? undefined : true}
+              onClick={() => setOpenSetting('dungeonSet')}
+            >
+              <span className="setup-option-label">성향 (단어)</span>
+              <span className="setup-option-value">
+                {dungeonSet ? `${dungeonSet.name} (${dungeonSet.spellIds.length})` : '— 선택 —'}
+              </span>
+            </button>
+            <button className="setup-option wide" onClick={() => setOpenSetting('answerMode')}>
+              <span className="setup-option-label">영어 답 입력 방식</span>
+              <span className="setup-option-value">
+                {englishAnswerMode === 'choice' ? '단어 고르기' : '철자 맞추기'}
+              </span>
+            </button>
           </div>
 
-          {/* 4. World selection */}
-          <div className="field">
-            <label>세계</label>
-            <div className="tier-card-list row">
-              {worlds.map((w) => (
+          {dungeonSet && (
+            <p className="faint setup-summary">
+              단어 {dungeonSet.spellIds.length}개 중 {Math.min(dungeonSet.spellIds.length, tier.wordLimit)}개를 사용합니다 ·
+              적 피해 ×{tier.enemyDamageMultiplier}
+            </p>
+          )}
+
+          {openSetting === 'world' && (
+            <SlidePanel title="세계" onClose={close}>
+              <div className="tier-card-list">
+                {worlds.map((w) => (
+                  <button
+                    key={w.id}
+                    className="tier-card stacked"
+                    data-selected={world?.id === w.id}
+                    onClick={() => {
+                      setWorldId(w.id)
+                      close()
+                    }}
+                  >
+                    <div className="tier-card-name">{w.name}</div>
+                    <div className="tier-card-meta faint">
+                      {w.enemies.length}종의 적 · {w.npcs.length}명의 인물
+                    </div>
+                    {w.description && <div className="tier-card-meta faint">{w.description}</div>}
+                  </button>
+                ))}
+              </div>
+              {unfinished.length > 0 && (
+                // Shown to whoever is building a world, not hidden away in a
+                // console they may never open.
+                <div className="world-unfinished">
+                  {unfinished.map((w) => (
+                    <div key={w.id} className="world-unfinished-item">
+                      <span className="label">{w.name} — 미완성</span>
+                      <span className="faint">
+                        {w.missing.slice(0, 3).join(', ')}
+                        {w.missing.length > 3 ? ` 외 ${w.missing.length - 3}개` : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SlidePanel>
+          )}
+
+          {openSetting === 'tier' && (
+            <SlidePanel title="던전 등급" onClose={close}>
+              <div className="tier-card-list">
+                {dungeonTiers.map((t) => (
+                  <button
+                    key={t.id}
+                    className="tier-card stacked"
+                    data-selected={tierId === t.id}
+                    onClick={() => {
+                      setTierId(t.id)
+                      close()
+                    }}
+                  >
+                    <div className="tier-card-name">{t.name}</div>
+                    <div className="tier-card-meta faint">{t.label}</div>
+                    <div className="tier-card-meta faint">{t.description}</div>
+                    <div className="tier-card-meta faint">
+                      단어 {t.wordLimit}개 · 보스 ~{t.minEventsBeforeBossEligible}개 사건 · 적 피해 ×
+                      {t.enemyDamageMultiplier}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </SlidePanel>
+          )}
+
+          {openSetting === 'totemSet' && (
+            <SlidePanel title="전투 덱" onClose={close}>
+              <p className="faint">토템이 공격에 사용하는 주문 세트입니다.</p>
+              <SpellSetList
+                sets={spellSets}
+                selectedId={totemSetId}
+                onPick={(id) => {
+                  setTotemSetId(id)
+                  close()
+                }}
+              />
+            </SlidePanel>
+          )}
+
+          {openSetting === 'dungeonSet' && (
+            <SlidePanel title="성향 (단어)" onClose={close}>
+              <p className="faint">던전이 이번 판에 가르칠 단어들입니다. 보스의 방벽도 여기서 만들어집니다.</p>
+              <SpellSetList
+                sets={spellSets}
+                selectedId={dungeonSetId}
+                onPick={(id) => {
+                  setDungeonSetId(id)
+                  close()
+                }}
+              />
+            </SlidePanel>
+          )}
+
+          {openSetting === 'answerMode' && (
+            <SlidePanel title="영어 답 입력 방식" onClose={close}>
+              <div className="answer-mode-row">
                 <button
-                  key={w.id}
-                  className="tier-card"
-                  data-selected={world?.id === w.id}
-                  onClick={() => setWorldId(w.id)}
+                  className="answer-mode-option"
+                  data-selected={englishAnswerMode === 'choice'}
+                  onClick={() => {
+                    updateSettings({ englishAnswerMode: 'choice' })
+                    close()
+                  }}
                 >
-                  <div className="tier-card-name">{w.name}</div>
-                  <div className="tier-card-meta faint">
-                    {w.enemies.length}종의 적 · {w.npcs.length}명의 인물
-                  </div>
+                  <span className="label">단어 고르기</span>
+                  <span className="sub">뜻을 통째로 골라 답합니다</span>
                 </button>
-              ))}
-            </div>
-            {world?.description && <p className="faint">{world.description}</p>}
-            {unfinished.length > 0 && (
-              // Shown to whoever is building a world, not hidden away in a
-              // console they may never open.
-              <div className="world-unfinished">
-                {unfinished.map((w) => (
-                  <div key={w.id} className="world-unfinished-item">
-                    <span className="label">{w.name} — 미완성</span>
-                    <span className="faint">{w.missing.slice(0, 3).join(', ')}{w.missing.length > 3 ? ` 외 ${w.missing.length - 3}개` : ''}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* 5. Dungeon tier selection */}
-          <div className="field">
-            <label>던전 등급</label>
-            <div className="tier-card-list row">
-              {dungeonTiers.map((t) => (
                 <button
-                  key={t.id}
-                  className="tier-card"
-                  data-selected={tierId === t.id}
-                  onClick={() => setTierId(t.id)}
+                  className="answer-mode-option"
+                  data-selected={englishAnswerMode === 'spell'}
+                  onClick={() => {
+                    updateSettings({ englishAnswerMode: 'spell' })
+                    close()
+                  }}
                 >
-                  <div className="tier-card-name">{t.name}</div>
-                  <div className="tier-card-meta faint">{t.label}</div>
+                  <span className="label">철자 맞추기</span>
+                  <span className="sub">글자를 하나씩 배열합니다</span>
                 </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 6. How English answers are given */}
-          <div className="field">
-            <label>영어 답 입력 방식</label>
-            <div className="answer-mode-row">
-              <button
-                className="answer-mode-option"
-                data-selected={englishAnswerMode === 'choice'}
-                onClick={() => updateSettings({ englishAnswerMode: 'choice' })}
-              >
-                <span className="label">단어 고르기</span>
-                <span className="sub">뜻을 통째로 골라 답합니다</span>
-              </button>
-              <button
-                className="answer-mode-option"
-                data-selected={englishAnswerMode === 'spell'}
-                onClick={() => updateSettings({ englishAnswerMode: 'spell' })}
-              >
-                <span className="label">철자 맞추기</span>
-                <span className="sub">글자를 하나씩 배열합니다</span>
-              </button>
-            </div>
-            <p className="faint">한국어 답은 언제나 음절로 조합합니다.</p>
-          </div>
-
-          {/* 7. Dungeon information display */}
-          <div className="dungeon-info-panel">
-            <p className="dungeon-info-desc">{tier.description}</p>
-            <div className="stats-grid">
-              <div className="stat-tile">
-                <div className="faint">단어 수 제한</div>
-                <div className="value">{tier.wordLimit}</div>
               </div>
-              <div className="stat-tile">
-                <div className="faint">보스 해금</div>
-                <div className="value">~{tier.minEventsBeforeBossEligible}개 사건</div>
-              </div>
-              <div className="stat-tile">
-                <div className="faint">적 피해</div>
-                <div className="value">×{tier.enemyDamageMultiplier}</div>
-              </div>
-            </div>
-            {dungeonSet && (
-              <p className="faint">
-                단어 {dungeonSet.spellIds.length}개 중 {Math.min(dungeonSet.spellIds.length, tier.wordLimit)}개를 사용합니다.
-              </p>
-            )}
-          </div>
+              <p className="faint">한국어 답은 언제나 음절로 조합합니다.</p>
+            </SlidePanel>
+          )}
 
           {/* 8. Enter dungeon. Pinned to the bottom of the screen rather than
               placed after the settings: this screen grows every time a world
@@ -250,6 +303,38 @@ export function DungeonConfigScreen() {
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+/** The spell-set list, identical in both set pickers. */
+function SpellSetList({
+  sets,
+  selectedId,
+  onPick,
+}: {
+  sets: { id: string; name: string; spellIds: string[] }[]
+  selectedId: string | null
+  onPick: (id: string) => void
+}) {
+  if (sets.length === 0) return <p className="faint">주문 세트가 없습니다 — 도감에서 먼저 만드세요.</p>
+  return (
+    <div className="tier-card-list">
+      {sets.map((set) => (
+        <button
+          key={set.id}
+          className="tier-card stacked"
+          data-selected={selectedId === set.id}
+          // An empty set cannot carry a run, so it is listed but not usable.
+          disabled={set.spellIds.length === 0}
+          onClick={() => onPick(set.id)}
+        >
+          <div className="tier-card-name">{set.name}</div>
+          <div className="tier-card-meta faint">
+            {set.spellIds.length === 0 ? '비어 있음' : `단어 ${set.spellIds.length}개`}
+          </div>
+        </button>
+      ))}
     </div>
   )
 }
