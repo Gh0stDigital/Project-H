@@ -2,6 +2,8 @@ import { useUiStore } from '@/state/uiStore'
 import { useGameAudio } from '@/ui/hooks/useGameAudio'
 import { useSoundtrack } from '@/ui/hooks/useSoundtrack'
 import { useUiSounds } from '@/ui/hooks/useUiSounds'
+import { useTransitions } from '@/ui/hooks/useTransitions'
+import { TransitionCurtain } from '@/ui/components/TransitionCurtain'
 import { MainMenuScreen } from '@/ui/screens/MainMenu/MainMenuScreen'
 import { CompendiumScreen } from '@/ui/screens/Compendium/CompendiumScreen'
 import { TotemScreen } from '@/ui/screens/Totem/TotemScreen'
@@ -16,6 +18,7 @@ export default function App() {
   useGameAudio()
   useSoundtrack()
   useUiSounds()
+  useTransitions()
 
   return (
     <div className="app-shell">
@@ -24,6 +27,7 @@ export default function App() {
       {screen === 'totem' && <TotemScreen />}
       {screen === 'dungeon' && <DungeonScreen />}
       {screen === 'records' && <RecordsScreen />}
+      <TransitionCurtain />
     </div>
   )
 }

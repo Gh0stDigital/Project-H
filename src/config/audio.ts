@@ -66,10 +66,21 @@ export const musicGain: Partial<Record<MusicCue, number>> = {
 }
 
 export const ambientGain: Partial<Record<AmbientCue, number>> = {
-  wind: 0.7,
-  drip: 0.5,
-  night: 0.6,
+  wind: 0.55,
+  drip: 0.4,
+  night: 0.5,
 }
+
+/**
+ * The whole ambience bus, under the music.
+ *
+ * Two beds run at once — a corridor is wind *and* dripping water — so their
+ * levels add, and at full bus gain the weather was sitting on top of the
+ * track instead of behind it. This is the one knob to turn when ambience is
+ * too loud; the per-cue gains above are for balancing the beds against each
+ * other.
+ */
+export const ambientBusGain = 0.45
 
 export const audioTiming = {
   /** Music crossfade. Long enough not to cut, short enough not to smear. */

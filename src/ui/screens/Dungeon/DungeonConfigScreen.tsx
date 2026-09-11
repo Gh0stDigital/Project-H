@@ -9,6 +9,9 @@ import { TotemPanel } from '@/ui/components/TotemPanel'
 import { dungeonTiers, type DungeonTierId } from '@/config/balance'
 import { buildDungeonConfig } from '@/systems/dungeonSession'
 import { isUsable } from '@/systems/totemManager'
+import { audio } from '@/systems/audioEngine'
+import { curtain } from '@/state/transitionStore'
+import { curtainTiming } from '@/config/transitions'
 
 export function DungeonConfigScreen() {
   const goTo = useUiStore((s) => s.goTo)
@@ -59,7 +62,17 @@ export function DungeonConfigScreen() {
     if (!totem || !totemSet || !dungeonSet || !world) return
     setLastSelection({ totemSpellSetId: totemSet.id, dungeonSpellSetId: dungeonSet.id, tierId })
     const config = buildDungeonConfig(totem.id, totemSet.id, dungeonSet.id, dungeonSet.spellIds, tier, world.id)
-    beginDungeon(config)
+    // The shrine sting first, then the screen goes dark on top of it, and the
+    // dungeon is built behind the curtain. The dungeon's own music does not
+    // start until the reveal has finished — useSoundtrack holds it — so the
+    // sting plays into silence rather than being buried under a track
+    // starting at the same instant.
+    audio.play('shrine')
+    void curtain({
+      label: world.name,
+      holdMs: curtainTiming.hold.dungeonEnter,
+      onCovered: () => beginDungeon(config),
+    })
   }
 
   return (
@@ -230,7 +243,7 @@ export function DungeonConfigScreen() {
               is added, and the button that starts the run is the one thing
               that must never end up below the fold. */}
           <div className="dungeon-start">
-            <button className="btn btn-primary btn-block" disabled={!canStart} onClick={handleStart}>
+            <button className="btn btn-primary btn-block" data-sfx="none" disabled={!canStart} onClick={handleStart}>
               던전 입장
             </button>
             {!canStart && <p className="faint">두 역할 모두에 비어 있지 않은 주문 세트를 골라야 계속할 수 있습니다.</p>}

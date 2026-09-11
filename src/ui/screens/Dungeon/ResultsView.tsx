@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { curtain } from '@/state/transitionStore'
+import { curtainTiming } from '@/config/transitions'
 import { useUiStore } from '@/state/uiStore'
 import { useDungeonStore } from '@/state/dungeonStore'
 import { getItemDef } from '@/config/items'
@@ -95,8 +97,17 @@ export function ResultsView() {
       <button
         className="btn btn-primary btn-block"
         onClick={() => {
-          exitToMenu()
-          goTo('menu')
+          // Both halves of leaving happen behind the curtain: the run is torn
+          // down and the menu is mounted while the screen is black, so the
+          // player never sees the results screen empty itself out. The menu
+          // theme comes back on the reveal rather than over the results.
+          void curtain({
+            holdMs: curtainTiming.hold.toMenu,
+            onCovered: () => {
+              exitToMenu()
+              goTo('menu')
+            },
+          })
         }}
       >
         메인 메뉴로

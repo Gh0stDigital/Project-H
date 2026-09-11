@@ -3320,12 +3320,16 @@ select:focus {
 
 /* ---- Totem portrait picker ---- */
 
-/* The hero frame is a button now — it keeps its look, gains a hint. */
+/* The hero frame is a button now — it keeps its look, gains a hint.
+   display must stay flex: this rule outranks .totem-hero-frame above it
+   (element + class beats class), and a `block` here quietly cancelled that
+   rule's justify-content, leaving the portrait flush against the left edge
+   of a button that was itself perfectly centred. */
 button.totem-hero-frame {
   appearance: none;
   cursor: pointer;
   font-family: inherit;
-  display: block;
+  display: flex;
   padding: 0;
   background: none;
   border: 0;
@@ -4216,4 +4220,99 @@ button.totem-hero-frame {
   font-size: 11.5px;
   line-height: 1.35;
   word-break: break-word;
+}
+
+/* ---- Screen curtain ---- */
+
+/* One overlay for every transition in the game. Idle it is not merely
+   transparent but hidden, so it can never quietly eat a tap. */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-deep, #05070c);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--curtain-ms, 420ms) ease;
+}
+
+.curtain.is-covering,
+.curtain.is-covered,
+.curtain.is-revealing {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.curtain.is-covering,
+.curtain.is-covered {
+  opacity: 1;
+}
+
+/* Revealing is the same element fading back out; the class change is what
+   starts it, so the duration switches with it. */
+.curtain.is-revealing {
+  opacity: 0;
+}
+
+.curtain-label {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: var(--accent-cyan, #4fe3f0);
+  opacity: 0;
+  animation: curtain-label-in 1.6s ease-in-out infinite;
+}
+
+@keyframes curtain-label-in {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.9; }
+}
+
+/* A battle does not fade in from black — it snaps, flashes, and clears. */
+.curtain-battle {
+  background: var(--bg-deep, #05070c);
+}
+
+.curtain-battle.is-covering,
+.curtain-battle.is-covered {
+  animation: battle-flash 260ms ease-out;
+}
+
+@keyframes battle-flash {
+  0% { background: #eaf6ff; }
+  35% { background: #2d4a63; }
+  100% { background: var(--bg-deep, #05070c); }
+}
+
+/* Two bars sweeping apart as the battle screen arrives. Drawn on the
+   curtain itself, so there is nothing extra in the tree when it is idle. */
+.curtain-battle::before,
+.curtain-battle::after {
+  content: '';
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(79, 227, 240, 0.16), transparent);
+  transform: translateY(0);
+  transition: transform var(--curtain-ms, 420ms) ease-in;
+}
+
+.curtain-battle::before { top: 0; }
+.curtain-battle::after { bottom: 0; background: linear-gradient(0deg, rgba(79, 227, 240, 0.16), transparent); }
+
+.curtain-battle.is-revealing::before { transform: translateY(-100%); }
+.curtain-battle.is-revealing::after { transform: translateY(100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Still covers — the swap underneath still has to be hidden — but without
+     the sweep or the flash. */
+  .curtain-battle.is-covering,
+  .curtain-battle.is-covered { animation: none; }
+  .curtain-battle::before,
+  .curtain-battle::after { display: none; }
+  .curtain-label { animation: none; opacity: 0.8; }
 }

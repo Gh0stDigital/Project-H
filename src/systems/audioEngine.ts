@@ -31,6 +31,7 @@
 
 import {
   ambientGain,
+  ambientBusGain,
   audioPath,
   audioTiming,
   musicGain,
@@ -242,6 +243,9 @@ export class AudioEngine {
     if (!this.master) return
     this.master.gain.value = this.volumes.muted ? 0 : 1
     this.musicBus!.gain.value = this.volumes.music
+    // Ambience hangs off the music bus, so this is a level *under* the
+    // player's background slider rather than a second slider.
+    this.ambientBus!.gain.value = ambientBusGain
     this.sfxBus!.gain.value = this.volumes.sfx
   }
 

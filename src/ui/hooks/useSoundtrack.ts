@@ -3,6 +3,7 @@ import { audio } from '@/systems/audioEngine'
 import { useDungeonStore } from '@/state/dungeonStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { useUiStore } from '@/state/uiStore'
+import { useTransitionStore } from '@/state/transitionStore'
 import type { MusicCue, AmbientCue } from '@/config/audio'
 
 /**
@@ -52,6 +53,8 @@ export function useSoundtrack(): void {
   const run = useDungeonStore((s) => s.run)
   const battle = useDungeonStore((s) => s.battle)
   const totems = usePersistentStore((s) => s.totems)
+  const phase = useTransitionStore((s) => s.phase)
+  const lastOutcome = useDungeonStore((s) => s.lastOutcome)
 
   const totem = totems.find((t) => t.id === run?.config.totemId)
   const previous = useRef({
@@ -64,6 +67,8 @@ export function useSoundtrack(): void {
     keyFound: false,
     bossDoorFound: false,
     lastResult: null as string | null,
+    eventId: null as string | null,
+    outcomeNonce: 0,
   })
 
   // ---- Beds -------------------------------------------------------------
@@ -71,9 +76,28 @@ export function useSoundtrack(): void {
     audio.setWorld(run?.config.worldId ?? null)
   }, [run?.config.worldId])
 
+  // Music waits for the curtain.
+  //
+  // A track starting at the same instant as the screen goes black is the
+  // thing that made entering a dungeon feel abrupt: the sting, the old theme
+  // and the new theme all landed together. So the bed stops as the curtain
+  // covers, and the next one only starts once the reveal has finished and
+  // the phase is idle again. Nothing here needs to know *which* transition
+  // is running — only whether one is.
   useEffect(() => {
+    // Read live rather than from the closure. A battle starting sets the
+    // curtain in a layout effect and the run state in the same commit, so
+    // the `phase` this effect closed over is still 'idle' on exactly the
+    // tick that matters — and the battle bed would start for one frame
+    // before being stopped again.
+    const current = useTransitionStore.getState().phase
+    if (current === 'covering' || current === 'covered') {
+      audio.setMusic(null)
+      return
+    }
+    if (current !== 'idle') return
     audio.setMusic(musicFor(screen, run?.state))
-  }, [screen, run?.state])
+  }, [screen, run?.state, phase])
 
   useEffect(() => {
     audio.setAmbience(screen === 'dungeon' ? ambienceFor(run?.state) : [])
@@ -121,10 +145,34 @@ export function useSoundtrack(): void {
     if (totem && totem.money > p.money && p.money > 0) audio.play('reward')
     p.money = totem?.money ?? 0
 
+    // A monster turning up on the map, which is a different moment from the
+    // battle actually starting — the player sees it before they walk into it.
+    const eventId = run?.currentEvent?.id ?? null
+    if (eventId && eventId !== p.eventId) {
+      if (run?.currentEvent?.type === 'battle') audio.play('enemyAppear')
+      p.eventId = eventId
+    }
+
+    // Chests and traps resolve into the same state whether they went well or
+    // badly, so the store says which out loud.
+    if (lastOutcome && lastOutcome.nonce !== p.outcomeNonce) {
+      if (lastOutcome.kind === 'chest_opened') audio.play('chestOpen')
+      if (lastOutcome.kind === 'chest_failed') {
+        // The lid shutting, then the mistake. Staggered, because the two
+        // landing on the same millisecond is one muddy noise rather than a
+        // chest closing and an answer being wrong.
+        audio.play('cancel')
+        setTimeout(() => audio.play('wrong'), 180)
+      }
+      if (lastOutcome.kind === 'trap_sprung') audio.play('trapTrigger')
+      if (lastOutcome.kind === 'trap_avoided') audio.play('correct')
+      p.outcomeNonce = lastOutcome.nonce
+    }
+
     if (run?.keyFound && !p.keyFound) audio.play('discovery')
     p.keyFound = run?.keyFound ?? false
 
     if (run?.bossDoorFound && !p.bossDoorFound) audio.play('discovery')
     p.bossDoorFound = run?.bossDoorFound ?? false
-  }, [run, battle, totem])
+  }, [run, battle, totem, lastOutcome])
 }

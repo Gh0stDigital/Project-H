@@ -80,6 +80,22 @@ export function challengedCount(run: DungeonRunState): number {
 /** Which slide-over panel is open on top of the dungeon, if any. */
 export type DungeonPanel = 'words' | 'items' | 'status'
 
+/**
+ * What just happened in an event, for the things that react to it rather
+ * than to state — currently only the soundtrack.
+ *
+ * A chest opening and a chest breaking leave the run in the same state
+ * (`treasure_result`) and differ only in their outcome text, so there was
+ * nothing to make a noise about without saying it out loud. The nonce is
+ * what lets the same outcome twice in a row fire twice.
+ */
+export type EventOutcome = 'chest_opened' | 'chest_failed' | 'trap_avoided' | 'trap_sprung'
+
+export interface EventOutcomeSignal {
+  kind: EventOutcome
+  nonce: number
+}
+
 /** Sub-mode within an event that the run state alone doesn't capture. */
 export type EventStage =
   | 'intro'
@@ -96,6 +112,7 @@ export type EventStage =
 
 interface DungeonStore {
   screenPhase: 'config' | 'run' | 'results'
+  lastOutcome: EventOutcomeSignal | null
   run: DungeonRunState | null
   battle: BattleState | null
   activePanel: DungeonPanel | null
@@ -231,6 +248,7 @@ function damageTotem(totemId: string, amount: number): boolean {
 
 export const useDungeonStore = create<DungeonStore>()((set, get) => ({
   screenPhase: 'config',
+  lastOutcome: null,
   run: null,
   battle: null,
   activePanel: null,
@@ -813,6 +831,7 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
       run: setOutcomeText(run, ['숨을 멈추고 — 조심스레 비켜섭니다. 함정은 끝내 작동하지 않았습니다.']),
       stage: 'trap_result',
       submitting: false,
+      lastOutcome: signal('trap_avoided'),
     })
     return
   }
@@ -828,8 +847,15 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
     ]),
     stage: 'trap_result',
     submitting: false,
+    lastOutcome: signal('trap_sprung'),
   })
   if (defeated) finishRun(set, get, { abandoned: false, totemDefeated: true })
+}
+
+/** A fresh signal, so the same outcome twice running is heard twice. */
+let outcomeNonce = 0
+function signal(kind: EventOutcome): EventOutcomeSignal {
+  return { kind, nonce: ++outcomeNonce }
 }
 
 function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
@@ -838,6 +864,7 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
       run: setOutcomeText(run, ['자물쇠가 딱 하고 부러집니다.', '이 상자는 이제 영영 열리지 않습니다.']),
       stage: 'treasure_result',
       submitting: false,
+      lastOutcome: signal('chest_failed'),
     })
     return
   }
@@ -867,6 +894,7 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
     run: setOutcomeText(applyRewardBundle(run, reward), ['자물쇠가 풀립니다. 뚜껑이 열립니다.']),
     stage: 'treasure_result',
     submitting: false,
+    lastOutcome: signal('chest_opened'),
   })
 }
 
