@@ -27,7 +27,29 @@ export type SceneKind =
   | 'entrance'
 
 /** The plain corridors, used for anything without a room of its own. */
-const CORRIDORS = ['corridor1', 'corridor2'] as const
+const CORRIDORS = ['corridor1', 'corridor2', 'corridor3'] as const
+
+/**
+ * Arenas. Worlds name their first one either way — dragon-king ships
+ * `battle`, parasite-garden ships `battle1` — and only `battle` was ever
+ * listed, so parasite-garden's first arena could not be chosen at all.
+ */
+const BATTLEGROUNDS = ['battle', 'battle1', 'battle2'] as const
+
+/**
+ * Situations that must not settle for a fallback when the world ships art
+ * made for them.
+ *
+ * A fight belongs in an arena. Leaving the corridors in the same list as
+ * peers meant they were picked on their share of the odds rather than as a
+ * last resort: parasite-garden has one listed arena against three corridors,
+ * so three fights in four happened in a passage. The corridors stay in the
+ * lists below for a world like `starter`, which ships no arena at all.
+ */
+const MUST_PREFER: Partial<Record<SceneKind, readonly string[]>> = {
+  battle: BATTLEGROUNDS,
+  battle_screen: BATTLEGROUNDS,
+}
 
 /**
  * Situations whose candidates are peers rather than a first choice with
@@ -46,11 +68,10 @@ const sceneSlots: Record<SceneKind, readonly string[]> = {
   standby: CORRIDORS,
   treasure: ['treasureRoom', 'keyRoom', ...CORRIDORS],
   trap: ['trapRoom', 'shrineRoom', ...CORRIDORS],
-  // The encounter, met in a corridor or at a shrine.
-  battle: ['battle', 'battle2', 'shrineRoom', ...CORRIDORS],
-  // The fight itself: the arena, not somewhere walked through. Falls back to
-  // a corridor for a world that ships no battle backdrop.
-  battle_screen: ['battle', 'battle2', ...CORRIDORS],
+  // The encounter, and the fight it leads to. Both want an arena; the
+  // shrine and the corridors are what a world without one gets.
+  battle: [...BATTLEGROUNDS, 'shrineRoom', ...CORRIDORS],
+  battle_screen: [...BATTLEGROUNDS, ...CORRIDORS],
   boss_battle: ['bossRoom'],
   boss_door: ['bossRoom'],
   rest: ['restRoom'],
@@ -90,6 +111,12 @@ function hash(seed: string): number {
 export function sceneSlotFor(world: WorldPack, kind: SceneKind, seed = ''): string | null {
   const available = sceneSlots[kind].filter((slot) => world.locations.includes(slot))
   if (available.length === 0) return resolveSlot(world, 'locations', CORRIDORS)
+
+  // Where a situation has art of its own, it uses it — evenly across
+  // however many the world ships, and never a fallback alongside them.
+  const preferred = MUST_PREFER[kind]?.filter((slot) => world.locations.includes(slot)) ?? []
+  if (preferred.length > 0) return preferred[hash(seed) % preferred.length]
+
   if (available.length === 1) return available[0]
 
   const h = hash(seed)

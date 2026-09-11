@@ -60,3 +60,41 @@ describe('world packs', () => {
     }
   })
 })
+
+describe('fights happen in arenas', () => {
+  const ARENAS = ['battle', 'battle1', 'battle2']
+  const seeds = Array.from({ length: 300 }, (_, i) => `evt-${i}`)
+
+  for (const world of worlds) {
+    const arenas = world.locations.filter((slot) => ARENAS.includes(slot))
+    // `starter` ships no arena; corridors are a real fallback there, not a
+    // shortfall, so it is excluded rather than asserted against.
+    const hasArena = arenas.length > 0
+
+    describe.skipIf(!hasArena)(world.id, () => {
+      it('never sends a fight to a corridor', () => {
+        // parasite-garden had one listed arena against three corridors and
+        // picked evenly between them, so three fights in four were a passage.
+        for (const kind of ['battle', 'battle_screen'] as const) {
+          const picked = seeds.map((seed) => sceneSlotFor(world, kind, seed))
+          for (const slot of picked) expect(arenas, `${world.id}/${kind}`).toContain(slot!)
+        }
+      })
+
+      it('uses every arena the world ships', () => {
+        // battle1 was in no candidate list at all, so parasite-garden's first
+        // arena could never be chosen however many times the game rolled.
+        const picked = new Set(seeds.map((seed) => sceneSlotFor(world, 'battle_screen', seed)))
+        for (const arena of arenas) expect(picked, `${world.id}`).toContain(arena)
+      })
+    })
+  }
+
+  it('still finds a backdrop for a world with no arena at all', () => {
+    const bare = worlds.find((w) => !w.locations.some((s) => ARENAS.includes(s)))
+    if (!bare) return
+    const slot = sceneSlotFor(bare, 'battle_screen', 'seed')
+    expect(slot).not.toBeNull()
+    expect(bare.locations).toContain(slot!)
+  })
+})
