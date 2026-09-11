@@ -4,7 +4,7 @@
 
 export const assetManifest = {
   spells: ['default', 'arcane', 'earth', 'fire', 'water', 'wind'],
-  totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'silverKnight'],
+  totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'SilverFinal'],
   ui: ['title'],
 } as const
 
@@ -23,6 +23,6 @@ export const assetFiles: Readonly<Record<string, string>> = {
   "totems/Dolbae": "Dolbae.webp",
   "totems/Magic_Parasite_Zoah": "Magic_Parasite_Zoah.webp",
   "totems/parasite_hunter_Yaharl": "parasite_hunter_Yaharl.webp",
-  "totems/silverKnight": "silverKnight.webp",
+  "totems/SilverFinal": "SilverFinal.webp",
   "ui/title": "title.webp"
 }

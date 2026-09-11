@@ -44,11 +44,13 @@ const sfxOverrides: Partial<Record<SfxCue, Partial<SfxSpec>>> = {
   discovery: { minInterval: 0.5, detune: 0 },
   bossDoor: { gain: 1, minInterval: 0.8, detune: 0 },
   battleStart: { gain: 1, minInterval: 0.8, detune: 0 },
-  shrine: { minInterval: 0.8, detune: 0 },
+  // The quietest file in the pack by average level — a sparse, reverby
+  // sting whose peak is as high as everything else but whose body is not.
+  shrine: { gain: 1, minInterval: 0.8, detune: 0 },
   // Fired on nearly every tap, so they sit back in the mix.
   confirm: { gain: 0.55, minInterval: 0.05 },
   cancel: { gain: 0.55, minInterval: 0.05 },
-  move: { gain: 0.6 },
+  move: { gain: 0.78 },
   npcTalk: { gain: 0.6, detune: 0.12 },
   diceRoll: { gain: 0.7, minInterval: 0.3, detune: 0 },
   correct: { gain: 0.95, minInterval: 0.15, detune: 0.03 },
@@ -80,7 +82,7 @@ export const ambientGain: Partial<Record<AmbientCue, number>> = {
  * too loud; the per-cue gains above are for balancing the beds against each
  * other.
  */
-export const ambientBusGain = 0.45
+export const ambientBusGain = 0.3
 
 export const audioTiming = {
   /** Music crossfade. Long enough not to cut, short enough not to smear. */

@@ -80,6 +80,7 @@ export function startDungeon(config: DungeonConfig): DungeonRunState {
     keyFound: false,
     keyUsed: false,
     bossDoorFound: false,
+    bossDoorPressure: 0,
     keyRoomUnlocked: false,
     keyRoomSeen: false,
     keyRoomPressure: 0,
@@ -167,6 +168,7 @@ export function generateNextEvent(
       keyRoomSeen: run.keyRoomSeen,
       keyRoomUnlocked: run.keyRoomUnlocked,
       keyRoomPressure: run.keyRoomPressure,
+      bossDoorPressure: run.bossDoorPressure,
     },
     rng,
   )
@@ -214,6 +216,7 @@ export function generateNextEvent(
     modifiers: tickModifiers(run.modifiers),
     keyRoomSeen: run.keyRoomSeen || type === 'key_room',
     keyRoomPressure: roll.nextKeyRoomPressure,
+    bossDoorPressure: roll.nextBossDoorPressure,
     bossDoorFound: run.bossDoorFound || type === 'boss_door',
     restAreaFound: run.restAreaFound || type === 'rest',
     stats: {
@@ -366,6 +369,20 @@ export function recordLevelUp(
 
 export function setOutcomeText(run: DungeonRunState, lines: string[]): DungeonRunState {
   return { ...run, lastOutcomeText: lines }
+}
+
+/**
+ * Repaints the current event with the art for how it turned out.
+ *
+ * Every world ships a treasureOpened and a trap2, and nothing was ever
+ * pointing at them: a chest you unlocked went on showing the same padlocked
+ * box as before you answered, which read as the game not having registered
+ * the win. The slot is a plain string so a world that lacks it falls back
+ * the way any missing art does, rather than throwing.
+ */
+export function setEventImage(run: DungeonRunState, slot: string): DungeonRunState {
+  if (!run.currentEvent) return run
+  return { ...run, currentEvent: { ...run.currentEvent, image: { folder: 'events', slot } } }
 }
 
 export type { DungeonEventType }

@@ -23,6 +23,7 @@ import {
   recordRestUsed,
   recordWordAttempt,
   setOutcomeText,
+  setEventImage,
   setStandbyNotice,
   setState,
   startEventTimer,
@@ -840,7 +841,7 @@ function resolveTrap(set: SetFn, get: GetFn, run: DungeonRunState, correct: bool
   const defeated = damageTotem(run.config.totemId, damage)
   const totem = usePersistentStore.getState().totems.find((t) => t.id === run.config.totemId)
   set({
-    run: setOutcomeText(run, [
+    run: setOutcomeText(setEventImage(run, 'trap2'), [
       timedOut ? '너무 늦었습니다 — 장치가 작동합니다!' : '틀렸습니다! 장치가 작동합니다!',
       `${damage}의 피해를 입었습니다.`,
       `HP: ${Math.max(0, totem?.currentHp ?? 0)}/${totem?.maxHp ?? 0}`,
@@ -874,7 +875,7 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
     const tier = tierFor(run)
     const mimic = spawnMimic(resolveWorld(run.config.worldId)!, run.currentEvent!.id, tier)
     set({
-      run: setOutcomeText(setState(run, 'Battle'), mimicRevealText),
+      run: setOutcomeText(setEventImage(setState(run, 'Battle'), 'treasureMimic'), mimicRevealText),
       battle: startBattle(mimic, totemDeckIds(run), null),
       stage: 'intro',
       submitting: false,
@@ -891,7 +892,9 @@ function resolveTreasure(set: SetFn, run: DungeonRunState, correct: boolean) {
   creditReward(run.config.totemId, reward)
 
   set({
-    run: setOutcomeText(applyRewardBundle(run, reward), ['자물쇠가 풀립니다. 뚜껑이 열립니다.']),
+    run: setOutcomeText(setEventImage(applyRewardBundle(run, reward), 'treasureOpened'), [
+      '자물쇠가 풀립니다. 뚜껑이 열립니다.',
+    ]),
     stage: 'treasure_result',
     submitting: false,
     lastOutcome: signal('chest_opened'),

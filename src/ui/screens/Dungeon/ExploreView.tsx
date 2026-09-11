@@ -8,7 +8,6 @@ import { WorldImage } from '@/ui/components/WorldImage'
 import { resolveWorld } from '@/systems/worldRegistry'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { TypewriterText } from '@/ui/components/TypewriterText'
-import { Bar } from '@/ui/components/Bar'
 import { DungeonProgressTrack } from '@/ui/components/DungeonProgressTrack'
 import { TotemPanel } from '@/ui/components/TotemPanel'
 import { MoveRollModal } from '@/ui/components/MoveRollModal'
@@ -194,15 +193,6 @@ export function ExploreView() {
 
       <TotemPanel totem={totem} compact />
 
-      {run.eventTimer && (
-        <div className="timer-row">
-          <span>⏱ {Math.ceil(run.eventTimer.remainingSeconds)}s</span>
-          <div style={{ flex: 1 }}>
-            <Bar value={run.eventTimer.remainingSeconds} max={run.eventTimer.totalSeconds} kind="timer" thin />
-          </div>
-        </div>
-      )}
-
       {/* ---- Action slot: exactly one of these is live at a time ---- */}
 
       {rolling && (
@@ -298,6 +288,7 @@ export function ExploreView() {
           decoyPool={answersInRun.map((sp) => (asksForKorean ? sp.korean : sp.english))}
           onSubmit={submitEventAnswer}
           submitLabel={event!.type === 'trap' ? '해제!' : '열기!'}
+          timer={run.eventTimer}
         />
       )}
 

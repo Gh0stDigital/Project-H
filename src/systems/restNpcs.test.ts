@@ -56,14 +56,27 @@ describe('buildRestNpcs', () => {
     for (const npc of npcs) expect(npc.line).toBe(spells[0].sampleSentence)
   })
 
-  it('still produces people when no word has an example', () => {
-    // A fresh Compendium must not make the Rest Area look broken.
-    const npcs = buildRestNpcs([spellWith('산', '')], PORTRAITS, () => 0.5)
+  it('speaks the word itself when it has no example', () => {
+    // The whole point of these people is that they say the player's own
+    // vocabulary back to them, so an entry written without a sample gets
+    // quoted rather than dropped for generic flavour.
+    const word = spellWith('산', '')
+    const npcs = buildRestNpcs([word], PORTRAITS, () => 0.5)
     expect(npcs.length).toBeGreaterThanOrEqual(1)
     for (const npc of npcs) {
-      expect(npc.spellId).toBeNull()
-      expect(npc.line.length).toBeGreaterThan(0)
+      expect(npc.spellId).toBe(word.id)
+      expect(npc.line).toContain(word.korean)
+      expect(npc.line).toContain(word.english)
+      // No sentence means no sentence translation to show under it.
+      expect(npc.translation).toBe('')
     }
+  })
+
+  it('gives a roomful of people different words where it can', () => {
+    const many = ['산', '강', '길', '문', '별'].map((k) => spellWith(k, ''))
+    const npcs = buildRestNpcs(many, PORTRAITS, seq([0.9, 0.1, 0.5, 0.3, 0.7, 0.2, 0.8, 0.4, 0.6]))
+    const cited = npcs.map((n) => n.spellId)
+    expect(new Set(cited).size).toBe(cited.length)
   })
 
   it('handles an entirely empty Compendium', () => {

@@ -152,15 +152,6 @@ export function BattleView() {
         </div>
       )}
 
-      {battle.phase === 'enemy_challenge' && battle.timer && (
-        <div className="timer-row">
-          <span>⏱ {Math.ceil(battle.timer.remainingSeconds)}s</span>
-          <div style={{ flex: 1 }}>
-            <Bar value={battle.timer.remainingSeconds} max={battle.timer.totalSeconds} kind="timer" thin />
-          </div>
-        </div>
-      )}
-
       {battle.phase === 'player_select' && (
         <>
           <p className="muted" style={{ textAlign: 'center' }}>
@@ -205,6 +196,7 @@ export function BattleView() {
           decoyPool={decoyPool}
           onSubmit={submitDefenseAnswer}
           submitLabel="방어!"
+          timer={battle.timer}
         />
       )}
 

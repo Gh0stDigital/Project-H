@@ -1,6 +1,7 @@
 import type { ActiveModifier } from '@/domain/dungeon'
 import {
   baseEventWeights,
+  bossDoorBalance,
   keyRoomBalance,
   maxRepeatEventStreak,
   onceOnlyEvents,
@@ -28,6 +29,8 @@ export interface EventRollContext {
   keyRoomUnlocked: boolean
   /** Climbing bonus applied while an unlocked Key Room keeps missing its roll. */
   keyRoomPressure: number
+  /** Climbing weight bonus while an unlocked Boss Door keeps not appearing. */
+  bossDoorPressure: number
 }
 
 export interface EventRollResult {
@@ -36,6 +39,8 @@ export interface EventRollResult {
   forced: boolean
   /** Key Room pressure to carry into the next roll. */
   nextKeyRoomPressure: number
+  /** Boss Door pressure to carry into the next roll. */
+  nextBossDoorPressure: number
 }
 
 /**
@@ -47,22 +52,47 @@ export interface EventRollResult {
  * ramps on each miss so it can never stay hidden indefinitely.
  */
 export function rollEvent(ctx: EventRollContext, rng: () => number = Math.random): EventRollResult {
+  // Pressure only builds while the door is both wanted and still missing;
+  // once it is found the number stops mattering and is left where it is.
+  const bossDoorWanted = ctx.keyRoomUnlocked && !ctx.bossDoorFound
+  const rampBossDoor = (type: DungeonEventType) =>
+    !bossDoorWanted || type === 'boss_door'
+      ? ctx.bossDoorPressure
+      : ctx.bossDoorPressure + bossDoorBalance.weightRampPerMiss
+
   if (ctx.keyRoomUnlocked && !ctx.keyRoomSeen) {
     const chance = Math.min(1, keyRoomBalance.chanceOnceUnlocked + ctx.keyRoomPressure)
     if (rng() < chance) {
-      return { type: 'key_room', forced: true, nextKeyRoomPressure: 0 }
+      return { type: 'key_room', forced: true, nextKeyRoomPressure: 0, nextBossDoorPressure: rampBossDoor('key_room') }
     }
+    const type = pickWeighted(ctx, rng)
     return {
-      type: pickWeighted(ctx, rng),
+      type,
       forced: false,
       nextKeyRoomPressure: ctx.keyRoomPressure + keyRoomBalance.chanceRampPerMiss,
+      nextBossDoorPressure: rampBossDoor(type),
     }
   }
-  return { type: pickWeighted(ctx, rng), forced: false, nextKeyRoomPressure: ctx.keyRoomPressure }
+  const type = pickWeighted(ctx, rng)
+  return {
+    type,
+    forced: false,
+    nextKeyRoomPressure: ctx.keyRoomPressure,
+    nextBossDoorPressure: rampBossDoor(type),
+  }
 }
 
 function pickWeighted(ctx: EventRollContext, rng: () => number): DungeonEventType {
-  const weighted = applyModifiers(baseEventWeights, ctx.modifiers)
+  const weighted = { ...applyModifiers(baseEventWeights, ctx.modifiers) }
+
+  // Once the dungeon has nothing left to teach, the way out becomes the most
+  // likely thing to find, and more likely again every Move it stays hidden.
+  if (ctx.keyRoomUnlocked && !ctx.bossDoorFound) {
+    weighted.boss_door = Math.min(
+      bossDoorBalance.maxWeight,
+      bossDoorBalance.weightOnceUnlocked + ctx.bossDoorPressure,
+    )
+  }
 
   const streakType = ctx.history.length > 0 ? ctx.history[ctx.history.length - 1] : null
   const streak = currentStreakLength(ctx.history)

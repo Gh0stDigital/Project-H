@@ -145,11 +145,16 @@ export function useSoundtrack(): void {
     if (totem && totem.money > p.money && p.money > 0) audio.play('reward')
     p.money = totem?.money ?? 0
 
-    // A monster turning up on the map, which is a different moment from the
-    // battle actually starting — the player sees it before they walk into it.
+    // What the player has just walked into, announced the moment it is on
+    // screen rather than when they finish dealing with it. Waiting for the
+    // outcome meant a find was heard several taps after it was seen.
     const eventId = run?.currentEvent?.id ?? null
     if (eventId && eventId !== p.eventId) {
-      if (run?.currentEvent?.type === 'battle') audio.play('enemyAppear')
+      const type = run?.currentEvent?.type
+      if (type === 'battle') audio.play('enemyAppear')
+      if (type === 'trap') audio.play('trapTrigger')
+      // A chest and the key are both finds; the door is the way out.
+      if (type === 'treasure' || type === 'key_room' || type === 'boss_door') audio.play('discovery')
       p.eventId = eventId
     }
 
@@ -164,15 +169,17 @@ export function useSoundtrack(): void {
         audio.play('cancel')
         setTimeout(() => audio.play('wrong'), 180)
       }
-      if (lastOutcome.kind === 'trap_sprung') audio.play('trapTrigger')
+      // The device was already heard arming itself when the trap appeared;
+      // springing it is the wrong answer, and the hit that follows.
+      if (lastOutcome.kind === 'trap_sprung') audio.play('wrong')
       if (lastOutcome.kind === 'trap_avoided') audio.play('correct')
       p.outcomeNonce = lastOutcome.nonce
     }
 
-    if (run?.keyFound && !p.keyFound) audio.play('discovery')
+    // Picking the key up and marking the door are the tail of events that
+    // already announced themselves above, so they stay silent rather than
+    // firing a second discovery a few taps later.
     p.keyFound = run?.keyFound ?? false
-
-    if (run?.bossDoorFound && !p.bossDoorFound) audio.play('discovery')
     p.bossDoorFound = run?.bossDoorFound ?? false
   }, [run, battle, totem, lastOutcome])
 }

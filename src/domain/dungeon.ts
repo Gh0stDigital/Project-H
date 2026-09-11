@@ -190,6 +190,8 @@ export interface DungeonRunState {
   keyFound: boolean
   keyUsed: boolean
   bossDoorFound: boolean
+  /** Climbing weight bonus while an unlocked Boss Door keeps not appearing. */
+  bossDoorPressure: number
   /** True once every pool word has been introduced — gates the Key Room. */
   keyRoomUnlocked: boolean
   /** Set once the Key Room has been generated, so it can never repeat. */

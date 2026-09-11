@@ -3311,11 +3311,18 @@ select:focus {
 
 /* The prompt, the assembled answer and the actions stay put; only the
    tray between them scrolls. */
+.challenge-prompt .prompt-timer,
 .challenge-prompt .prompt-label,
 .challenge-prompt .prompt-word,
 .challenge-prompt .tile-answer,
 .challenge-prompt .tile-actions {
   flex-shrink: 0;
+}
+
+/* The countdown belongs to the question, so it sits at the top of the panel
+   asking it rather than in the view underneath, where the panel covered it. */
+.challenge-prompt .prompt-timer {
+  margin: -4px 0 8px;
 }
 
 /* ---- Totem portrait picker ---- */

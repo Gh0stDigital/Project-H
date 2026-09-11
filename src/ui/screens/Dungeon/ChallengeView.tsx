@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Challenge } from '@/domain/challenge'
+import type { TimerState } from '@/domain/battle'
+import { Bar } from '@/ui/components/Bar'
 import { usePersistentStore } from '@/state/persistentStore'
 import { buildTileChallenge, assembledText, type AnswerTile } from '@/systems/tileAssembly'
 
@@ -11,6 +13,14 @@ interface ChallengeViewProps {
   decoyPool: string[]
   onSubmit: (text: string) => void
   submitLabel?: string
+  /**
+   * Countdown for a timed prompt, drawn inside the panel.
+   *
+   * It used to sit in the view behind this one, where the panel covered it:
+   * the enemy would start counting down and the only thing on screen was
+   * the question. A timer the player cannot see is not a timer.
+   */
+  timer?: TimerState | null
 }
 
 /**
@@ -19,7 +29,7 @@ interface ChallengeViewProps {
  * is the player's own saved answer, spelled out) and means no keyboard
  * ever opens mid-dungeon.
  */
-export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답' }: ChallengeViewProps) {
+export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답', timer = null }: ChallengeViewProps) {
   const asksForKorean = challenge.direction === 'eng_to_kor'
   const kind = asksForKorean ? 'korean' : 'english'
   // Only affects the English direction; Korean is syllables either way.
@@ -57,6 +67,14 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
 
   return (
     <div className={`panel challenge-prompt${board.granularity === 'whole' ? ' choice-board' : ''}`}>
+      {timer && (
+        <div className="timer-row prompt-timer">
+          <span>⏱ {Math.ceil(timer.remainingSeconds)}s</span>
+          <div style={{ flex: 1 }}>
+            <Bar value={timer.remainingSeconds} max={timer.totalSeconds} kind="timer" thin />
+          </div>
+        </div>
+      )}
       <div className="prompt-label">{asksForKorean ? '한국어로 번역하세요' : '영어로 번역하세요'}</div>
       <div className="prompt-word" lang={asksForKorean ? 'en' : 'ko'}>
         {challenge.prompt}

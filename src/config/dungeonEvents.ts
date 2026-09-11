@@ -158,6 +158,24 @@ export const fourWayDirectionChance = 0.35
 // Key Room
 // ---------------------------------------------------------------------------
 
+/**
+ * The Boss Door has the same gate as the Key Room — every word in the
+ * dungeon's set introduced at least once — but it is not force-selected the
+ * way the Key Room is, because the player should still be exploring when
+ * they find it. Instead its weight in the ordinary table is raised sharply
+ * and keeps climbing while it hides, which is the difference between "will
+ * turn up soon" and the 4-in-94 it had before, where a run could end without
+ * ever seeing the door it needed.
+ */
+export const bossDoorBalance = {
+  /** Replaces the base weight once every word has been seen. */
+  weightOnceUnlocked: 40,
+  /** Added per Move that passes without it appearing. */
+  weightRampPerMiss: 8,
+  /** Ceiling, so the rest of the dungeon never disappears entirely. */
+  maxWeight: 140,
+}
+
 export const keyRoomBalance = {
   /**
    * Once every word in the dungeon's Spellword Set has been introduced, the
