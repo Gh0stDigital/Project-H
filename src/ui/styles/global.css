@@ -1903,33 +1903,9 @@ select:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Hugs the logo so the wash below is a lit panel around it, rather than a
-     band across the whole top of the screen. */
   width: fit-content;
-  padding: 6px 10px 2px;
+  padding: 2px 0 0;
   margin: 0 auto;
-}
-
-/* The logo is brush calligraphy in black and red, drawn for white paper. Two
-   thirds of its ink is the black, which on this menu's near-black background
-   simply disappears — the subtitle vanished entirely and the composition read
-   as a few floating red strokes.
-   
-   So the menu gives it paper rather than the artwork being repainted: a wash
-   that is bone in the middle and gone by the edges, which keeps the red
-   exactly as authored and leaves the file untouched. Inverting it in CSS was
-   the other candidate and washed the red out to pink. */
-.menu-title.has-art::before {
-  content: '';
-  position: absolute;
-  inset: -6% -9%;
-  background: radial-gradient(
-    ellipse 62% 58% at 50% 47%,
-    rgba(240, 235, 224, 0.96) 0%,
-    rgba(238, 233, 222, 0.9) 62%,
-    rgba(238, 233, 222, 0) 88%
-  );
-  pointer-events: none;
 }
 
 .menu-title-art {
@@ -1945,12 +1921,37 @@ select:focus {
   background: none;
   border-radius: 0;
   image-rendering: auto;
-  /* Sits above the wash. No glow: the paper behind it is what makes it read,
-     and a shadow on top of that only muddies the brushwork. */
   position: relative;
 }
 
 /* ---- Sound controls ----------------------------------------------------- */
+
+/* Sits in the corner, out of the flow, so it costs the menu no height. */
+.menu-sound-button {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: 14px;
+  z-index: 6;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  background: rgba(22, 26, 36, 0.82);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+
+.menu-sound-button:active {
+  border-color: var(--accent-cyan-dim);
+}
+
 
 .audio-settings {
   display: flex;

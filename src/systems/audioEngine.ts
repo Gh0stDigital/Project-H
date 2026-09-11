@@ -153,27 +153,57 @@ export class AudioEngine {
    * Call from a real user gesture. Safe to call repeatedly; the work happens
    * once. Everything else in this class is a no-op until it has run.
    */
-  unlock(): void {
-    if (!this.ctx) {
-      try {
-        this.ctx = this.makeContext()
-      } catch {
-        return // No Web Audio: the game is simply silent.
-      }
-      this.buildBuses()
-      // Safari otherwise routes through the ringer, where the hardware mute
-      // switch silences a game that the player explicitly started.
-      const session = (navigator as { audioSession?: { type: string } }).audioSession
-      if (session) session.type = 'playback'
+  /**
+   * Creates the context and the buses. No gesture needed: a context may be
+   * built before one, it just starts suspended — and a suspended context
+   * still decodes, which is the whole point of warm() below.
+   */
+  private ensureContext(): boolean {
+    if (this.ctx) return true
+    try {
+      this.ctx = this.makeContext()
+    } catch {
+      return false // No Web Audio: the game is simply silent.
     }
-    void this.ctx.resume?.()
+    this.buildBuses()
+    // Safari otherwise routes through the ringer, where the hardware mute
+    // switch silences a game that the player explicitly started.
+    const session = (navigator as { audioSession?: { type: string } }).audioSession
+    if (session) session.type = 'playback'
+    return true
+  }
+
+  /**
+   * Decode ahead of the gesture.
+   *
+   * Waiting for the tap to build the context meant waiting for the tap to
+   * start decoding, and the menu theme is a two-minute mp3 — so the first
+   * thing anyone heard was a second of silence. Decoding does not need
+   * permission; only making a sound does. This runs at load, so by the time
+   * there is a gesture the buffers are already in memory and resume() is the
+   * only work left.
+   *
+   * Ordered by when each is needed: the track playing now, then the effects
+   * that have to be instant, then the beds that fade in anyway.
+   */
+  async warm(music: MusicCue | null, sfx: readonly SfxCue[], ambient: readonly AmbientCue[] = []): Promise<void> {
+    if (!this.ensureContext()) return
+    if (music) await this.buffer('music', music)
+    await Promise.all(sfx.map((c) => this.buffer('sfx', c)))
+    await Promise.all(ambient.map((c) => this.buffer('ambient', c)))
+  }
+
+  unlock(): void {
+    if (!this.ensureContext()) return
+    const ctx = this.ctx!
+    void ctx.resume?.()
     // Older iOS needs to have actually played something before it believes
     // the gesture happened.
     try {
-      const blip = this.ctx.createBuffer(1, 1, 22050)
-      const source = this.ctx.createBufferSource()
+      const blip = ctx.createBuffer(1, 1, 22050)
+      const source = ctx.createBufferSource()
       source.buffer = blip
-      source.connect(this.ctx.destination)
+      source.connect(ctx.destination)
       source.start(0)
     } catch {
       // Not fatal: resume() alone is enough on everything newer.
@@ -304,6 +334,10 @@ export class AudioEngine {
   }
 
   setMusic(cue: MusicCue | null): void {
+    // Only queue when there is no context at all. Once there is one — warmed
+    // before any gesture — the bed is decoded and started immediately; a
+    // source started on a suspended context begins the moment it resumes,
+    // which is what makes the music arrive with the tap rather than after it.
     if (!this.ctx) {
       this.pending = { music: cue, ambient: this.pending?.ambient ?? [], worldId: this.worldId }
       return

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { audio } from '@/systems/audioEngine'
 import { usePersistentStore } from '@/state/persistentStore'
-import { allSfx } from '@/config/audio'
+import { allSfx, allAmbient } from '@/config/audio'
 
 /**
  * Connects the engine to the page: one gesture to unlock it, the player's
@@ -17,15 +17,18 @@ export function useGameAudio(): void {
   const muted = usePersistentStore((s) => s.settings.muted)
 
   useEffect(() => {
-    // Autoplay rules mean the first real gesture is the only chance to start
-    // an audio context. Several event names because a tap is a pointerdown on
-    // most things and a touchend on some older iOS.
+    // Decode now, at load, rather than on the gesture. A context may be built
+    // before any interaction — it starts suspended — and a suspended context
+    // still decodes. Doing it here is what stops the menu theme arriving a
+    // second late, since the gesture then only has to resume.
+    void audio.warm('menu', allSfx, allAmbient)
+
+    // Autoplay rules still mean the first real gesture is the only thing that
+    // can start playback. Several event names because a tap is a pointerdown
+    // on most things and a touchend on some older iOS.
     const events = ['pointerdown', 'touchend', 'keydown'] as const
     const start = () => {
       audio.unlock()
-      // Warm every one-shot now. They are small, and a cue that decodes on
-      // first use is a cue that is silent the first time you need it.
-      void audio.preload(allSfx)
       for (const e of events) window.removeEventListener(e, start)
     }
     for (const e of events) window.addEventListener(e, start, { passive: true })

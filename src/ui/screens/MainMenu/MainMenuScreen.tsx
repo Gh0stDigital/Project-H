@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useUiStore } from '@/state/uiStore'
 import { findNewContent, hasNewContent } from '@/systems/newContent'
 import { allWorlds } from '@/systems/worldRegistry'
@@ -8,6 +9,7 @@ import { AssetImage } from '@/ui/components/AssetImage'
 import { Bar } from '@/ui/components/Bar'
 import { totemBalance } from '@/config/balance'
 import { AudioSettings } from '@/ui/components/AudioSettings'
+import { SlidePanel } from '@/ui/components/SlidePanel'
 
 const menuItems = [
   { screen: 'compendium' as const, icon: '📖', label: '주문 불러오기 / 도감', desc: '주문 단어와 주문 세트를 만들고 정리합니다.' },
@@ -27,13 +29,30 @@ export function MainMenuScreen() {
   const fresh = findNewContent(allWorlds, assetKeys('totems'), seenContent)
   const spellCount = usePersistentStore((s) => s.spells.length)
   const titleArt = optionalAsset('ui', 'title')
+  const [soundOpen, setSoundOpen] = useState(false)
+  const muted = usePersistentStore((s) => s.settings.muted)
 
   return (
-    // Scrolls. The menu carries a logo, the Totem banner, four entries and the
-    // sound controls, which is more than a 667px phone holds — it was already
-    // 59px over at 390x844 with the written title, and nothing said so
-    // because .screen clips silently.
-    <div className="screen screen-scroll">
+    <div className="screen">
+      {/* A corner toggle rather than a row of sliders: the controls are worth
+          reaching occasionally and not worth the height they cost on every
+          visit — carrying them cost the menu its whole fold on a short
+          phone. */}
+      <button
+        className="menu-sound-button"
+        data-sfx="none"
+        onClick={() => setSoundOpen(true)}
+        title="소리 설정"
+        aria-label="소리 설정"
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
+
+      {soundOpen && (
+        <SlidePanel title="소리" onClose={() => setSoundOpen(false)}>
+          <AudioSettings />
+        </SlidePanel>
+      )}
       {hasNewContent(fresh) && (
         <button className="new-content-notice" onClick={acknowledgeNewContent}>
           <span className="new-content-title">✦ 새로운 내용이 추가되었습니다</span>
@@ -108,7 +127,6 @@ export function MainMenuScreen() {
       </div>
 
       <div style={{ flex: 1 }} />
-      <AudioSettings />
       <p className="faint" style={{ textAlign: 'center' }}>
         완전 오프라인 · 진행 상황은 이 기기에 저장됩니다
       </p>
