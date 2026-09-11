@@ -60,8 +60,28 @@ export function convertible() {
     .map((f) => ({ path: f, bytes: statSync(f).size }))
 }
 
+/**
+ * Interface art is trimmed to its ink; everything else is left as authored.
+ *
+ * A logo exported from a canvas carries whatever margin the canvas had — the
+ * title art arrived 2048x2224 with the calligraphy occupying 1130px of it, so
+ * nearly half the image was nothing. Layout sizes a box, not the drawing
+ * inside it, so that margin came straight off the visible logo.
+ *
+ * World art and portraits are deliberately *not* trimmed: their framing is
+ * load-bearing, and the Totem window already normalises them by measuring
+ * rather than by cropping.
+ */
+const TRIMMED = ['assets/ui']
+
+function isTrimmed(path) {
+  const rel = relative(ROOT, path).split('\\').join('/')
+  return TRIMMED.some((dir) => rel.startsWith(`public/${dir}/`))
+}
+
 async function encode(path) {
-  const image = sharp(path)
+  let image = sharp(path)
+  if (isTrimmed(path)) image = sharp(await image.trim({ threshold: 1 }).toBuffer())
   const { width } = await image.metadata()
   return image
     .resize({ width: Math.min(width ?? MAX_WIDTH, MAX_WIDTH), withoutEnlargement: true })

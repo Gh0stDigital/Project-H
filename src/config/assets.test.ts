@@ -39,9 +39,15 @@ describe('asset registry', () => {
     expect(resolveKey('totems', ['totem_flame'])).toBeNull()
   })
 
-  it('holds only world-independent art now that worlds own the rest', () => {
-    // Locations, events, enemies and NPCs moved into public/worlds; a Totem
-    // is the player's character and can enter any world.
-    expect(Object.keys(assetManifest).sort()).toEqual(['spells', 'totems'])
+  it('holds no world content now that worlds own it', () => {
+    // Locations, events, enemies, NPCs and bosses moved into public/worlds.
+    // What is left is art that belongs to no world: a Totem is the player's
+    // character and travels between them, and ui/ is the interface itself.
+    // Stated as what may not be here rather than as an exact list, so adding
+    // another world-independent category is not a test failure.
+    const worldOwned = ['locations', 'events', 'enemies', 'npcs', 'bosses', 'traps', 'treasure', 'battlebg']
+    for (const category of worldOwned) {
+      expect(Object.keys(assetManifest)).not.toContain(category)
+    }
   })
 })

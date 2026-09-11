@@ -29,7 +29,11 @@ export function MainMenuScreen() {
   const titleArt = optionalAsset('ui', 'title')
 
   return (
-    <div className="screen">
+    // Scrolls. The menu carries a logo, the Totem banner, four entries and the
+    // sound controls, which is more than a 667px phone holds — it was already
+    // 59px over at 390x844 with the written title, and nothing said so
+    // because .screen clips silently.
+    <div className="screen screen-scroll">
       {hasNewContent(fresh) && (
         <button className="new-content-notice" onClick={acknowledgeNewContent}>
           <span className="new-content-title">✦ 새로운 내용이 추가되었습니다</span>

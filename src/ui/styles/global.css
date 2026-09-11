@@ -1899,27 +1899,55 @@ select:focus {
    viewport so it scales with the phone instead of a fixed pixel width. */
 
 .menu-title.has-art {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
-  margin: 4px 0 2px;
+  /* Hugs the logo so the wash below is a lit panel around it, rather than a
+     band across the whole top of the screen. */
+  width: fit-content;
+  padding: 6px 10px 2px;
+  margin: 0 auto;
+}
+
+/* The logo is brush calligraphy in black and red, drawn for white paper. Two
+   thirds of its ink is the black, which on this menu's near-black background
+   simply disappears — the subtitle vanished entirely and the composition read
+   as a few floating red strokes.
+   
+   So the menu gives it paper rather than the artwork being repainted: a wash
+   that is bone in the middle and gone by the edges, which keeps the red
+   exactly as authored and leaves the file untouched. Inverting it in CSS was
+   the other candidate and washed the red out to pink. */
+.menu-title.has-art::before {
+  content: '';
+  position: absolute;
+  inset: -6% -9%;
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 47%,
+    rgba(240, 235, 224, 0.96) 0%,
+    rgba(238, 233, 222, 0.9) 62%,
+    rgba(238, 233, 222, 0) 88%
+  );
+  pointer-events: none;
 }
 
 .menu-title-art {
-  width: auto;
+  /* Sized by width: the art is trimmed to its ink and lands about 1.8:1, so
+     width is what decides how big the calligraphy reads. */
+  width: min(74%, 312px);
   max-width: 100%;
   height: auto;
-  max-height: clamp(96px, 17dvh, 168px);
+  max-height: 22dvh;
   object-fit: contain;
   aspect-ratio: auto;
   border: 0;
   background: none;
   border-radius: 0;
   image-rendering: auto;
-  /* The artwork's own red reads dark against the panel; a soft glow lifts it
-     off the background the way the rest of the menu is lit. */
-  filter: drop-shadow(0 0 18px rgba(226, 42, 42, 0.28)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  /* Sits above the wash. No glow: the paper behind it is what makes it read,
+     and a shadow on top of that only muddies the brushwork. */
+  position: relative;
 }
 
 /* ---- Sound controls ----------------------------------------------------- */
