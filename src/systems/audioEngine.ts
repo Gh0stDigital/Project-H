@@ -150,10 +150,6 @@ export class AudioEngine {
   }
 
   /**
-   * Call from a real user gesture. Safe to call repeatedly; the work happens
-   * once. Everything else in this class is a no-op until it has run.
-   */
-  /**
    * Creates the context and the buses. No gesture needed: a context may be
    * built before one, it just starts suspended — and a suspended context
    * still decodes, which is the whole point of warm() below.
@@ -193,6 +189,11 @@ export class AudioEngine {
     await Promise.all(ambient.map((c) => this.buffer('ambient', c)))
   }
 
+  /**
+   * Call from a real user gesture. Safe to call repeatedly; the work happens
+   * once. Sound cannot start until it has run, so anything asked for before
+   * the gesture is held in `pending` and started here.
+   */
   unlock(): void {
     if (!this.ensureContext()) return
     const ctx = this.ctx!

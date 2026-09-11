@@ -51,3 +51,37 @@ describe('asset registry', () => {
     }
   })
 })
+
+describe('a totem_ prefix is decoration, not identity', () => {
+  // Portraits are named both ways — totem_stone and silverKnight sit in the
+  // folder together — and a save holds whatever key it was written with. If
+  // the prefix decided identity, renaming a file would quietly cost a player
+  // their character's face. Derived from the folder rather than pinned to a
+  // filename, so deleting a totem is still allowed.
+  const isPrefixed = (key: string) => /^totem/i.test(key.replace(/[^a-z0-9]/gi, ''))
+  const prefixed = assetKeys('totems').find(isPrefixed)
+  const plain = assetKeys('totems').find((key) => key !== 'default' && !isPrefixed(key))
+
+  it.skipIf(!plain)('finds unprefixed art through a prefixed key', () => {
+    expect(getAsset('totems', `totem_${plain}`)).toBe(getAsset('totems', plain!))
+    expect(hasAsset('totems', `totem_${plain}`)).toBe(true)
+    expect(resolveKey('totems', [`totem_${plain}`])).toBe(plain)
+  })
+
+  it.skipIf(!prefixed)('finds prefixed art through a bare key', () => {
+    const bare = prefixed!.replace(/^totem[_-]?/i, '')
+    expect(getAsset('totems', bare)).toBe(getAsset('totems', prefixed!))
+    expect(resolveKey('totems', [bare])).toBe(prefixed)
+  })
+
+  it('lets an exact spelling outrank another key stripped of its prefix', () => {
+    // Both spellings can be present at once; whichever is asked for by name
+    // is the one that answers.
+    for (const key of assetKeys('totems')) expect(resolveKey('totems', [key])).toBe(key)
+  })
+
+  it('still falls back when the name matches with or without the prefix', () => {
+    expect(getAsset('totems', 'totem_no_such_totem')).toBe(getAsset('totems', 'default'))
+    expect(hasAsset('totems', 'totem_no_such_totem')).toBe(false)
+  })
+})

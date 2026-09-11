@@ -51,12 +51,42 @@ function normalize(key: string): string {
   return key.toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
+/**
+ * A `totem_` prefix is decoration, not identity.
+ *
+ * Portraits have been named both ways — `totem_stone` and `silverKnight` sit
+ * in the folder together — and renaming a file is how a Totem loses its face:
+ * a save holding `totem_silverKnight` finds nothing once the file is called
+ * `silverKnight`, and falls back to the default portrait. Matching with the
+ * prefix ignored means that rename costs nobody their character.
+ */
+function stripTotemPrefix(normalized: string): string {
+  return normalized.startsWith('totem') ? normalized.slice('totem'.length) : normalized
+}
+
+function looseTable(keys: string[]): Record<string, string> {
+  const table: Record<string, string> = {}
+  // Exact spellings first, so no bare form can displace one: `stone` must
+  // keep meaning `stone` even when `totem_stone` sits beside it.
+  for (const key of keys) table[normalize(key)] = key
+  for (const key of keys) {
+    const bare = stripTotemPrefix(normalize(key))
+    if (bare && !(bare in table)) table[bare] = key
+  }
+  return table
+}
+
 const loose: Record<AssetCategory, Record<string, string>> = Object.fromEntries(
-  Object.entries(registry).map(([category, table]) => [
-    category,
-    Object.fromEntries(Object.keys(table).map((key) => [normalize(key), key])),
-  ]),
+  Object.entries(registry).map(([category, table]) => [category, looseTable(Object.keys(table))]),
 ) as Record<AssetCategory, Record<string, string>>
+
+/** Looks a key up loosely: exact spelling first, then without the prefix. */
+function looseLookup(category: AssetCategory, key: string): string | undefined {
+  const table = loose[category]
+  if (!table) return undefined
+  const normalized = normalize(key)
+  return table[normalized] ?? table[stripTotemPrefix(normalized)]
+}
 
 /** The key a category falls back to: its `default`, else whatever it has. */
 function fallbackKey(category: AssetCategory): string {
@@ -73,7 +103,7 @@ export function getAsset(category: AssetCategory, key?: string | null): string {
   if (!table) return ''
   if (key) {
     if (table[key]) return table[key]
-    const match = loose[category][normalize(key)]
+    const match = looseLookup(category, key)
     if (match) return table[match]
   }
   return table[fallbackKey(category)]
@@ -117,7 +147,7 @@ export function optionalAsset(category: string, key: string): string | null {
   const table = (registry as Record<string, Record<string, string> | undefined>)[category]
   if (!table) return null
   if (table[key]) return table[key]
-  const match = (loose as Record<string, Record<string, string> | undefined>)[category]?.[normalize(key)]
+  const match = looseLookup(category as AssetCategory, key)
   return match ? table[match] : null
 }
 
@@ -133,7 +163,7 @@ export function assetKeys(category: AssetCategory): string[] {
 /** True when a key names real art rather than falling back to the placeholder. */
 export function hasAsset(category: AssetCategory, key: string): boolean {
   if (!registry[category]) return false
-  return key in registry[category] || normalize(key) in loose[category]
+  return key in registry[category] || looseLookup(category, key) !== undefined
 }
 
 /**
@@ -144,7 +174,7 @@ export function resolveKey(category: AssetCategory, candidates: readonly string[
   if (!registry[category]) return null
   for (const candidate of candidates) {
     if (registry[category][candidate]) return candidate
-    const match = loose[category][normalize(candidate)]
+    const match = looseLookup(category, candidate)
     if (match) return match
   }
   return null
