@@ -85,3 +85,22 @@ describe('a totem_ prefix is decoration, not identity', () => {
     expect(hasAsset('totems', 'totem_no_such_totem')).toBe(false)
   })
 })
+
+describe('a folder without a `default` still answers', () => {
+  // default.webp was renamed to Dolbae.webp — the placeholder turned out to
+  // be a character. Every save still names `default` as its portrait, so an
+  // unknown key has to land on real art rather than on nothing.
+  it('falls back to a real portrait when there is no default', () => {
+    const resolved = getAsset('totems', 'no_such_totem')
+    expect(resolved).toBeTruthy()
+    const real = assetKeys('totems').map((key) => getAsset('totems', key))
+    expect(real).toContain(resolved)
+  })
+
+  it('resolves the key every save was written with', () => {
+    // Not a placeholder and not empty: whatever `default` means now, asking
+    // for it gets a portrait.
+    expect(getAsset('totems', 'default')).toBe(getAsset('totems', 'no_such_totem'))
+    expect(getAsset('totems', 'default')).toBeTruthy()
+  })
+})

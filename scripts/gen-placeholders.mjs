@@ -187,13 +187,20 @@ function drawPlaceholder({ bg, accent, shape }) {
 // so replacing a placeholder with real artwork is permanent.
 
 const globalManifest = {
-  // Only `default` — every lookup falls back to it, so it has to exist.
   // Named totems are content, not slots: nothing in the game requires a
   // particular one, and generating a fixed list meant a placeholder someone
   // deleted came back on the next build.
+  //
+  // `default` is generated only into an empty folder. It is a fallback for
+  // having no portraits at all, and getAsset() already falls back to the
+  // first portrait when there is no `default` — so a folder with real art in
+  // it does not need one. Generating it regardless is how renaming
+  // default.webp to Dolbae.webp put a grey circle in front of every save
+  // that still named `default`, in place of the art it had been showing.
   totems: {
     palette: { bg: '#1f2a3a', accent: '#5fa8e0' },
     items: { default: 'circle' },
+    onlyWhenEmpty: true,
   },
   spells: {
     palette: { bg: '#1a1a2e', accent: '#f2c14e' },
@@ -271,6 +278,7 @@ function ensure(dir, key, palette, shape) {
 // --- global art ---
 for (const [category, def] of Object.entries(globalManifest)) {
   const dir = join(OUT_ROOT, category)
+  if (def.onlyWhenEmpty && artIn(dir).length > 0) continue
   for (const [key, shape] of Object.entries(def.items)) ensure(dir, key, def.palette, shape)
 }
 
