@@ -8,6 +8,7 @@ import {
   IMPORT_TEMPLATE_SIMPLE_CSV,
 } from '@/systems/spellImport'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
+import { ElementIcon } from '@/ui/components/ElementIcon'
 
 /** Saves text as a local file via a throwaway object URL — no network involved. */
 function downloadTextFile(filename: string, content: string, mime: string) {
@@ -163,7 +164,8 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
                         {row.korean} <span className="faint">— {row.english}</span>
                         {row.input.wordType && (
                           <span className={`element-chip element-${elementDefFor(row.input.wordType).id}`}>
-                            {elementDefFor(row.input.wordType).icon} {wordTypeDefs[row.input.wordType].shortLabel}
+                            <ElementIcon element={elementDefFor(row.input.wordType)} size={13} />{' '}
+                            {wordTypeDefs[row.input.wordType].shortLabel}
                           </span>
                         )}
                       </span>

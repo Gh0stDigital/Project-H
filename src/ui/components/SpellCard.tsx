@@ -1,8 +1,9 @@
 import type { Spell } from '@/domain/spell'
 import { damageForSpell } from '@/systems/spellProgression'
-import { hasAsset, pickFlavorKey } from '@/config/assets'
+import { assetKeyOrFlavor } from '@/config/assets'
 import { elementDefFor } from '@/config/wordTypes'
 import { AssetImage } from './AssetImage'
+import { ElementIcon } from './ElementIcon'
 import { Bar } from './Bar'
 
 interface SpellCardProps {
@@ -24,10 +25,8 @@ interface SpellCardProps {
 export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onClick }: SpellCardProps) {
   const element = elementDefFor(spell.wordType)
   // The icon belongs to the element, not to the word: a fire word shows the
-  // fire icon. Elements the folder has no art for keep the old behaviour of
-  // borrowing one of the others, so every card still has a face — drop in
-  // `lightning` and `metal` and they pick themselves up.
-  const artKey = hasAsset('spells', element.id) ? element.id : pickFlavorKey('spells', spell.id)
+  // fire seal, here and in the list and anywhere else the word appears.
+  const artKey = assetKeyOrFlavor('spells', element.id, spell.id)
   return (
     <div
       className={`spell-card element-${element.id}${selected ? ' selected' : ''}${disabled ? ' disabled' : ''}${
@@ -64,7 +63,9 @@ export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onC
         </div>
       )}
       <div className="meta">
-        <span title={element.label}>{element.icon} Lv {spell.level}</span>
+        <span title={element.label}>
+          <ElementIcon element={element} size={14} /> Lv {spell.level}
+        </span>
         <span>피해 {damageForSpell(spell)}</span>
       </div>
       <Bar value={spell.charge} max={spell.maxCharge} kind="charge" thin />

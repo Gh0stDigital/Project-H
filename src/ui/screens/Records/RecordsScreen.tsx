@@ -7,6 +7,7 @@ import { spellAccuracy } from '@/domain/spell'
 import { sortSpells, filterSpellsBySet, type RecordsSortKey } from '@/systems/records'
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
+import { ElementIcon } from '@/ui/components/ElementIcon'
 
 const sortOptions: { key: RecordsSortKey; label: string }[] = [
   { key: 'level', label: '레벨' },
@@ -68,7 +69,8 @@ export function RecordsScreen() {
             <div className="head">
               <span className="kor">{spell.korean}</span>
               <span className={`element-chip element-${elementDefFor(spell.wordType).id}`}>
-                {elementDefFor(spell.wordType).icon} {wordTypeDefs[spell.wordType].shortLabel}
+                <ElementIcon element={elementDefFor(spell.wordType)} size={13} />{' '}
+                {wordTypeDefs[spell.wordType].shortLabel}
               </span>
               <span className="faint">Lv {spell.level}</span>
             </div>

@@ -4,6 +4,7 @@ import type { SpellSet } from '@/domain/spellSet'
 import { elementDefs } from '@/config/wordTypes'
 import { MAX_STARS, totemCard } from '@/systems/totemCard'
 import { AvatarFrame } from './AvatarFrame'
+import { ElementIcon } from './ElementIcon'
 
 interface TotemCardProps {
   totem: Totem
@@ -32,7 +33,7 @@ export function TotemCard({ totem, spells, spellSets, onPortraitClick }: TotemCa
         <h3 className="totem-card-name">{card.name}</h3>
         {element ? (
           <span className="totem-card-attribute" style={{ color: `var(${element.colorVar})` }}>
-            <span aria-hidden>{element.icon}</span> {element.label}
+            <ElementIcon element={element} size={14} /> {element.label}
           </span>
         ) : (
           <span className="totem-card-attribute is-empty">무속성</span>

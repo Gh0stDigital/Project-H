@@ -2,6 +2,7 @@ import type { DungeonRunState } from '@/domain/dungeon'
 import type { BattleState } from '@/domain/battle'
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor } from '@/config/wordTypes'
+import { ElementIcon } from '@/ui/components/ElementIcon'
 import { usePersistentStore } from '@/state/persistentStore'
 import { SlidePanel } from '@/ui/components/SlidePanel'
 import { Bar } from '@/ui/components/Bar'
@@ -51,7 +52,7 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
               <span style={{ flex: 1 }}>
                 {spell!.korean} <span className="faint">— {definitionsOf(spell!).join(', ')}</span>
               </span>
-              <span title={elementDefFor(spell!.wordType).label}>{elementDefFor(spell!.wordType).icon}</span>
+              <ElementIcon element={elementDefFor(spell!.wordType)} size={16} />
               <span className="faint">Lv{spell!.level}</span>
               <div style={{ width: 40 }}>
                 <Bar value={spell!.charge} max={spell!.maxCharge} kind="charge" thin />
@@ -69,7 +70,7 @@ export function WordInfoPanel({ run, battle, onClose }: WordInfoPanelProps) {
               <span style={{ flex: 1 }}>
                 {spell!.korean} <span className="faint">— {definitionsOf(spell!).join(', ')}</span>
               </span>
-              <span title={elementDefFor(spell!.wordType).label}>{elementDefFor(spell!.wordType).icon}</span>
+              <ElementIcon element={elementDefFor(spell!.wordType)} size={16} />
               <span className="faint">Lv{spell!.level}</span>
               <div style={{ width: 40 }}>
                 <Bar value={spell!.charge} max={spell!.maxCharge} kind="charge" thin />

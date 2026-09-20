@@ -146,6 +146,20 @@ export function pickFlavorKey(category: AssetCategory, seed: string): string {
   return keys[hash % keys.length]
 }
 
+/**
+ * The art named by `key`, or a stand-in from the same folder when the folder
+ * has none for it.
+ *
+ * What a spell icon needs: the element's own seal where one is painted, and
+ * something rather than nothing where it is not — `lightning` and `metal`
+ * have no art yet, and a card face with a hole in it is worse than a card
+ * face borrowing a neighbour's. Drop the missing art in and every one of
+ * these picks it up without a code change.
+ */
+export function assetKeyOrFlavor(category: AssetCategory, key: string, seed: string): string {
+  return hasAsset(category, key) ? key : pickFlavorKey(category, seed)
+}
+
 /** The same pick, as a drawable path. */
 export function pickFlavor(category: AssetCategory, seed: string): string {
   return registry[category][pickFlavorKey(category, seed)]

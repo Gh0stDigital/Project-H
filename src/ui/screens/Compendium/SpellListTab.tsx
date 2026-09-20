@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { usePersistentStore } from '@/state/persistentStore'
 import { Bar } from '@/ui/components/Bar'
 import { AssetImage } from '@/ui/components/AssetImage'
-import { pickFlavorKey } from '@/config/assets'
+import { assetKeyOrFlavor } from '@/config/assets'
 import { SpellEditorForm } from './SpellEditorForm'
 import { SpellImportPanel } from './SpellImportPanel'
 import type { Spell } from '@/domain/spell'
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
+import { ElementIcon } from '@/ui/components/ElementIcon'
 
 export function SpellListTab() {
   const spells = usePersistentStore((s) => s.spells)
@@ -63,7 +64,7 @@ export function SpellListTab() {
       )}
 
       {filtered.map((spell) => {
-        const artKey = pickFlavorKey('spells', spell.id)
+        const artKey = assetKeyOrFlavor('spells', elementDefFor(spell.wordType).id, spell.id)
         return (
           <div key={spell.id} className="spell-card-list-item">
             <div className="thumb">
@@ -73,7 +74,8 @@ export function SpellListTab() {
               <div className="kor">
                 {spell.korean}
                 <span className={`element-chip element-${elementDefFor(spell.wordType).id}`}>
-                  {elementDefFor(spell.wordType).icon} {wordTypeDefs[spell.wordType].shortLabel}
+                  <ElementIcon element={elementDefFor(spell.wordType)} size={13} />{' '}
+                  {wordTypeDefs[spell.wordType].shortLabel}
                 </span>
               </div>
               {/* Blank optional definitions are dropped, never shown as empty rows. */}

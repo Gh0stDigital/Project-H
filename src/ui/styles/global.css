@@ -4723,3 +4723,22 @@ button.totem-hero-frame {
   color: var(--danger, #ff7a6b);
   border-color: var(--danger, #ff7a6b);
 }
+
+/* ---- Element icon ---- */
+
+/* Sits on the text baseline beside a word rather than on the line box, so a
+   row of words with icons in it does not come out ragged. */
+.element-icon-img {
+  display: inline-block;
+  vertical-align: -0.16em;
+  object-fit: contain;
+  flex-shrink: 0;
+  /* The seals are painted on their own dark ground; a touch of lift keeps
+     them from disappearing into a dark chip. */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.element-icon-emoji {
+  display: inline-block;
+  line-height: 1;
+}

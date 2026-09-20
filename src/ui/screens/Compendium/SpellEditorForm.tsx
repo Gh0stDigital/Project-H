@@ -10,6 +10,7 @@ import {
   wordTypeDefs,
   type WordType,
 } from '@/config/wordTypes'
+import { ElementIcon } from '@/ui/components/ElementIcon'
 
 interface SpellEditorFormProps {
   existing?: Spell
@@ -107,7 +108,7 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       </div>
 
       <div className={`element-readout element-${element.id}`}>
-        <span className="element-icon">{element.icon}</span>
+        <ElementIcon element={element} size={22} className="element-icon" />
         <div>
           <div className="element-name">{element.label}</div>
           <div className="faint">품사에 따라 자동으로 정해집니다</div>
