@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import type React from 'react'
+import { LONG_PRESS_MS, useLongPress } from '@/ui/hooks/useLongPress'
 
 interface StandbyActionsProps {
   canEnterBoss: boolean
@@ -21,6 +23,10 @@ interface StandbyActionsProps {
  * Boss Door) are destinations rather than separate commands, so they hang
  * off Move instead of appearing as extra buttons elsewhere on the screen.
  *
+ * Move stays a move. Once there is somewhere to go back to, holding it opens
+ * the list of those places — pressing it still just moves, which is what the
+ * player does nearly every turn and should never cost a second tap.
+ *
  * Every action here is presentational; the store decides whether each one
  * is actually legal, so a stale render can't smuggle a Move through.
  */
@@ -39,24 +45,27 @@ export function StandbyActions({
   const [destinationsOpen, setDestinationsOpen] = useState(false)
   const hasDestinations = restAreaFound || bossDoorFound
 
-  function handleMove() {
-    // With nowhere else to go, Move just moves — no menu in the way.
-    if (!hasDestinations) {
-      onMove()
-      return
-    }
-    setDestinationsOpen(true)
-  }
+  const { holding, handlers } = useLongPress({
+    enabled: hasDestinations,
+    onTap: onMove,
+    onLongPress: () => setDestinationsOpen(true),
+  })
 
   return (
     <>
       <div className="room-actions">
-        <button className="room-action primary" onClick={handleMove}>
+        <button
+          className={`room-action primary${hasDestinations ? ' holdable' : ''}${holding ? ' is-holding' : ''}`}
+          // The fill has to reach the edge exactly as the timer fires, so
+          // both read the same number rather than agreeing by hand.
+          style={{ '--hold-ms': `${LONG_PRESS_MS}ms` } as React.CSSProperties}
+          {...handlers}
+        >
           <span className="label">
             이동{hasDestinations && <span className="room-action-caret">▾</span>}
           </span>
           <span className="sub">
-            {hasDestinations ? '계속 나아가거나, 찾아 둔 곳으로 갑니다' : '던전 안으로 나아갑니다'}
+            {hasDestinations ? '눌러서 나아가기 · 길게 눌러 다른 곳으로' : '던전 안으로 나아갑니다'}
           </span>
         </button>
         <button className="room-action" onClick={onCheckTotem}>
@@ -74,8 +83,8 @@ export function StandbyActions({
       </div>
 
       {destinationsOpen && (
-        <div className="overlay-backdrop" onClick={() => setDestinationsOpen(false)}>
-          <div className="destination-menu" onClick={(e) => e.stopPropagation()}>
+        <div className="overlay-backdrop" onPointerDown={() => setDestinationsOpen(false)}>
+          <div className="destination-menu" onPointerDown={(e) => e.stopPropagation()}>
             <h2>어디로 갈까요?</h2>
 
             <button

@@ -54,13 +54,15 @@
      window edges. (The name is historic: it was the cyan sci-fi layer
      before the interface was reworked in bronze, and it is referenced in
      enough rules that renaming it would be churn for nothing.) */
-  /* The portrait frame. Totems are not part of the furniture: they keep
-     the cold steel-blue light they had, which is also what separates a
-     face from the bronze window it sits in. */
-  --portrait-edge: #2a8f9c;
-  --portrait-back: #1e2330;
-  --portrait-glow: rgba(79, 227, 240, 0.35);
-  --portrait-sheen: rgba(79, 227, 240, 0.14);
+  /* The blue that survived the bronze retheme. It edges the things the
+     player looks *through* or *at* rather than the furniture around them:
+     Totem portraits, the dungeon's scene window, and the narration box
+     floating inside it. Against warm chrome it reads as glass and steel. */
+  --cool-edge: #2a8f9c;
+  --cool-bright: #4fe3f0;
+  --cool-back: #1e2330;
+  --cool-glow: rgba(79, 227, 240, 0.35);
+  --cool-sheen: rgba(79, 227, 240, 0.14);
 
   --accent-cyan: #dcb87e;
   --accent-cyan-dim: #8a6636;
@@ -80,6 +82,9 @@
   --xp-color: #c9a227;
   --plateau-color: #c98fb0;
 
+  /* Almost square. The portrait window and the narration box are meant to
+     read as cut stone rather than as soft UI chrome. */
+  --radius-tight: 3px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -585,11 +590,11 @@ select:focus {
      true regardless of the source PNG's own dimensions. */
   width: 100%;
   aspect-ratio: 1;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-tight);
   object-fit: cover;
   image-rendering: pixelated;
-  background: var(--portrait-back);
-  border: 1px solid var(--portrait-edge);
+  background: var(--cool-back);
+  border: 1px solid var(--cool-edge);
 }
 
 /* ---- Spell card ---- */
@@ -688,8 +693,8 @@ select:focus {
   aspect-ratio: 1 / 0.82;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--accent-cyan-dim);
-  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 0 1px rgba(220, 184, 126, 0.08);
+  border: 1px solid var(--cool-edge);
+  box-shadow: 0 0 22px -8px var(--cool-glow), inset 0 0 0 1px rgba(79, 227, 240, 0.08);
   background: var(--surface-panel);
   flex-shrink: 0;
 }
@@ -794,7 +799,7 @@ select:focus {
 .typewriter-box {
   background: var(--surface-panel);
   border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-tight);
   padding: 14px 16px;
   min-height: 92px;
   font-size: 15px;
@@ -881,12 +886,12 @@ select:focus {
   height: var(--avatar-h);
   width: calc(var(--avatar-h) * 1.3);
   overflow: hidden;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--portrait-edge);
+  border-radius: var(--radius-tight);
+  border: 1px solid var(--cool-edge);
   background:
-    radial-gradient(ellipse at 50% 64%, var(--portrait-sheen), transparent 70%),
-    var(--portrait-back);
-  box-shadow: 0 0 18px -8px var(--portrait-glow), inset 0 0 26px -18px #4fe3f0;
+    radial-gradient(ellipse at 50% 64%, var(--cool-sheen), transparent 70%),
+    var(--cool-back);
+  box-shadow: 0 0 18px -8px var(--cool-glow), inset 0 0 26px -18px var(--cool-bright);
 }
 
 /* Sized by height, and free of every square-thumbnail rule .avatar-img
@@ -1472,6 +1477,45 @@ select:focus {
   color: var(--text-faint);
   line-height: 1.35;
 }
+
+/* ---- Hold to reach the places already found -----------------------------
+
+   A press that has not yet become a hold looks exactly like a press that is
+   being ignored, so the button fills as it is held: the bar reaching the far
+   edge is the moment the menu opens. The fill is a child rather than a
+   background so it can animate independently of the button's own states.
+
+   touch-action and the callout rules matter as much as the bar. Without
+   them iOS treats a held button as a text selection and offers its own
+   long-press menu over the top of ours. */
+.room-action.holdable {
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.room-action.holdable::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 0;
+  background: var(--accent-gold);
+  box-shadow: 0 0 10px -2px var(--glow-gold);
+  /* Instant on release: the bar is a promise about *this* press, so it has
+     to be gone before the next one starts rather than draining backwards. */
+  transition: width 0s;
+}
+
+.room-action.holdable.is-holding::after {
+  width: 100%;
+  transition: width var(--hold-ms, 450ms) linear;
+}
+
 
 /* ---- Item panel ---- */
 
@@ -3463,8 +3507,8 @@ button.totem-hero-frame {
   cursor: pointer;
   font-family: inherit;
   padding: 10px 8px;
-  background: var(--portrait-back);
-  border: 1px solid var(--portrait-edge);
+  background: var(--cool-back);
+  border: 1px solid var(--cool-edge);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
 }
@@ -3786,7 +3830,7 @@ button.totem-hero-frame {
   /* Translucent so the art stays readable behind the text. */
   background: rgba(18, 12, 7, 0.82);
   backdrop-filter: blur(3px);
-  border-color: var(--accent-cyan-dim);
+  border-color: var(--cool-edge);
   padding: 10px 12px;
   font-size: 14px;
   line-height: 1.45;
@@ -4084,8 +4128,8 @@ button.totem-hero-frame {
   margin-top: 10px;
   padding: 10px 12px;
   background: var(--bg-deep);
-  border: 1px solid var(--accent-cyan-dim);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--cool-edge);
+  border-radius: var(--radius-tight);
   animation: sheet-arrive 220ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
