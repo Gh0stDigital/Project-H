@@ -6,7 +6,7 @@ export const assetManifest = {
   icons: ['BookIcon', 'chartIcon', 'expIcon', 'heartIcon', 'keyIcon', 'moneyIcon', 'totemIcon', 'trashcanIcon'],
   spells: ['dark', 'earth', 'fire', 'light', 'water', 'wind'],
   totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'Silver Knight', 'TheExplorer'],
-  ui: ['title'],
+  ui: ['awaken', 'cover', 'title'],
 } as const
 
 /**
@@ -34,5 +34,7 @@ export const assetFiles: Readonly<Record<string, string>> = {
   "totems/parasite_hunter_Yaharl": "parasite_hunter_Yaharl.webp",
   "totems/Silver Knight": "Silver Knight.webp",
   "totems/TheExplorer": "TheExplorer.webp",
+  "ui/awaken": "awaken.webp",
+  "ui/cover": "cover.webp",
   "ui/title": "title.webp"
 }

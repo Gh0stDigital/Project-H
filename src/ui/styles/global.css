@@ -4886,3 +4886,245 @@ button.totem-hero-frame {
   margin: 0 auto;
   vertical-align: middle;
 }
+
+/* ===========================================================================
+   Title sequence
+   ===========================================================================
+
+   The opening plays over the app, not instead of it: the menu is mounted and
+   settling underneath the whole time, which is what lets the loading beat
+   actually wait for the menu's art instead of pretending to.
+
+   Both plates are in the tree from the first frame. Swapping `src` on one
+   element would decode the second image at the exact moment it is needed,
+   which is a black frame on a phone; two elements cross-fading means the
+   second one has been decoded since load and only has to become visible. */
+
+.title-sequence {
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  overflow: hidden;
+  background: #05070c;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.title-plate {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 240ms ease, filter 700ms ease, transform 900ms ease;
+  will-change: opacity, filter, transform;
+}
+
+.title-plate-blur,
+.title-plate-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The filler. Blown up past the frame so the blur has no edge of its own to
+   show, and darkened so it never competes with the picture in front of it. */
+.title-plate-blur {
+  object-fit: cover;
+  transform: scale(1.35);
+  filter: blur(26px) brightness(0.45) saturate(0.7);
+}
+
+/* The picture itself, whole.
+   drop-shadow follows the painted image box rather than the element box, so
+   it lands exactly on the edge where the picture meets the blur whatever the
+   art's proportions are. That turns a hard seam into the picture sitting
+   over its own shadow — which is also why the filler is not masked: a mask
+   would have to guess where that edge is. */
+.title-plate-art {
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.9));
+}
+
+/* The cover holds still until it is touched, then leans in and catches light
+   — the book waking up under the finger rather than cutting to the flash. */
+.phase-cover .title-plate.cover {
+  opacity: 1;
+  transform: scale(1.02);
+}
+
+.phase-igniting .title-plate.cover {
+  opacity: 1;
+  transform: scale(1.1);
+  filter: brightness(2.6) saturate(0.5) blur(1px);
+}
+
+/* Through the white, the second plate is already at full opacity behind it,
+   so what the flash uncovers is a finished frame rather than a fade-in. */
+.phase-flash .title-plate.awaken,
+.phase-awaken .title-plate.awaken,
+.phase-loading .title-plate.awaken {
+  opacity: 1;
+}
+
+.phase-flash .title-plate.awaken {
+  transform: scale(1.06);
+}
+
+.phase-awaken .title-plate.awaken,
+.phase-loading .title-plate.awaken {
+  transform: scale(1);
+  transition: opacity 240ms ease, transform 2400ms ease-out;
+}
+
+/* A vignette over both plates. It does two jobs: it buries the seam where
+   the picture meets the blurred filler, which is otherwise a hard horizontal
+   line, and it darkens the bottom enough for the tap prompt to read against
+   whatever the art happens to be doing there. */
+.title-sequence::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.12) 18%,
+    rgba(0, 0, 0, 0) 38%,
+    rgba(0, 0, 0, 0) 58%,
+    rgba(0, 0, 0, 0.3) 80%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+/* The white itself. It arrives instantly — an impact, not a dissolve — and
+   leaves over the length of the beat after it. */
+.title-white {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 420ms ease-out;
+}
+
+.phase-flash .title-white {
+  opacity: 1;
+  transition: opacity 60ms linear;
+}
+
+.phase-awaken .title-white,
+.phase-loading .title-white {
+  opacity: 0;
+}
+
+/* ---- Tap to start ---- */
+
+.title-start {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 0 calc(74px + env(safe-area-inset-bottom));
+  touch-action: manipulation;
+}
+
+.title-start-text {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  /* The art is busy under the text, so the legibility comes from a dark halo
+     rather than from a plate that would cover the cover. */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.8);
+  animation: title-pulse 2s ease-in-out infinite;
+}
+
+.title-start-sub {
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: var(--accent-gold);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+  animation: title-pulse 2s ease-in-out infinite;
+}
+
+@keyframes title-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.38; }
+}
+
+/* ---- Loading ---- */
+
+.title-loading {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: dialogue-arrive 300ms ease both;
+}
+
+.title-loading-text {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: var(--text-secondary);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* Indeterminate on purpose. The wait is short and mostly decode, so a
+   percentage would be a number invented to fill a bar. */
+.title-loading-bar {
+  position: relative;
+  width: min(220px, 56vw);
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.title-loading-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  animation: title-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes title-sweep {
+  from { left: -40%; }
+  to { left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-start-text,
+  .title-start-sub,
+  .title-loading-bar::after {
+    animation: none;
+  }
+
+  .title-plate {
+    transition: opacity 200ms ease;
+    transform: none !important;
+    filter: none !important;
+  }
+}
