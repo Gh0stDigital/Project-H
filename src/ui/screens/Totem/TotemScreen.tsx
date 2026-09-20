@@ -186,7 +186,8 @@ export function TotemScreen() {
 
       <div className="field">
         <label>전투 덱 (장착한 주문 세트)</label>
-        <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setPickerOpen(true)}>
+        <button className="card row has-icon" style={{ width: '100%', textAlign: 'left' }} onClick={() => setPickerOpen(true)}>
+          <UiIcon name="deck" size={30} className="row-icon" />
           <div>
             <div style={{ fontWeight: 700 }}>{equippedSet ? equippedSet.name : '장착 없음'}</div>
             <div className="faint">{equippedSet ? `주문 ${equippedSet.spellIds.length}개` : '눌러서 주문 세트를 고르세요'}</div>
@@ -197,7 +198,8 @@ export function TotemScreen() {
 
       <div className="field">
         <label>내 토템들</label>
-        <button className="card row" style={{ width: '100%', textAlign: 'left' }} onClick={() => setRosterOpen(true)}>
+        <button className="card row has-icon" style={{ width: '100%', textAlign: 'left' }} onClick={() => setRosterOpen(true)}>
+          <UiIcon name="roster" size={30} className="row-icon" />
           <div>
             <div style={{ fontWeight: 700 }}>
               {totems.length}기 기름{usable.length < totems.length ? ` · ${usable.length}기 살아 있음` : ''}

@@ -11,6 +11,8 @@ import { getAsset, hasAsset } from '@/config/assets'
 const icons = {
   book: { key: 'BookIcon', emoji: '📖', label: '도감' },
   chart: { key: 'chartIcon', emoji: '📊', label: '기록' },
+  deck: { key: 'deckIcon', emoji: '⚔️', label: '전투 덱' },
+  roster: { key: 'chestIcon', emoji: '📦', label: '토템 보관' },
   exp: { key: 'expIcon', emoji: '✨', label: '경험치' },
   heart: { key: 'heartIcon', emoji: '❤️', label: '체력' },
   key: { key: 'keyIcon', emoji: '🗝️', label: '열쇠' },

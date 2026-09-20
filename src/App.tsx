@@ -1,4 +1,3 @@
-import { useCallback, useState } from 'react'
 import { useUiStore } from '@/state/uiStore'
 import { useGameAudio } from '@/ui/hooks/useGameAudio'
 import { useSoundtrack } from '@/ui/hooks/useSoundtrack'
@@ -16,9 +15,11 @@ export default function App() {
   const screen = useUiStore((s) => s.screen)
   // The opening plays *over* a mounted app rather than instead of one, so
   // the menu underneath has settled by the time the sequence lifts — which
-  // is what lets its loading beat wait on real work.
-  const [opened, setOpened] = useState(false)
-  const finishTitle = useCallback(() => setOpened(true), [])
+  // is what lets its loading beat wait on real work. Whether it is up lives
+  // in the store rather than here, because the menu can send the player back
+  // to it.
+  const titleUp = useUiStore((s) => s.titleUp)
+  const closeTitle = useUiStore((s) => s.closeTitle)
 
   // Sound is mounted once, here. None of it can throw, and none of it is
   // awaited: the game runs identically with the speakers off.
@@ -35,7 +36,7 @@ export default function App() {
       {screen === 'dungeon' && <DungeonScreen />}
       {screen === 'records' && <RecordsScreen />}
       <TransitionCurtain />
-      {!opened && <TitleSequence onDone={finishTitle} />}
+      {titleUp && <TitleSequence onDone={closeTitle} />}
     </div>
   )
 }

@@ -22,6 +22,7 @@ const menuItems = [
 
 export function MainMenuScreen() {
   const goTo = useUiStore((s) => s.goTo)
+  const returnToTitle = useUiStore((s) => s.returnToTitle)
   const totem = usePersistentStore((s) => s.totems.find((t) => t.id === s.activeTotemId))
   const seenContent = usePersistentStore((s) => s.seenContent)
   const acknowledgeNewContent = usePersistentStore((s) => s.acknowledgeNewContent)
@@ -135,6 +136,12 @@ export function MainMenuScreen() {
       </div>
 
       <div style={{ flex: 1 }} />
+      {/* Quieter than the four destinations above it: going back to the
+          title is a way out of the game, not a fifth place to visit. */}
+      <button className="menu-exit" onClick={returnToTitle} data-sfx="cancel">
+        타이틀 화면으로
+      </button>
+
       <p className="faint" style={{ textAlign: 'center' }}>
         완전 오프라인 · 진행 상황은 이 기기에 저장됩니다
       </p>
