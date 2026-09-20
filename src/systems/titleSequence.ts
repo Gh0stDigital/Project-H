@@ -9,6 +9,7 @@
  */
 export type TitlePhase =
   | 'cover'
+  | 'choosing'
   | 'igniting'
   | 'flash'
   | 'awaken'
@@ -20,6 +21,7 @@ export type TitlePhase =
 /** The beats in order. `done` is terminal: the sequence is over and gone. */
 const ORDER: readonly TitlePhase[] = [
   'cover',
+  'choosing',
   'igniting',
   'flash',
   'awaken',
@@ -31,6 +33,10 @@ const ORDER: readonly TitlePhase[] = [
 
 /**
  * How long each self-timed beat lasts.
+ *
+ * `choosing` is missing on purpose, like `cover`: it waits for the player to
+ * pick New Game or Load Game, and a duration would carry them past the
+ * choice without one.
  *
  * `igniting` is the book catching light under the finger that just touched
  * it; `flash` is the white at the top of that, brief enough to read as an
@@ -85,6 +91,16 @@ export function titlePhaseMs(phase: TitlePhase): number | null {
     default:
       return null
   }
+}
+
+/**
+ * The beats the player is being asked something in.
+ *
+ * Both of them wait: the first for a tap, the second for which game to play.
+ * Nothing in the opening may run itself forward while one is on screen.
+ */
+export function titleIsWaiting(phase: TitlePhase): boolean {
+  return phase === 'cover' || phase === 'choosing'
 }
 
 /** Whether the sequence is still covering the game underneath it. */

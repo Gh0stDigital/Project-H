@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   nextTitlePhase,
   titleHasArrived,
+  titleIsWaiting,
   titleIsShowing,
   titlePhaseMs,
   titleTimings,
@@ -16,6 +17,7 @@ describe('title sequence', () => {
     }
     expect(seen).toEqual([
       'cover',
+      'choosing',
       'igniting',
       'flash',
       'awaken',
@@ -30,11 +32,20 @@ describe('title sequence', () => {
     expect(nextTitlePhase('done')).toBe('done')
   })
 
-  it('leaves the two beats that wait on something else untimed', () => {
-    // The tap, and the art finishing its decode. A duration here would run
-    // the sequence on without either of them.
+  it('leaves the beats that wait on something else untimed', () => {
+    // The tap, the choice of game, and the art finishing its decode. A
+    // duration on any of them would run the sequence on without it.
     expect(titlePhaseMs('cover')).toBeNull()
+    expect(titlePhaseMs('choosing')).toBeNull()
     expect(titlePhaseMs('loading')).toBeNull()
+  })
+
+  it('knows which beats are waiting on the player', () => {
+    expect(titleIsWaiting('cover')).toBe(true)
+    expect(titleIsWaiting('choosing')).toBe(true)
+    for (const phase of ['igniting', 'flash', 'awaken', 'fading', 'loading', 'revealing', 'done'] as const) {
+      expect(titleIsWaiting(phase)).toBe(false)
+    }
   })
 
   it('gives every self-timed beat a duration', () => {
@@ -58,7 +69,7 @@ describe('title sequence', () => {
   it('counts as arrived only once the menu is on show', () => {
     // What decides when the music may start. Anything earlier is still the
     // opening, and the theme would play over the book and the flash.
-    for (const phase of ['cover', 'igniting', 'flash', 'awaken', 'fading', 'loading'] as const) {
+    for (const phase of ['cover', 'choosing', 'igniting', 'flash', 'awaken', 'fading', 'loading'] as const) {
       expect(titleHasArrived(phase)).toBe(false)
     }
     expect(titleHasArrived('revealing')).toBe(true)

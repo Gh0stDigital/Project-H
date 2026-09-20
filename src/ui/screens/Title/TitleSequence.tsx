@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import type React from 'react'
 import { getAsset, hasAsset, type AssetCategory } from '@/config/assets'
 import { audio } from '@/systems/audioEngine'
+import { autosaveTime, usePersistentStore } from '@/state/persistentStore'
 import { useUiStore } from '@/state/uiStore'
 import {
   nextTitlePhase,
   titleHasArrived,
+  titleIsWaiting,
   titlePhaseMs,
   titleTimings,
   type TitlePhase,
@@ -41,7 +43,18 @@ const PRELOAD: ReadonlyArray<readonly [AssetCategory, string]> = [
 export function TitleSequence({ onDone }: TitleSequenceProps) {
   const hasArt = hasAsset('ui', 'cover') && hasAsset('ui', 'awaken')
   const arrive = useUiStore((s) => s.arrive)
+  const startNewGame = usePersistentStore((s) => s.startNewGame)
   const [phase, setPhase] = useState<TitlePhase>('cover')
+  const [warning, setWarning] = useState(false)
+  /**
+   * Read once, at mount, and kept.
+   *
+   * The store writes on every change, so by the time the player reaches the
+   * choice the app itself has usually saved — asking then would say "yes,
+   * there is a save" even on a first launch. This is what was on disk before
+   * this session touched anything.
+   */
+  const [existing] = useState<Date | null>(() => autosaveTime())
 
   // Nothing to show: leave before the player ever sees a frame of it.
   useEffect(() => {
@@ -105,11 +118,26 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
     // The tap is also the gesture that unlocks audio, so the sting lands on
     // the same frame the book catches light.
     audio.unlock()
-    audio.play('confirm')
+    audio.play('gameStart')
+    setPhase('choosing')
+  }
+
+  /** Both answers sound the same, because both mean "this one, then". */
+  function choose(fresh: boolean) {
+    if (phase !== 'choosing') return
+    audio.play('gameChoice')
+    if (fresh) startNewGame()
     setPhase('igniting')
   }
 
-  const onCover = phase === 'cover' || phase === 'igniting'
+  function askNewGame() {
+    // Nothing to lose: no save, no question.
+    if (!existing) return choose(true)
+    audio.play('gameChoice')
+    setWarning(true)
+  }
+
+  const onCover = titleIsWaiting(phase) || phase === 'igniting'
 
   return (
     <div
@@ -133,6 +161,48 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
           <span className="title-start-text">화면을 눌러 시작</span>
           <span className="title-start-sub">TAP TO START</span>
         </button>
+      )}
+
+      {phase === 'choosing' && !warning && (
+        <div className="title-menu">
+          <button className="title-option" onClick={askNewGame} autoFocus data-sfx="none">
+            <span className="title-option-text">새 게임</span>
+            <span className="title-option-sub">NEW GAME</span>
+          </button>
+          {/* Offered only when there is something to load. A button that
+              says "continue" and then starts from nothing is worse than no
+              button. */}
+          {existing && (
+            <button className="title-option" onClick={() => choose(false)} data-sfx="none">
+              <span className="title-option-text">이어하기</span>
+              <span className="title-option-sub">LOAD GAME · {savedWhen(existing)}</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {phase === 'choosing' && warning && (
+        <div className="title-menu title-warning">
+          <p className="title-warning-text">
+            저장된 기록이 있습니다 ({savedWhen(existing!)}).
+            <br />새 게임을 시작하면 그 기록은 지워집니다.
+          </p>
+          <button className="title-option danger" onClick={() => choose(true)} data-sfx="none">
+            <span className="title-option-text">지우고 새로 시작</span>
+            <span className="title-option-sub">ERASE AND BEGIN</span>
+          </button>
+          {/* The safe answer takes the focus, not the destructive one: an
+              Enter pressed out of habit should back out, not erase. */}
+          <button
+            className="title-option"
+            onClick={() => { audio.play('cancel'); setWarning(false) }}
+            autoFocus
+            data-sfx="none"
+          >
+            <span className="title-option-text">돌아가기</span>
+            <span className="title-option-sub">BACK</span>
+          </button>
+        </div>
       )}
 
       {/* Kept through the reveal so it fades out with the black rather than
@@ -164,4 +234,20 @@ function Plate({ name, src, hidden }: { name: string; src: string; hidden: boole
       <img className="title-plate-art" src={src} alt="" draggable={false} />
     </div>
   )
+}
+
+/**
+ * How long ago the save was written, in words.
+ *
+ * A timestamp would be precise and useless: what the player needs to know
+ * before erasing it is whether this is the game they were playing an hour
+ * ago or one they abandoned last year.
+ */
+function savedWhen(when: Date): string {
+  const minutes = Math.floor((Date.now() - when.getTime()) / 60000)
+  if (minutes < 1) return '방금'
+  if (minutes < 60) return `${minutes}분 전`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}시간 전`
+  return `${Math.floor(hours / 24)}일 전`
 }

@@ -83,6 +83,28 @@ export class PersistenceService<T> {
     }
   }
 
+  /**
+   * When the stored save was last written, or null when there is none.
+   *
+   * Reads the envelope without touching `data`, so asking "is there a save,
+   * and how old is it" costs nothing on a save full of spells. A stored blob
+   * that will not parse, or was written by a schema this build cannot read,
+   * counts as no save — the same answer load() gives, so the title screen
+   * cannot offer to continue something that would not come back.
+   */
+  savedAt(): Date | null {
+    const raw = this.adapter.getItem(this.key)
+    if (!raw) return null
+    try {
+      const parsed = JSON.parse(raw) as SaveEnvelope<T>
+      if (!parsed || typeof parsed !== 'object' || parsed.version !== this.version) return null
+      const when = new Date(parsed.savedAt)
+      return Number.isNaN(when.getTime()) ? null : when
+    } catch {
+      return null
+    }
+  }
+
   save(data: T): void {
     const envelope: SaveEnvelope<T> = {
       version: this.version,

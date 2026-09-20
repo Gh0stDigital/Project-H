@@ -6,7 +6,7 @@
 export const audioManifest = {
   music: ["battle","boss","dungeon","menu","rest","results"],
   ambient: ["drip","night","wind"],
-  sfx: ["battleStart","bossDoor","cancel","chestOpen","confirm","correct","damage","defeat","diceRoll","discovery","enemyAppear","enemyAttack","itemUse","levelUp","move","npcTalk","playerAttack","reward","shrine","trapTrigger","victory","wrong"],
+  sfx: ["battleStart","bossDoor","cancel","chestOpen","confirm","correct","damage","defeat","diceRoll","discovery","enemyAppear","enemyAttack","gameChoice","gameStart","itemUse","levelUp","move","npcTalk","playerAttack","reward","shrine","trapTrigger","victory","wrong"],
 } as const
 
 /**
@@ -42,6 +42,8 @@ export const audioFiles: Readonly<Record<string, string>> = {
   "audio/sfx/discovery": "discovery.mp3",
   "audio/sfx/enemyAppear": "enemyAppear.mp3",
   "audio/sfx/enemyAttack": "enemyAttack.mp3",
+  "audio/sfx/gameChoice": "gameChoice.mp3",
+  "audio/sfx/gameStart": "gameStart.mp3",
   "audio/sfx/itemUse": "itemUse.mp3",
   "audio/sfx/levelUp": "levelUp.mp3",
   "audio/sfx/move": "move.mp3",

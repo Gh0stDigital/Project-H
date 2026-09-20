@@ -116,6 +116,8 @@ export interface PersistentStore extends PersistedData {
 
   /** Raises a new Totem — its own character, not a reskin of the current one. */
   createTotem(name: string, avatarKey?: string): Totem
+  /** Throws the save away and begins again. */
+  startNewGame(): void
   /** Swaps a Totem's portrait to any art the totems registry offers. */
   setTotemAvatar(totemId: string, avatarKey: string): void
   /** Totems that can still enter a dungeon (not destroyed). */
@@ -242,7 +244,27 @@ export const usePersistentStore = create<PersistentStore>()((set, get) => ({
   consumeItem(itemId) {
     set((state) => ({ inventory: consumeItem(state.inventory, itemId) }))
   },
+
+  startNewGame() {
+    // Everything the save holds, back to how a first launch finds it. The
+    // subscription below then writes it out, so the old game is gone from
+    // disk as well as from memory — a half-reset that left the old spells on
+    // disk would come back on the next load.
+    set(defaultData())
+  },
 }))
+
+/**
+ * When the autosave was last written, or null when there is none.
+ *
+ * The title screen asks this to decide whether "Load Game" has anything to
+ * load, and whether starting fresh is about to overwrite something. It is a
+ * plain function rather than store state because it is a fact about the
+ * disk, not about the game in memory.
+ */
+export function autosaveTime(): Date | null {
+  return persistence.savedAt()
+}
 
 // Persist on every change. Simple + adequate for prototype scale.
 usePersistentStore.subscribe((state) => {

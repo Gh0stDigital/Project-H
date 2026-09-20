@@ -4983,9 +4983,16 @@ button.totem-hero-frame {
 
 /* The cover holds still until it is touched, then leans in and catches light
    — the book waking up under the finger rather than cutting to the flash. */
-.phase-cover .title-plate.cover {
+.phase-cover .title-plate.cover,
+.phase-choosing .title-plate.cover {
   opacity: 1;
   transform: scale(1.02);
+}
+
+/* Held a touch darker under the options, so the words win against the art
+   without a plate big enough to hide the book. */
+.phase-choosing .title-plate.cover {
+  filter: brightness(0.72) saturate(0.92);
 }
 
 .phase-igniting .title-plate.cover {
@@ -5107,6 +5114,112 @@ button.totem-hero-frame {
 @keyframes title-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.38; }
+}
+
+/* ---- New game / load game ----------------------------------------------
+
+   Sits where the tap prompt was, so the eye does not have to travel when one
+   replaces the other. The column is anchored to the bottom for the same
+   reason the prompt was: the art's subject is in the middle of the frame and
+   this must not cover it. */
+
+.title-menu {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: calc(52px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 0 34px;
+  animation: title-options-arrive 420ms ease both;
+}
+
+@keyframes title-options-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title-option {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 13px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-tight);
+  /* Darker and flatter than the game's own windows: this is over artwork,
+     and the bronze gradient fought the picture behind it. */
+  background: rgba(14, 9, 5, 0.82);
+  backdrop-filter: blur(3px);
+  box-shadow: var(--bevel), 0 8px 24px -12px rgba(0, 0, 0, 0.9);
+  touch-action: manipulation;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.08s ease;
+}
+
+.title-option:active {
+  transform: scale(0.985);
+}
+
+.title-option:hover,
+.title-option:focus-visible {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: rgba(30, 19, 10, 0.88);
+}
+
+.title-option.danger {
+  border-color: var(--accent-red);
+}
+
+.title-option.danger:hover,
+.title-option.danger:focus-visible {
+  border-color: var(--accent-red);
+  background: rgba(58, 20, 14, 0.88);
+}
+
+.title-option-text {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.title-option-sub {
+  font-size: 9.5px;
+  letter-spacing: 0.26em;
+  text-indent: 0.26em;
+  color: var(--accent-gold);
+}
+
+.title-option.danger .title-option-sub {
+  color: var(--accent-red);
+}
+
+/* The one thing in the opening the player has to read before answering, so
+   it gets a plate of its own rather than a text shadow over artwork. */
+.title-warning-text {
+  margin: 0 0 2px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--text-secondary);
+  background: rgba(14, 9, 5, 0.88);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-tight);
+  backdrop-filter: blur(3px);
 }
 
 /* ---- Loading ---- */

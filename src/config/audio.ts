@@ -47,6 +47,13 @@ const sfxOverrides: Partial<Record<SfxCue, Partial<SfxSpec>>> = {
   // The quietest file in the pack by average level — a sparse, reverby
   // sting whose peak is as high as everything else but whose body is not.
   shrine: { gain: 1, minInterval: 0.8, detune: 0 },
+  // The opening. Both are stings: one at a time, never pitch-shifted, and
+  // pulled down a little — they peak within half a decibel of full scale,
+  // where `confirm`, the click the player will hear all day, peaks at -7,
+  // so at the default gain they would arrive noticeably louder than the
+  // game that follows them.
+  gameStart: { gain: 0.78, minInterval: 1, detune: 0 },
+  gameChoice: { gain: 0.8, minInterval: 0.5, detune: 0 },
   // Fired on nearly every tap, so they sit back in the mix.
   confirm: { gain: 0.55, minInterval: 0.05 },
   cancel: { gain: 0.55, minInterval: 0.05 },
