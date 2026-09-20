@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import type React from 'react'
 import { getAsset, hasAsset, type AssetCategory } from '@/config/assets'
 import { audio } from '@/systems/audioEngine'
+import { useUiStore } from '@/state/uiStore'
 import {
   nextTitlePhase,
+  titleHasArrived,
   titlePhaseMs,
   titleTimings,
   type TitlePhase,
@@ -37,12 +40,20 @@ const PRELOAD: ReadonlyArray<readonly [AssetCategory, string]> = [
  */
 export function TitleSequence({ onDone }: TitleSequenceProps) {
   const hasArt = hasAsset('ui', 'cover') && hasAsset('ui', 'awaken')
+  const arrive = useUiStore((s) => s.arrive)
   const [phase, setPhase] = useState<TitlePhase>('cover')
 
   // Nothing to show: leave before the player ever sees a frame of it.
   useEffect(() => {
     if (!hasArt) onDone()
   }, [hasArt, onDone])
+
+  // The menu is the player's now, even though the sequence is still on top
+  // of it fading out. That is the moment the theme is allowed to start, so
+  // it comes up with the menu rather than a second after it.
+  useEffect(() => {
+    if (titleHasArrived(phase) || !hasArt) arrive()
+  }, [phase, hasArt, arrive])
 
   // The self-timed beats. `cover` waits for the tap and `loading` waits for
   // the art, so neither returns a duration and neither schedules anything.
@@ -75,7 +86,10 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
       if (cancelled) return
       const held = Date.now() - started
       const rest = Math.max(0, titleTimings.minLoading - held)
-      setTimeout(() => { if (!cancelled) setPhase('done') }, rest)
+      // Hand back to the machine rather than naming the next beat here:
+      // one place decides the order, and this effect only decides when
+      // loading is finished.
+      setTimeout(() => { if (!cancelled) setPhase((ph) => nextTitlePhase(ph)) }, rest)
     })
     return () => { cancelled = true }
   }, [phase])
@@ -98,7 +112,17 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
   const onCover = phase === 'cover' || phase === 'igniting'
 
   return (
-    <div className={`title-sequence phase-${phase}`}>
+    <div
+      className={`title-sequence phase-${phase}`}
+      // The CSS and the state machine have to agree on how long these beats
+      // are, so only one of them gets to decide.
+      style={
+        {
+          '--title-fade-ms': `${titleTimings.fading}ms`,
+          '--title-reveal-ms': `${titleTimings.revealing}ms`,
+        } as React.CSSProperties
+      }
+    >
       <Plate name="cover" src={getAsset('ui', 'cover')} hidden={!onCover} />
       <Plate name="awaken" src={getAsset('ui', 'awaken')} hidden={onCover} />
 
@@ -111,7 +135,9 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
         </button>
       )}
 
-      {phase === 'loading' && (
+      {/* Kept through the reveal so it fades out with the black rather than
+          vanishing a beat before it. */}
+      {(phase === 'loading' || phase === 'revealing') && (
         <div className="title-loading">
           <span className="title-loading-text">불러오는 중…</span>
           <span className="title-loading-bar" />

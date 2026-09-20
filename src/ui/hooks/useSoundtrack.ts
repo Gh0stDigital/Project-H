@@ -50,6 +50,7 @@ function musicFor(screen: string, state: string | undefined): MusicCue | null {
 
 export function useSoundtrack(): void {
   const screen = useUiStore((s) => s.screen)
+  const opening = useUiStore((s) => s.opening)
   const run = useDungeonStore((s) => s.run)
   const battle = useDungeonStore((s) => s.battle)
   const totems = usePersistentStore((s) => s.totems)
@@ -90,6 +91,14 @@ export function useSoundtrack(): void {
     // the `phase` this effect closed over is still 'idle' on exactly the
     // tick that matters — and the battle bed would start for one frame
     // before being stopped again.
+    // Nothing plays under the opening. `screen` says 'menu' from the first
+    // frame — the sequence is an overlay, not a screen — so without this the
+    // theme starts while the book is still shut, and the tap that is meant to
+    // begin the game lands on a track already playing.
+    if (opening) {
+      audio.setMusic(null)
+      return
+    }
     const current = useTransitionStore.getState().phase
     if (current === 'covering' || current === 'covered') {
       audio.setMusic(null)
@@ -97,11 +106,11 @@ export function useSoundtrack(): void {
     }
     if (current !== 'idle') return
     audio.setMusic(musicFor(screen, run?.state))
-  }, [screen, run?.state, phase])
+  }, [screen, run?.state, phase, opening])
 
   useEffect(() => {
-    audio.setAmbience(screen === 'dungeon' ? ambienceFor(run?.state) : [])
-  }, [screen, run?.state])
+    audio.setAmbience(!opening && screen === 'dungeon' ? ambienceFor(run?.state) : [])
+  }, [screen, run?.state, opening])
 
   // ---- Stings -----------------------------------------------------------
   useEffect(() => {

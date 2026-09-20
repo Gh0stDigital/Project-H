@@ -4923,6 +4923,18 @@ button.totem-hero-frame {
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  opacity: 1;
+}
+
+/* The last beat: the whole opening fades away over a menu that has been
+   mounted and settled underneath it the entire time, so what comes up is a
+   finished screen rather than one assembling itself. Pointer events go
+   first — the menu is the player's the moment it is visible, not once the
+   fade has finished. */
+.title-sequence.phase-revealing {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--title-reveal-ms, 1000ms) ease-in-out;
 }
 
 .title-plate {
@@ -4985,17 +4997,25 @@ button.totem-hero-frame {
 /* Through the white, the second plate is already at full opacity behind it,
    so what the flash uncovers is a finished frame rather than a fade-in. */
 .phase-flash .title-plate.awaken,
-.phase-awaken .title-plate.awaken,
-.phase-loading .title-plate.awaken {
+.phase-awaken .title-plate.awaken {
   opacity: 1;
+}
+
+/* Then it goes out, and the loading screen arrives on black rather than on
+   top of a picture that is still there. The plate keeps drifting in as it
+   fades, so the shot is still moving when it leaves. */
+.phase-fading .title-plate.awaken {
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity var(--title-fade-ms, 700ms) ease-in,
+    transform var(--title-fade-ms, 700ms) ease-out;
 }
 
 .phase-flash .title-plate.awaken {
   transform: scale(1.06);
 }
 
-.phase-awaken .title-plate.awaken,
-.phase-loading .title-plate.awaken {
+.phase-awaken .title-plate.awaken {
   transform: scale(1);
   transition: opacity 240ms ease, transform 2400ms ease-out;
 }
@@ -5038,6 +5058,7 @@ button.totem-hero-frame {
 }
 
 .phase-awaken .title-white,
+.phase-fading .title-white,
 .phase-loading .title-white {
   opacity: 0;
 }
