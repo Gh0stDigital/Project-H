@@ -14,20 +14,16 @@ const noun = (korean: string, english: string) => createSpell({ korean, english,
 const actionVerb = (korean: string, english: string) => createSpell({ korean, english, wordType: 'action_verb' })
 
 describe('a Totem as a card', () => {
-  it('reads its numbers off the equipped deck', () => {
+  it('counts the equipped deck', () => {
     const spells = [noun('물', 'water'), noun('불', 'fire')]
     const sets = [deck('s1', spells.map((s) => s.id))]
     const totem = { ...createTotem('돌배', 'Dolbae'), equippedSpellSetId: 's1' }
-    const card = totemCard(totem, spells, sets)
-    expect(card.deckSize).toBe(2)
-    expect(card.attack).toBeGreaterThan(0)
-    expect(card.defense).toBe(totem.maxHp)
+    expect(totemCard(totem, spells, sets).deckSize).toBe(2)
   })
 
-  it('has no attribute and no attack with nothing equipped', () => {
+  it('has no attribute with nothing equipped', () => {
     const card = totemCard(createTotem('돌배', 'Dolbae'), [], [])
     expect(card.element).toBeNull()
-    expect(card.attack).toBe(0)
     expect(card.deckSize).toBe(0)
   })
 

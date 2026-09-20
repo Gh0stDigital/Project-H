@@ -4,16 +4,16 @@ import type { Totem } from '@/domain/totem'
 import { type Element, elementFor } from '@/config/wordTypes'
 import { loreFor } from '@/config/totemLore'
 import { resolvedKey } from '@/config/assets'
-import { damageForSpell } from './spellProgression'
 
 /**
  * A Totem as a monster card.
  *
- * Every number here is one the game already plays with rather than a stat
- * invented for the card: the attack is what the equipped deck actually hits
- * for, the defence is the HP it actually has, and the attribute is the
- * element its own words lean towards. A card that shows made-up numbers is
- * decoration; this one is a readout.
+ * Everything here is something the game already tracks rather than a stat
+ * invented for the card: the level it really is, the attribute its own
+ * equipped words lean towards, the size of the deck it carries. A card
+ * showing made-up numbers is decoration; this one is a readout. The HP is
+ * read straight off the Totem by the card itself, since it changes during
+ * a run and nothing here needs to derive it.
  *
  * Pure: no React, no store.
  */
@@ -28,9 +28,6 @@ export interface TotemCardData {
   level: number
   /** Stars to draw; the level is printed as well once it passes the cap. */
   stars: number
-  /** Total damage the equipped deck deals at its current charge. */
-  attack: number
-  defense: number
   /** The element the equipped words lean towards, or null with no deck. */
   element: Element | null
   /** Words in the equipped set. */
@@ -80,8 +77,6 @@ export function totemCard(totem: Totem, spells: Spell[], sets: SpellSet[]): Tote
     description: totem.description?.trim() || lore.description,
     level: totem.level,
     stars: Math.max(1, Math.min(MAX_STARS, totem.level)),
-    attack: deck.reduce((sum, spell) => sum + damageForSpell(spell), 0),
-    defense: totem.maxHp,
     element: dominantElement(deck),
     deckSize: deck.length,
   }

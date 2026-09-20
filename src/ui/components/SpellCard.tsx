@@ -1,6 +1,6 @@
 import type { Spell } from '@/domain/spell'
 import { damageForSpell } from '@/systems/spellProgression'
-import { pickFlavorKey } from '@/config/assets'
+import { hasAsset, pickFlavorKey } from '@/config/assets'
 import { elementDefFor } from '@/config/wordTypes'
 import { AssetImage } from './AssetImage'
 import { Bar } from './Bar'
@@ -22,8 +22,12 @@ interface SpellCardProps {
 
 /** A single battle-hand Spell card: word, level, charge, potential damage. */
 export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onClick }: SpellCardProps) {
-  const artKey = pickFlavorKey('spells', spell.id)
   const element = elementDefFor(spell.wordType)
+  // The icon belongs to the element, not to the word: a fire word shows the
+  // fire icon. Elements the folder has no art for keep the old behaviour of
+  // borrowing one of the others, so every card still has a face — drop in
+  // `lightning` and `metal` and they pick themselves up.
+  const artKey = hasAsset('spells', element.id) ? element.id : pickFlavorKey('spells', spell.id)
   return (
     <div
       className={`spell-card element-${element.id}${selected ? ' selected' : ''}${disabled ? ' disabled' : ''}${
@@ -37,7 +41,15 @@ export function SpellCard({ spell, selected, disabled, clue, barrierCleared, onC
           and no Korean — showing the word would hand over the answer the
           player is about to be asked to produce. */}
       {clue ? (
-        <div className="word card-clue">{clue}</div>
+        // The clue is still the only thing that says which word this is; the
+        // icon says what kind of word, which the meta row below already
+        // states in words, so it gives nothing away that was not shown.
+        <>
+          <div className="art art-badge">
+            <AssetImage category="spells" assetKey={artKey} alt={element.label} />
+          </div>
+          <div className="word card-clue">{clue}</div>
+        </>
       ) : (
         <>
           <div className="art">

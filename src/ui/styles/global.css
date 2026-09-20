@@ -4669,8 +4669,7 @@ button.totem-hero-frame {
   font-weight: 700;
 }
 
-.totem-card-atk { color: var(--accent-gold); }
-.totem-card-def { color: var(--accent-cyan); }
+.totem-card-hp { color: var(--accent-gold); }
 
 .totem-desc-input {
   width: 100%;
@@ -4683,4 +4682,44 @@ button.totem-hero-frame {
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
+}
+
+/* The element's icon on an attack card, where the art block would be too
+   big: the clue has to stay the thing the eye lands on. */
+.spell-card .art.art-badge {
+  width: 38px;
+  margin: 0 auto 2px;
+  border-color: var(--border-soft);
+  flex-shrink: 0;
+}
+
+/* With a badge above it the clue no longer needs to claim the whole card. */
+.spell-card .art-badge + .word.card-clue {
+  min-height: 52px;
+  font-size: 34px;
+}
+
+/* Deliberately quiet and small: it lives in the HUD beside the numbers, not
+   among the buttons the player is aiming for, and it only ever opens a
+   confirmation. */
+.run-hud-giveup {
+  appearance: none;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-left: 2px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: rgba(8, 10, 16, 0.5);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.run-hud-giveup:active {
+  color: var(--danger, #ff7a6b);
+  border-color: var(--danger, #ff7a6b);
 }

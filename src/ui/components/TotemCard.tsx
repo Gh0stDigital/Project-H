@@ -69,8 +69,13 @@ export function TotemCard({ totem, spells, spellSets, onPortraitClick }: TotemCa
           {card.deckSize > 0 ? `장착 단어 ${card.deckSize}개` : '장착한 주문 세트 없음'}
         </span>
         <span className="totem-card-numbers">
-          <span className="totem-card-atk">공격 {card.attack}</span>
-          <span className="totem-card-def">방어 {card.defense}</span>
+          {/* The one number that means something at a glance. Attack was the
+              equipped deck's total rather than the Totem's own, and defence
+              was max HP under another name — two figures saying less than
+              the bar above them. */}
+          <span className="totem-card-hp">
+            HP {totem.currentHp}/{totem.maxHp}
+          </span>
         </span>
       </div>
     </div>

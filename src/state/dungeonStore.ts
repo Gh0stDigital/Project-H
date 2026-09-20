@@ -149,6 +149,8 @@ interface DungeonStore {
   enterBossDoor(): void
   useItem(itemId: ItemId): void
   abandonRun(): void
+  /** Walks out mid-run. The run is thrown away rather than finished. */
+  giveUpRun(): void
 
   // Events
   attemptTreasure(): void
@@ -768,6 +770,33 @@ export const useDungeonStore = create<DungeonStore>()((set, get) => ({
     // the answer.
     if (battle && (battle.phase === 'player_challenge' || battle.phase === 'enemy_challenge')) return
     set({ activePanel: 'words' })
+  },
+
+  /**
+   * Quitting outright.
+   *
+   * Not the same as an Escape Rope, which *ends* the run — that one still
+   * counts, pays out and writes a report. This throws the run away: no
+   * results screen, nothing added to the record, no Life Point taken. What
+   * the Totem banked as it went (experience, coin, wounds) is already its
+   * own and stays; there is no run left to credit it from.
+   */
+  giveUpRun() {
+    if (!get().run) return
+    set({
+      screenPhase: 'config',
+      run: null,
+      battle: null,
+      report: null,
+      activePanel: null,
+      stage: 'intro',
+      puzzle: null,
+      rolling: false,
+      submitting: false,
+      restRevisit: false,
+      confirmingBoss: false,
+      lastOutcome: null,
+    })
   },
 
   exitToMenu() {

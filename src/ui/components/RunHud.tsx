@@ -1,6 +1,7 @@
 import type { DungeonRunState } from '@/domain/dungeon'
 import type { Totem } from '@/domain/totem'
 import { describeModifier } from '@/systems/directionModifiers'
+import { GiveUpButton } from './GiveUpButton'
 
 interface RunHudProps {
   run: DungeonRunState
@@ -26,6 +27,7 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
           <span className="faint">{'◇'.repeat(Math.max(0, totem.maxLifePoints - totem.lifePoints))}</span>
         </span>
         <span className="run-hud-money">💰 {totem.money}</span>
+        <GiveUpButton />
       </div>
 
       <div className="run-hud-row secondary">
