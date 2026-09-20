@@ -23,7 +23,7 @@ import {
   deleteSpellSet,
   pruneSpellFromAllSets,
 } from '@/systems/spellSetManager'
-import { createTotem, equipSpellSet, isUsable } from '@/systems/totemManager'
+import { createTotem, equipSpellSet, isUsable, STARTING_AVATAR } from '@/systems/totemManager'
 import { migrateSpells } from '@/systems/spellMigration'
 import { totemBalance } from '@/config/balance'
 import { hasAsset } from '@/config/assets'
@@ -77,10 +77,10 @@ function loadInitial(): PersistedData {
     totems: (saved.totems && saved.totems.length > 0 ? saved.totems : defaults.totems).map((t) => ({
       ...t,
       // A saved portrait is kept as-is. An unknown key (art removed or
-      // renamed since the save) falls back rather than breaking the load —
-      // getAsset() would show the placeholder anyway, so normalise it here
-      // and keep the stored value honest.
-      avatarKey: hasAsset('totems', t.avatarKey) ? t.avatarKey : 'default',
+      // renamed since the save) falls back rather than breaking the load,
+      // and it falls back to a portrait that exists rather than to a key
+      // that has to be guessed at again on every render.
+      avatarKey: hasAsset('totems', t.avatarKey) ? t.avatarKey : STARTING_AVATAR,
       // Life Points were added after some saves were written — give older
       // Totems a full set rather than a destroyed one.
       lifePoints: t.lifePoints ?? totemBalance.startingLifePoints,
@@ -194,7 +194,7 @@ export const usePersistentStore = create<PersistentStore>()((set, get) => ({
   },
 
   createTotem(name, avatarKey) {
-    const totem = createTotem(name, avatarKey && hasAsset('totems', avatarKey) ? avatarKey : 'default')
+    const totem = createTotem(name, avatarKey && hasAsset('totems', avatarKey) ? avatarKey : STARTING_AVATAR)
     // A newly raised Totem becomes the active one — otherwise a player
     // whose only Totem was destroyed would still have no one to play as.
     set((state) => ({ totems: [...state.totems, totem], activeTotemId: totem.id }))

@@ -29,7 +29,18 @@ export function nameFromAvatarKey(avatarKey: string): string {
  * experience, HP, money, Life Points and record — so switching between them
  * swaps who you are playing, not just how you look.
  */
-export function createTotem(name: string, avatarKey = 'default'): Totem {
+/**
+ * The face a new Totem wears unless the player picks another.
+ *
+ * It used to be 'default', a key no art answers to — so the portrait was
+ * resolved by the flavour fallback, which hashes the key and picks whatever
+ * comes out. That landed on Dolbae, but by arithmetic rather than by
+ * intent: adding one file to the folder would have silently changed who the
+ * game starts you as.
+ */
+export const STARTING_AVATAR = 'Dolbae'
+
+export function createTotem(name: string, avatarKey = STARTING_AVATAR): Totem {
   const level = 1
   return {
     id: makeId('totem'),

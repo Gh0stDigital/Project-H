@@ -1369,6 +1369,10 @@ select:focus {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-strong);
   padding: 4px;
+  /* See .status-portrait .avatar-img below: contain, not cover, because one
+     of the Totems is a tall portrait and cover cut its head off. */
+  aspect-ratio: 1 / 1.08;
+  object-fit: contain;
 }
 
 .totem-banner-body {
@@ -1566,10 +1570,20 @@ select:focus {
   flex-shrink: 0;
 }
 
+/* Totem art comes in two shapes: wide sprites (1200x896) and tall full-body
+   portraits (768x1376). A square box filled with object-fit: cover crops
+   whatever does not fit, and for the tall ones that is the head and the
+   feet — Dolbae appeared as a torso with no face. contain shows all of every
+   one of them, and the box is a little taller than square so the portraits
+   get most of the room rather than being reduced to a strip. .avatar-frame
+   solves the same problem the other way, by sizing on height; these two
+   slots are width-driven by the row they sit in, so they cannot use it. */
 .status-portrait .avatar-img {
   border-radius: var(--radius-md);
   border: 1px solid var(--border-strong);
   padding: 4px;
+  aspect-ratio: 1 / 1.08;
+  object-fit: contain;
 }
 
 .status-hero-body {
