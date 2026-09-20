@@ -3,17 +3,20 @@ import { useUiStore } from '@/state/uiStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { TopBar } from '@/ui/components/TopBar'
 import { AvatarFrame } from '@/ui/components/AvatarFrame'
+import { TotemCard } from '@/ui/components/TotemCard'
 import { Bar } from '@/ui/components/Bar'
 import { SlidePanel } from '@/ui/components/SlidePanel'
 import { totemBalance } from '@/config/balance'
-import { assetKeys } from '@/config/assets'
+import { assetKeys, resolvedKey } from '@/config/assets'
 import { isUsable, nameFromAvatarKey } from '@/systems/totemManager'
+import { loreFor } from '@/config/totemLore'
 
 export function TotemScreen() {
   const goTo = useUiStore((s) => s.goTo)
   const totems = usePersistentStore((s) => s.totems)
   const activeTotemId = usePersistentStore((s) => s.activeTotemId)
   const spellSets = usePersistentStore((s) => s.spellSets)
+  const spells = usePersistentStore((s) => s.spells)
   const equipTotemSpellSet = usePersistentStore((s) => s.equipTotemSpellSet)
   const editName = usePersistentStore((s) => s.replaceTotem)
   const createNewTotem = usePersistentStore((s) => s.createTotem)
@@ -29,6 +32,8 @@ export function TotemScreen() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
   const [rosterOpen, setRosterOpen] = useState(false)
+  const [describing, setDescribing] = useState(false)
+  const [descDraft, setDescDraft] = useState(totem?.description ?? '')
 
   // Switching Totem changes who the rename field is editing, so the draft
   // has to follow. Without this, opening rename on a freshly switched Totem
@@ -37,7 +42,9 @@ export function TotemScreen() {
   if (totem && nameOwner !== totem.id) {
     setNameOwner(totem.id)
     setNameDraft(totem.name)
+    setDescDraft(totem.description ?? '')
     setRenaming(false)
+    setDescribing(false)
   }
 
   if (!totem) {
@@ -60,22 +67,35 @@ export function TotemScreen() {
       <TopBar title="토템" onBack={() => goTo('menu')} />
 
       <div className="panel" style={{ textAlign: 'center' }}>
-        <button className="totem-hero-frame" onClick={() => setRosterOpen(true)} title="토템 교체">
-          <AvatarFrame assetKey={totem.avatarKey} alt={totem.name} size="hero" />
-        </button>
-        {/* Below the frame, not over the art. Switching is the primary
+        {/* The card is the Totem: name, attribute, level, art, what kind of
+            thing it is, and the two numbers. Everything below it is the
+            player's own bookkeeping — lives, XP, record, equipped set. */}
+        <TotemCard
+          totem={totem}
+          spells={spells}
+          spellSets={spellSets}
+          onPortraitClick={() => setRosterOpen(true)}
+        />
+
+        {/* Below the card, not over the art. Switching is the primary
             action — each Totem is its own character, with its own level and
             record. Repainting the one you have is the rarer, cosmetic case. */}
-        <div className="btn-row" style={{ justifyContent: 'center' }}>
+        <div className="btn-row" style={{ justifyContent: 'center', marginTop: 10 }}>
           <button className="totem-hero-edit" onClick={() => setRosterOpen(true)}>
             토템 교체
           </button>
           <button className="totem-hero-edit" onClick={() => setAvatarPickerOpen(true)}>
             초상화 변경
           </button>
+          <button className="totem-hero-edit" onClick={() => setRenaming(true)}>
+            이름 변경
+          </button>
+          <button className="totem-hero-edit" onClick={() => setDescribing(true)}>
+            설명 쓰기
+          </button>
         </div>
 
-        {renaming ? (
+        {renaming && (
           <div className="btn-row" style={{ justifyContent: 'center' }}>
             <input type="text" value={nameDraft} onChange={(e) => setNameDraft(e.target.value)} style={{ maxWidth: 180 }} />
             <button
@@ -88,13 +108,42 @@ export function TotemScreen() {
               저장
             </button>
           </div>
-        ) : (
-          <h2 onClick={() => setRenaming(true)} style={{ cursor: 'pointer' }}>
-            {totem.name} ✏️
-          </h2>
         )}
 
-        <p className="muted">레벨 {totem.level}</p>
+        {describing && (
+          <SlidePanel title="토템 설명" onClose={() => setDescribing(false)}>
+            <p className="faint">
+              비워 두면 이 초상화에 원래 적혀 있는 이야기가 카드에 실립니다.
+            </p>
+            <textarea
+              className="totem-desc-input"
+              rows={5}
+              value={descDraft}
+              placeholder={loreFor(resolvedKey('totems', totem.avatarKey)).description}
+              onChange={(e) => setDescDraft(e.target.value)}
+            />
+            <div className="btn-row" style={{ justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setDescDraft('')
+                  editName(totem.id, (t) => ({ ...t, description: '' }))
+                }}
+              >
+                원래대로
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  editName(totem.id, (t) => ({ ...t, description: descDraft.trim() }))
+                  setDescribing(false)
+                }}
+              >
+                저장
+              </button>
+            </div>
+          </SlidePanel>
+        )}
 
         <div className="life-points" title="생명력">
           {Array.from({ length: totem.maxLifePoints }, (_, i) => (

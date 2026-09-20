@@ -88,6 +88,25 @@ function looseLookup(category: AssetCategory, key: string): string | undefined {
   return table[normalized] ?? table[stripTotemPrefix(normalized)]
 }
 
+/**
+ * The key a lookup will actually use — the spelling asked for when it names
+ * real art, otherwise whatever the fallback resolves to.
+ *
+ * Anything keyed off a portrait rather than drawing it needs this. A Totem
+ * whose saved key is `default` is *shown* as the first real portrait, so
+ * asking for `default`'s written lore got a picture of one character with
+ * another's blank underneath it.
+ */
+export function resolvedKey(category: AssetCategory, key?: string | null): string {
+  if (!registry[category]) return ''
+  if (key) {
+    if (registry[category][key]) return key
+    const match = looseLookup(category, key)
+    if (match) return match
+  }
+  return fallbackKey(category)
+}
+
 /** The key a category falls back to: its `default`, else whatever it has. */
 function fallbackKey(category: AssetCategory): string {
   const table = registry[category]

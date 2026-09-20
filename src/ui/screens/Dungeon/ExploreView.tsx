@@ -165,9 +165,17 @@ export function ExploreView() {
       <div className="scene-window dungeon">
         <SceneBackdrop world={world} slot={sceneSlot} alt="던전 배경" />
         {event && !inStandby && !rolling && (
-          // Keyed by event so the entrance animation replays for each new
-          // event rather than only the first.
-          <div key={event.id} className="explore-event-overlay" data-asset={event.image.slot}>
+          // Keyed by event *and* by the art it is showing. The id alone was
+          // not enough: an event that changes its own picture keeps its id,
+          // so React reused the element, the sprite-arrive animation never
+          // replayed, and a chest that had just been unlocked swapped to the
+          // open one on a hard cut — which read as it not having opened at
+          // all.
+          <div
+            key={`${event.id}:${event.image.slot}`}
+            className="explore-event-overlay"
+            data-asset={event.image.slot}
+          >
             <WorldImage world={world} folder={event.image.folder} slot={event.image.slot} alt={event.title} />
           </div>
         )}

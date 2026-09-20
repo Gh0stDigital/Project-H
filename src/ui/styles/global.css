@@ -4492,3 +4492,195 @@ button.totem-hero-frame {
   margin: 2px 0 0;
 }
 
+
+/* ---- Example sentence under a combat prompt ---- */
+
+.example-sentence {
+  margin-top: 10px;
+  padding: 9px 11px;
+  text-align: left;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: rgba(10, 13, 20, 0.55);
+}
+
+.example-sentence-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+
+.example-sentence-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  /* The blank has to read as a gap to fill, not as punctuation. */
+  word-break: keep-all;
+}
+
+.example-sentence-translation {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Once the answer is in, the sentence is the reward for getting it right. */
+.example-sentence.is-revealed {
+  border-color: var(--accent-cyan-dim);
+  animation: example-reveal 420ms ease-out;
+}
+
+@keyframes example-reveal {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .example-sentence.is-revealed { animation: none; }
+}
+
+/* ---- Totem card ---- */
+
+/* Card proportions rather than panel proportions: a border that reads as an
+   edge, a tinted ground, and the pieces in the order a trading card puts
+   them so the shape is recognised before any of it is read. */
+.totem-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--accent-gold);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(242, 193, 78, 0.08), transparent 60%),
+    linear-gradient(180deg, #171a22 0%, #0f1219 100%);
+  box-shadow: 0 0 22px -12px var(--glow-gold);
+}
+
+.totem-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.totem-card-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.totem-card-attribute {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: rgba(8, 10, 16, 0.6);
+}
+
+.totem-card-attribute.is-empty { color: var(--text-secondary); }
+
+.totem-card-stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  min-height: 16px;
+  font-size: 13px;
+  color: var(--accent-gold);
+  /* Twelve stars must not push the card wider on a narrow phone. */
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.totem-card-level {
+  margin-left: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.totem-card-art {
+  appearance: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.totem-card-kind {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent-cyan);
+  text-align: center;
+}
+
+/* The flavour box: a ruled area distinct from the card ground, the way the
+   text box on a card is. */
+.totem-card-text {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: rgba(8, 10, 16, 0.55);
+}
+
+.totem-card-stats {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 2px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.totem-card-deck {
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.totem-card-numbers {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.totem-card-atk { color: var(--accent-gold); }
+.totem-card-def { color: var(--accent-cyan); }
+
+.totem-desc-input {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+}

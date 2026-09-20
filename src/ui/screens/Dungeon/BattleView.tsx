@@ -7,6 +7,7 @@ import { WorldImage } from '@/ui/components/WorldImage'
 import { resolveWorld } from '@/systems/worldRegistry'
 import { SceneBackdrop } from '@/ui/components/SceneBackdrop'
 import { BarrierRoulette } from '@/ui/components/BarrierRoulette'
+import { ExampleSentence } from '@/ui/components/ExampleSentence'
 import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
 import { sceneSlotFor } from '@/config/scenes'
 import { Bar } from '@/ui/components/Bar'
@@ -54,6 +55,13 @@ export function BattleView() {
   const challengeSpell = battle.activeChallenge
     ? spells.find((sp) => sp.id === battle.activeChallenge!.spellId)
     : undefined
+  // The word that was just answered — activeChallenge is cleared the moment
+  // a prompt resolves, and the resolve screen is where the sentence is
+  // finally shown whole.
+  const resolvedSpell = battle.lastChallenge
+    ? spells.find((sp) => sp.id === battle.lastChallenge!.spellId)
+    : undefined
+
   const asksForKorean = battle.activeChallenge?.direction === 'eng_to_kor'
   const answerFor = (sp: (typeof spells)[number]) => (asksForKorean ? sp.korean : sp.english)
   const decoyPool = run.config.dungeonWordIds
@@ -206,6 +214,7 @@ export function BattleView() {
           decoyPool={decoyPool}
           onSubmit={submitAttackAnswer}
           submitLabel="공격!"
+          spell={challengeSpell}
         />
       )}
 
@@ -217,12 +226,14 @@ export function BattleView() {
           onSubmit={submitDefenseAnswer}
           submitLabel="방어!"
           timer={battle.timer}
+          spell={challengeSpell}
         />
       )}
 
       {battle.phase === 'player_resolve' && (
         <>
           <div className={`feedback-banner ${battle.lastResult ?? ''}`}>{lastLog}</div>
+          <ExampleSentence spell={resolvedSpell} reveal />
           <button className="btn btn-primary btn-block" onClick={continueAfterPlayerResolve}>
             계속 →
           </button>
@@ -232,6 +243,7 @@ export function BattleView() {
       {battle.phase === 'enemy_resolve' && (
         <>
           <div className={`feedback-banner ${battle.lastResult ?? ''}`}>{lastLog}</div>
+          <ExampleSentence spell={resolvedSpell} reveal />
           <button className="btn btn-primary btn-block" onClick={continueAfterEnemyResolve}>
             계속 →
           </button>

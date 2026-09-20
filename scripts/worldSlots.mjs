@@ -19,8 +19,16 @@ export const REQUIRED_LOCATIONS = [
   'bossRoom',
 ]
 
-/** Extra backdrops a world may add; the game uses them when present. */
-export const OPTIONAL_LOCATIONS = ['battle', 'battle2']
+/**
+ * Extra backdrops a world may add; the game uses them when present.
+ *
+ * Arenas are named either way in the wild — dragon-king ships `battle`,
+ * the newer worlds ship `battle1` — and config/scenes.ts treats all three
+ * as the same kind of room. The extra corridors join the rotation the plain
+ * ones are drawn from, so a world with four passages does not keep showing
+ * the first two.
+ */
+export const OPTIONAL_LOCATIONS = ['battle', 'battle1', 'battle2', 'corridor3', 'corridor4']
 
 /** The props and moments an event shows. */
 export const REQUIRED_EVENTS = [

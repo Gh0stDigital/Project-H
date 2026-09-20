@@ -5,6 +5,13 @@ export interface Totem {
   id: string
   name: string
   avatarKey: string
+  /**
+   * The player's own flavour text. Blank means the portrait's written lore
+   * stands in — see config/totemLore.ts — so a Totem always has something
+   * on its card, and a save from before descriptions existed simply has none
+   * of its own.
+   */
+  description?: string
 
   level: number
   experience: number

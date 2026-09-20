@@ -27,7 +27,7 @@ export type SceneKind =
   | 'entrance'
 
 /** The plain corridors, used for anything without a room of its own. */
-const CORRIDORS = ['corridor1', 'corridor2', 'corridor3'] as const
+const CORRIDORS = ['corridor1', 'corridor2', 'corridor3', 'corridor4'] as const
 
 /**
  * Arenas. Worlds name their first one either way — dragon-king ships

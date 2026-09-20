@@ -63,6 +63,12 @@ export interface BattleState {
   deck: DeckState
   phase: BattlePhase
   activeChallenge: Challenge | null
+  /**
+   * The question that was just answered, kept after `activeChallenge` is
+   * cleared. The resolve screen needs to say what the word was — and show
+   * its example sentence, which the prompt had been hiding.
+   */
+  lastChallenge: Challenge | null
   /** Non-null while an enemy attack is being defended against. */
   defense: DefenseSequence | null
   timer: TimerState | null

@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import type { Challenge } from '@/domain/challenge'
 import type { TimerState } from '@/domain/battle'
 import { Bar } from '@/ui/components/Bar'
+import { ExampleSentence } from '@/ui/components/ExampleSentence'
+import type { Spell } from '@/domain/spell'
 import { usePersistentStore } from '@/state/persistentStore'
 import { buildTileChallenge, assembledText, type AnswerTile } from '@/systems/tileAssembly'
 
@@ -13,6 +15,11 @@ interface ChallengeViewProps {
   decoyPool: string[]
   onSubmit: (text: string) => void
   submitLabel?: string
+  /**
+   * The entry being asked about, so its example sentence can sit under the
+   * options with the word itself cut out of it.
+   */
+  spell?: Spell | null
   /**
    * Countdown for a timed prompt, drawn inside the panel.
    *
@@ -29,7 +36,7 @@ interface ChallengeViewProps {
  * is the player's own saved answer, spelled out) and means no keyboard
  * ever opens mid-dungeon.
  */
-export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답', timer = null }: ChallengeViewProps) {
+export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLabel = '정답', timer = null, spell = null }: ChallengeViewProps) {
   const asksForKorean = challenge.direction === 'eng_to_kor'
   const kind = asksForKorean ? 'korean' : 'english'
   // Only affects the English direction; Korean is syllables either way.
@@ -117,6 +124,10 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
           {submitLabel}
         </button>
       </div>
+
+      {/* Below the options, not above them: it is a clue to glance at, and
+          the thing the thumb is reaching for should stay put. */}
+      <ExampleSentence spell={spell} />
     </div>
   )
 }

@@ -380,9 +380,18 @@ export function setOutcomeText(run: DungeonRunState, lines: string[]): DungeonRu
  * the win. The slot is a plain string so a world that lacks it falls back
  * the way any missing art does, rather than throwing.
  */
-export function setEventImage(run: DungeonRunState, slot: string): DungeonRunState {
+export function setEventImage(run: DungeonRunState, slot: string, title?: string): DungeonRunState {
   if (!run.currentEvent) return run
-  return { ...run, currentEvent: { ...run.currentEvent, image: { folder: 'events', slot } } }
+  return {
+    ...run,
+    currentEvent: {
+      ...run.currentEvent,
+      image: { folder: 'events', slot },
+      // The label names what is on screen, so it follows the art: a chest
+      // that has just been unlocked should not still be captioned "locked".
+      title: title ?? run.currentEvent.title,
+    },
+  }
 }
 
 export type { DungeonEventType }

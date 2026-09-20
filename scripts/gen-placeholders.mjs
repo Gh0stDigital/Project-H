@@ -202,6 +202,11 @@ const globalManifest = {
     items: { default: 'circle' },
     onlyWhenEmpty: true,
   },
+  // Spell icons are flavour, not slots: pickFlavorKey() spreads whatever is
+  // in the folder across the cards, so a generated stand-in does not fill a
+  // gap — it takes a turn in the rotation ahead of real art. Renaming
+  // arcane.webp to dark.webp put a grey card back in front of one spell in
+  // seven. Generated only into an empty folder, same as the totems.
   spells: {
     palette: { bg: '#1a1a2e', accent: '#f2c14e' },
     items: {
@@ -212,6 +217,7 @@ const globalManifest = {
       wind: 'card',
       arcane: 'card',
     },
+    onlyWhenEmpty: true,
   },
 }
 

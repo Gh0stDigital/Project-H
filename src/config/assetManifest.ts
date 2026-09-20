@@ -3,7 +3,7 @@
 // removed while it is running, and at the start of every build.
 
 export const assetManifest = {
-  spells: ['default', 'arcane', 'earth', 'fire', 'water', 'wind'],
+  spells: ['dark', 'earth', 'fire', 'light', 'water', 'wind'],
   totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'SilverFinal'],
   ui: ['title'],
 } as const
@@ -14,10 +14,10 @@ export const assetManifest = {
  * than reconstructed from the key.
  */
 export const assetFiles: Readonly<Record<string, string>> = {
-  "spells/default": "default.webp",
-  "spells/arcane": "arcane.webp",
+  "spells/dark": "dark.webp",
   "spells/earth": "earth.webp",
   "spells/fire": "fire.webp",
+  "spells/light": "light.webp",
   "spells/water": "water.webp",
   "spells/wind": "wind.webp",
   "totems/Dolbae": "Dolbae.webp",
