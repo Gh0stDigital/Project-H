@@ -9,6 +9,7 @@ import type { Spell } from '@/domain/spell'
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
 import { ElementIcon } from '@/ui/components/ElementIcon'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 export function SpellListTab() {
   const spells = usePersistentStore((s) => s.spells)
@@ -58,7 +59,7 @@ export function SpellListTab() {
 
       {filtered.length === 0 && (
         <div className="empty-state">
-          <span className="glyph">📖</span>
+          <span className="glyph"><UiIcon name="book" size={44} /></span>
           <p>{spells.length === 0 ? '아직 주문이 없습니다 — 첫 주문을 만들어 보세요!' : '결과가 없습니다.'}</p>
         </div>
       )}
@@ -93,7 +94,7 @@ export function SpellListTab() {
                 if (confirm(`"${spell.korean}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)) deleteSpell(spell.id)
               }}
             >
-              🗑️
+              <UiIcon name="trash" size={18} />
             </button>
           </div>
         )

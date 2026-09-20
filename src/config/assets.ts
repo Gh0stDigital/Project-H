@@ -64,6 +64,19 @@ function stripTotemPrefix(normalized: string): string {
   return normalized.startsWith('totem') ? normalized.slice('totem'.length) : normalized
 }
 
+/**
+ * Art that has been renamed, old name to new.
+ *
+ * Saves hold the key they were written with, and a portrait is the one
+ * thing a player would notice losing. Dropping the `totem_` prefix was a
+ * pattern this could infer; `SilverFinal` becoming `Silver Knight` is not,
+ * so it is written down. Keys are normalised, so spelling and spacing on
+ * either side do not matter.
+ */
+const RENAMED: Record<string, string> = {
+  silverfinal: 'silverknight',
+}
+
 function looseTable(keys: string[]): Record<string, string> {
   const table: Record<string, string> = {}
   // Exact spellings first, so no bare form can displace one: `stone` must
@@ -85,7 +98,12 @@ function looseLookup(category: AssetCategory, key: string): string | undefined {
   const table = loose[category]
   if (!table) return undefined
   const normalized = normalize(key)
-  return table[normalized] ?? table[stripTotemPrefix(normalized)]
+  return (
+    table[normalized] ??
+    table[stripTotemPrefix(normalized)] ??
+    // Last: what this art used to be called.
+    (RENAMED[normalized] ? table[RENAMED[normalized]] : undefined)
+  )
 }
 
 /**

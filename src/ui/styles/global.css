@@ -4742,3 +4742,34 @@ button.totem-hero-frame {
   display: inline-block;
   line-height: 1;
 }
+
+/* ---- Interface icons ---- */
+
+/* Pixel art: never smoothed, and sat on the text baseline so a row of
+   numbers with icons in it does not come out ragged. */
+.ui-icon {
+  display: inline-block;
+  vertical-align: -0.18em;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.ui-icon-emoji {
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Where an icon stands in for a large decorative glyph — the empty states —
+   it needs room rather than the baseline treatment. */
+.glyph .ui-icon {
+  vertical-align: middle;
+}
+
+/* The menu's icon column was sized for an emoji glyph; a bitmap needs
+   centring in it rather than sitting on a text baseline. */
+.menu-item .icon .ui-icon {
+  display: block;
+  margin: 0 auto;
+  vertical-align: middle;
+}

@@ -27,11 +27,11 @@ export interface WorldPack {
 export const requiredLocations = ["entrance","corridor1","corridor2","keyRoom","restRoom","pathwayFork","shrineRoom","treasureRoom","trapRoom","bossRoom"] as const
 export const requiredEvents = ["bossDoor","roadSign","key","trap1","trap2","treasureLocked","treasureOpened","treasureMimic","rest","shrineDoor"] as const
 export const minNpcs = 3
-export const minEnemies = 4
+export const minEnemies = 3
 
 export const worldPacks: readonly WorldPack[] = [
   {
-    id: "dragon-king",
+    id: "dragon-king-palace",
     name: "용왕의 던전",
     description: "물에 잠긴 회랑과 금빛 보고. 깊은 곳에서 무언가가 기다립니다.",
     complete: true,
@@ -68,9 +68,9 @@ export const worldPacks: readonly WorldPack[] = [
     optionalLocations: ["battle1","corridor3","corridor4"],
     events: ["bossDoor","key","rest","roadSign","shrineDoor","trap1","trap2","treasureLocked","treasureMimic","treasureOpened"],
     npcs: ["hunter","merchant","pilgrim","scholar","wanderer"],
-    enemies: ["Armatick","Man-Eater","Pseudoroid","Scalatick Runt"],
-    bosses: ["Zoah Awakend"],
-    files: {"locations/battle1":"battle1.webp","locations/bossRoom":"bossRoom.webp","locations/corridor1":"corridor1.webp","locations/corridor2":"corridor2.webp","locations/corridor3":"corridor3.webp","locations/corridor4":"corridor4.webp","locations/entrance":"entrance.webp","locations/keyRoom":"keyRoom.webp","locations/pathwayFork":"pathwayFork.webp","locations/restRoom":"restRoom.webp","locations/shrineRoom":"shrineRoom.webp","locations/trapRoom":"trapRoom.webp","locations/treasureRoom":"treasureRoom.webp","events/bossDoor":"bossDoor.webp","events/key":"Key.webp","events/rest":"rest.webp","events/roadSign":"roadSign.webp","events/shrineDoor":"shrineDoor.webp","events/trap1":"trap1.webp","events/trap2":"trap2.webp","events/treasureLocked":"treasureLocked.webp","events/treasureMimic":"treasureMimic.webp","events/treasureOpened":"treasureOpened.webp","npcs/hunter":"hunter.png","npcs/merchant":"merchant.png","npcs/pilgrim":"pilgrim.webp","npcs/scholar":"scholar.webp","npcs/wanderer":"wanderer.webp","enemies/Armatick":"Armatick.webp","enemies/Man-Eater":"Man-Eater.webp","enemies/Pseudoroid":"Pseudoroid.webp","enemies/Scalatick Runt":"Scalatick Runt.webp","bosses/Zoah Awakend":"Zoah Awakend.webp"},
+    enemies: ["The Bouncer","The Sniper","The Watcher"],
+    bosses: ["Eshra The Profane"],
+    files: {"locations/battle1":"battle1.webp","locations/bossRoom":"bossRoom.webp","locations/corridor1":"corridor1.webp","locations/corridor2":"corridor2.webp","locations/corridor3":"corridor3.webp","locations/corridor4":"corridor4.webp","locations/entrance":"entrance.webp","locations/keyRoom":"keyRoom.webp","locations/pathwayFork":"pathwayFork.webp","locations/restRoom":"restRoom.webp","locations/shrineRoom":"shrineRoom.webp","locations/trapRoom":"trapRoom.webp","locations/treasureRoom":"treasureRoom.webp","events/bossDoor":"bossDoor.webp","events/key":"Key.webp","events/rest":"rest.webp","events/roadSign":"roadSign.webp","events/shrineDoor":"shrineDoor.webp","events/trap1":"trap1.webp","events/trap2":"trap2.webp","events/treasureLocked":"treasureLocked.webp","events/treasureMimic":"treasureMimic.webp","events/treasureOpened":"treasureOpened.webp","npcs/hunter":"hunter.png","npcs/merchant":"merchant.png","npcs/pilgrim":"pilgrim.webp","npcs/scholar":"scholar.webp","npcs/wanderer":"wanderer.webp","enemies/The Bouncer":"The Bouncer.webp","enemies/The Sniper":"The Sniper.webp","enemies/The Watcher":"The Watcher.webp","bosses/Eshra The Profane":"Eshra The Profane.webp"},
   },
   {
     id: "starter",

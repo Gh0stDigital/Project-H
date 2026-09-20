@@ -1,3 +1,5 @@
+import { UiIcon } from './UiIcon'
+
 interface ProgressMeterProps {
   challenged: number
   total: number
@@ -13,7 +15,7 @@ export function ProgressMeter({ challenged, total, bossUnlocked, onOpenWordInfo 
         접한 단어 <b>{challenged}/{total}</b>
       </span>
       <span className={`boss-status ${bossUnlocked ? 'open' : 'locked'}`}>
-        {bossUnlocked ? '🗝️ 열쇠 있음' : '🔒 열쇠 없음'}
+        {bossUnlocked ? <><UiIcon name="key" size={12} /> 열쇠 있음</> : '🔒 열쇠 없음'}
       </span>
       {onOpenWordInfo && (
         <button className="btn btn-ghost btn-sm" onClick={onOpenWordInfo}>

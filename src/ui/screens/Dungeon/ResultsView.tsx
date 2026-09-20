@@ -7,6 +7,7 @@ import { getItemDef } from '@/config/items'
 import { pct, type RunReport, type WordReportRow } from '@/systems/runResults'
 import type { ItemId } from '@/domain/item'
 import { SlidePanel } from '@/ui/components/SlidePanel'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 type DetailPanel = 'words' | 'haul' | null
 
@@ -47,7 +48,9 @@ export function ResultsView() {
       {/* ---- Totem outcome ---- */}
       <div className={`panel totem-outcome ${report.totemDestroyed ? 'destroyed' : ''}`}>
         <div className="row">
-          <span>❤️ {report.totemHp}/{report.totemMaxHp}</span>
+          <span>
+            <UiIcon name="heart" size={14} /> {report.totemHp}/{report.totemMaxHp}
+          </span>
           <span>◆ 생명력 {report.lifePointsRemaining}</span>
           {report.totemLevelAfter > report.totemLevelBefore && (
             <span className="faint">Lv {report.totemLevelBefore} → {report.totemLevelAfter}</span>
@@ -85,7 +88,7 @@ export function ResultsView() {
       {/* ---- Everything long lives behind a modal ---- */}
       <div className="btn-row">
         <button className="btn btn-ghost" onClick={() => setPanel('words')}>
-          📖 단어 ({attempted}/{report.words.length})
+          <UiIcon name="book" size={15} /> 단어 ({attempted}/{report.words.length})
         </button>
         <button className="btn btn-ghost" disabled={haulCount === 0} onClick={() => setPanel('haul')}>
           🎁 전리품 ({haulCount})

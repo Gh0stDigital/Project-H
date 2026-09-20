@@ -104,3 +104,18 @@ describe('a folder without a `default` still answers', () => {
     expect(getAsset('totems', 'default')).toBeTruthy()
   })
 })
+
+describe('art that has been renamed', () => {
+  // A portrait is the one thing a player would notice losing, and these
+  // files get renamed between builds — SilverFinal became Silver Knight.
+  it('finds a portrait under the name a save was written with', () => {
+    const current = getAsset('totems', 'Silver Knight')
+    expect(hasAsset('totems', 'SilverFinal')).toBe(true)
+    expect(getAsset('totems', 'SilverFinal')).toBe(current)
+    expect(resolveKey('totems', ['SilverFinal'])).toBe('Silver Knight')
+  })
+
+  it('still falls back for a name that was never used', () => {
+    expect(hasAsset('totems', 'NeverExisted')).toBe(false)
+  })
+})

@@ -4,6 +4,7 @@ import type { RestNpc } from '@/systems/restNpcs'
 import { quoteRest } from '@/systems/restArea'
 import type { WorldPack } from '@/config/worldManifest'
 import { WorldImage } from '@/ui/components/WorldImage'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 interface RestAreaViewProps {
   totem: Totem
@@ -37,25 +38,25 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
       <div className="stats-grid">
         <div className="stat-tile">
           <div className="faint">회복량</div>
-          <div className="value">❤️ {quote.healAmount}</div>
+          <div className="value"><UiIcon name="heart" size={14} /> {quote.healAmount}</div>
         </div>
         <div className="stat-tile">
           <div className="faint">가격</div>
-          <div className="value">💰 {quote.price}</div>
+          <div className="value"><UiIcon name="money" size={14} /> {quote.price}</div>
         </div>
         <div className="stat-tile">
           <div className="faint">보유</div>
-          <div className="value">💰 {totem.money}</div>
+          <div className="value"><UiIcon name="money" size={14} /> {totem.money}</div>
         </div>
         <div className="stat-tile">
           <div className="faint">다음 이용</div>
-          <div className="value">💰 {quote.nextPrice}</div>
+          <div className="value"><UiIcon name="money" size={14} /> {quote.nextPrice}</div>
         </div>
       </div>
 
       <div className="hp-row">
         <span>
-          ❤️ {totem.currentHp}/{totem.maxHp}
+          <UiIcon name="heart" size={14} /> {totem.currentHp}/{totem.maxHp}
         </span>
         <span className="faint">{usesSoFar}번 휴식함</span>
       </div>
@@ -71,7 +72,7 @@ export function RestAreaView({ totem, usesSoFar, npcs, world, said, onTalk, onRe
           disabled={quote.blockedReason !== null}
           onClick={onRest}
         >
-          휴식 — 💰 {quote.price}
+          휴식 — <UiIcon name="money" size={14} /> {quote.price}
         </button>
       </div>
 

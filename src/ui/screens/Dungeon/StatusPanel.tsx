@@ -5,6 +5,7 @@ import { totemBalance, dungeonTiers } from '@/config/balance'
 import { SlidePanel } from '@/ui/components/SlidePanel'
 import { AssetImage } from '@/ui/components/AssetImage'
 import { Bar } from '@/ui/components/Bar'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 interface StatusPanelProps {
   totem: Totem
@@ -30,7 +31,9 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
             레벨 {totem.level} · ◆ 생명력 {totem.lifePoints}/{totem.maxLifePoints}
           </p>
           <div className="hp-row">
-            <span>❤️ {totem.currentHp}/{totem.maxHp}</span>
+            <span>
+              <UiIcon name="heart" size={13} /> {totem.currentHp}/{totem.maxHp}
+            </span>
             <div style={{ flex: 1 }}>
               <Bar value={totem.currentHp} max={totem.maxHp} kind="hp" thin />
             </div>
@@ -73,7 +76,7 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
           </div>
           <div className="stat-tile">
             <div className="faint">획득한 돈</div>
-            <div className="value">💰 {run.stats.moneyEarned}</div>
+            <div className="value"><UiIcon name="money" size={14} /> {run.stats.moneyEarned}</div>
           </div>
           <div className="stat-tile">
             <div className="faint">보스의 문</div>
@@ -87,7 +90,7 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
         <div className="stats-grid">
           <div className="stat-tile">
             <div className="faint">돈</div>
-            <div className="value">💰 {totem.money}</div>
+            <div className="value"><UiIcon name="money" size={14} /> {totem.money}</div>
           </div>
           <div className="stat-tile">
             <div className="faint">처치한 보스</div>

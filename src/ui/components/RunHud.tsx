@@ -2,6 +2,7 @@ import type { DungeonRunState } from '@/domain/dungeon'
 import type { Totem } from '@/domain/totem'
 import { describeModifier } from '@/systems/directionModifiers'
 import { GiveUpButton } from './GiveUpButton'
+import { UiIcon } from './UiIcon'
 
 interface RunHudProps {
   run: DungeonRunState
@@ -26,13 +27,15 @@ export function RunHud({ run, totem, modeLabel }: RunHudProps) {
           {'◆'.repeat(Math.max(0, totem.lifePoints))}
           <span className="faint">{'◇'.repeat(Math.max(0, totem.maxLifePoints - totem.lifePoints))}</span>
         </span>
-        <span className="run-hud-money">💰 {totem.money}</span>
+        <span className="run-hud-money">
+          <UiIcon name="money" size={13} /> {totem.money}
+        </span>
         <GiveUpButton />
       </div>
 
       <div className="run-hud-row secondary">
         <span className={`run-hud-chip ${run.keyFound ? 'on' : 'off'}`}>
-          {run.keyFound ? '🗝️ 열쇠 있음' : '🗝️ 열쇠 없음'}
+          <UiIcon name="key" size={12} /> {run.keyFound ? ' 열쇠 있음' : ' 열쇠 없음'}
         </span>
         <span className={`run-hud-chip ${run.bossDoorFound ? 'on' : 'off'}`}>
           {run.bossDoorFound ? '🚪 문 발견' : '🚪 문 미발견'}

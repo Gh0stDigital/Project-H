@@ -13,6 +13,7 @@ import { isUsable } from '@/systems/totemManager'
 import { audio } from '@/systems/audioEngine'
 import { curtain } from '@/state/transitionStore'
 import { curtainTiming } from '@/config/transitions'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 export function DungeonConfigScreen() {
   const goTo = useUiStore((s) => s.goTo)
@@ -96,7 +97,7 @@ export function DungeonConfigScreen() {
 
       {!totem && (
         <div className="empty-state">
-          <span className="glyph">🗿</span>
+          <span className="glyph"><UiIcon name="totem" size={44} /></span>
           <p>
             지금 던전에 들어갈 수 있는 토템이 없습니다. 토템 화면에서 새로 기르세요.
           </p>
@@ -105,7 +106,7 @@ export function DungeonConfigScreen() {
 
       {spellSets.length === 0 && (
         <div className="empty-state">
-          <span className="glyph">🗝️</span>
+          <span className="glyph"><UiIcon name="key" size={44} /></span>
           <p>던전에 들어가려면 주문 세트가 최소 하나 필요합니다. 도감에서 만드세요.</p>
         </div>
       )}

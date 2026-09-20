@@ -49,7 +49,14 @@ export const REQUIRED_EVENTS = [
  * matters. NPC and enemy filenames become their in-game names.
  */
 export const MIN_NPCS = 3
-export const MIN_ENEMIES = 4
+/**
+ * Three is enough for a bestiary to feel like one, and it is the number a
+ * hand-drawn pack actually arrives with. At four, the Profane Prison's three
+ * painted inmates were topped up with a grey stand-in that then turned up in
+ * fights alongside them — a placeholder is there to keep an unfinished world
+ * playable, not to pad a finished one.
+ */
+export const MIN_ENEMIES = 3
 
 /**
  * Boss art is optional. A world without it borrows one of its own enemies,

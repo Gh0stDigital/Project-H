@@ -2,6 +2,7 @@ import type { Totem } from '@/domain/totem'
 import { AvatarFrame } from './AvatarFrame'
 import { Bar } from './Bar'
 import { useDamageFlash } from '@/ui/hooks/useDamageFlash'
+import { UiIcon } from './UiIcon'
 
 interface TotemPanelProps {
   totem: Totem
@@ -25,13 +26,17 @@ export function TotemPanel({ totem, effectText, compact }: TotemPanelProps) {
           <span className="muted">Lv {totem.level}</span>
         </div>
         <div className="hp-row">
-          <span>❤️ {totem.currentHp}/{totem.maxHp}</span>
+          <span>
+            <UiIcon name="heart" size={13} /> {totem.currentHp}/{totem.maxHp}
+          </span>
           <div style={{ flex: 1 }}>
             <Bar value={totem.currentHp} max={totem.maxHp} kind="hp" thin />
           </div>
         </div>
         <div className="hp-row">
-          <span>💰 {totem.money}</span>
+          <span>
+            <UiIcon name="money" size={13} /> {totem.money}
+          </span>
           {effectText && <span className="faint">{effectText}</span>}
         </div>
       </div>

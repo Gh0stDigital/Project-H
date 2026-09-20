@@ -10,6 +10,7 @@ import { totemBalance } from '@/config/balance'
 import { assetKeys, resolvedKey } from '@/config/assets'
 import { isUsable, nameFromAvatarKey } from '@/systems/totemManager'
 import { loreFor } from '@/config/totemLore'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 export function TotemScreen() {
   const goTo = useUiStore((s) => s.goTo)
@@ -174,7 +175,7 @@ export function TotemScreen() {
           </div>
           <div>
             <div className="faint">돈</div>
-            <b>💰 {totem.money}</b>
+            <b><UiIcon name="money" size={14} /> {totem.money}</b>
           </div>
           <div>
             <div className="faint">처치한 보스</div>

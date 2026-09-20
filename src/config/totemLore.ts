@@ -25,10 +25,15 @@ const lore: Record<string, TotemLore> = {
     description:
       '길가에 천 년을 서 있던 돌입니다. 오가는 이들의 말을 하나도 잊지 않았고, 이제 그 말을 빌려 싸웁니다.',
   },
-  silverfinal: {
+  silverknight: {
     kind: '기사 / 맹세',
     description:
       '은빛 갑옷 아래 얼굴을 본 사람은 없습니다. 맹세한 말은 반드시 지키기에, 틀린 말은 그의 검을 무디게 합니다.',
+  },
+  theexplorer: {
+    kind: '탐험가 / 기록',
+    description:
+      '지도에 없는 곳만 골라 걷습니다. 돌아오지 못할 수도 있다는 걸 알면서도, 본 것을 적어 둘 사람이 있어야 한다고 말합니다.',
   },
   magic_parasite_zoah: {
     kind: '기생체 / 변이',

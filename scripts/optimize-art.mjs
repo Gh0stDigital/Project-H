@@ -72,19 +72,37 @@ export function convertible() {
  * load-bearing, and the Totem window already normalises them by measuring
  * rather than by cropping.
  */
-const TRIMMED = ['assets/ui']
+const TRIMMED = ['assets/ui', 'assets/icons']
+
+/**
+ * Directories with a tighter ceiling than the viewport's.
+ *
+ * An interface icon is drawn at a few tens of pixels; carrying it at 1290
+ * wide costs a third of a megabyte each to store detail no screen will ever
+ * resolve. 256 is still 3x for a 64 px slot.
+ */
+const WIDTH_CAPS = [['assets/icons', 256]]
+
+function rel(path) {
+  return relative(ROOT, path).split('\\').join('/')
+}
 
 function isTrimmed(path) {
-  const rel = relative(ROOT, path).split('\\').join('/')
-  return TRIMMED.some((dir) => rel.startsWith(`public/${dir}/`))
+  return TRIMMED.some((dir) => rel(path).startsWith(`public/${dir}/`))
+}
+
+function capFor(path) {
+  const found = WIDTH_CAPS.find(([dir]) => rel(path).startsWith(`public/${dir}/`))
+  return found ? found[1] : MAX_WIDTH
 }
 
 async function encode(path) {
   let image = sharp(path)
   if (isTrimmed(path)) image = sharp(await image.trim({ threshold: 1 }).toBuffer())
   const { width } = await image.metadata()
+  const cap = capFor(path)
   return image
-    .resize({ width: Math.min(width ?? MAX_WIDTH, MAX_WIDTH), withoutEnlargement: true })
+    .resize({ width: Math.min(width ?? cap, cap), withoutEnlargement: true })
     .webp({ quality: QUALITY, alphaQuality: 100, effort: 6 })
     .toBuffer()
 }

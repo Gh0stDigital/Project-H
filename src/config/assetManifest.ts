@@ -3,8 +3,9 @@
 // removed while it is running, and at the start of every build.
 
 export const assetManifest = {
+  icons: ['BookIcon', 'heartIcon', 'keyIcon', 'moneyIcon', 'totemIcon', 'trashcanIcon'],
   spells: ['dark', 'earth', 'fire', 'light', 'water', 'wind'],
-  totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'SilverFinal'],
+  totems: ['Dolbae', 'Magic_Parasite_Zoah', 'parasite_hunter_Yaharl', 'Silver Knight', 'TheExplorer'],
   ui: ['title'],
 } as const
 
@@ -14,6 +15,12 @@ export const assetManifest = {
  * than reconstructed from the key.
  */
 export const assetFiles: Readonly<Record<string, string>> = {
+  "icons/BookIcon": "BookIcon.webp",
+  "icons/heartIcon": "heartIcon.webp",
+  "icons/keyIcon": "keyIcon.webp",
+  "icons/moneyIcon": "moneyIcon.webp",
+  "icons/totemIcon": "totemIcon.webp",
+  "icons/trashcanIcon": "trashcanIcon.webp",
   "spells/dark": "dark.webp",
   "spells/earth": "earth.webp",
   "spells/fire": "fire.webp",
@@ -23,6 +30,7 @@ export const assetFiles: Readonly<Record<string, string>> = {
   "totems/Dolbae": "Dolbae.webp",
   "totems/Magic_Parasite_Zoah": "Magic_Parasite_Zoah.webp",
   "totems/parasite_hunter_Yaharl": "parasite_hunter_Yaharl.webp",
-  "totems/SilverFinal": "SilverFinal.webp",
+  "totems/Silver Knight": "Silver Knight.webp",
+  "totems/TheExplorer": "TheExplorer.webp",
   "ui/title": "title.webp"
 }
