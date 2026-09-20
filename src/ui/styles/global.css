@@ -923,6 +923,14 @@ select:focus {
    inside a square. */
 .avatar-frame-hud { --avatar-h: 112px; }
 
+/* The one window that stays rounded. In the run the portrait sits among
+   soft-cornered chrome — the HUD, the action buttons, the panel it is set
+   into — where the cut-stone corner the other Totem windows take reads as a
+   mistake rather than as a choice. `hud` is only ever the compact
+   TotemPanel, which is only ever Explore and Battle, so this is exactly the
+   in-dungeon portrait and nothing else. */
+.avatar-frame-hud { border-radius: var(--radius-md); }
+
 @media (max-height: 900px) {
   .avatar-frame-hud { --avatar-h: 76px; }
 }
