@@ -12,7 +12,10 @@
      and it is carried here by the --surface-* gradients rather than by the
      flat colours, which remain for the few places that need one value
      (color-mix, image backers). */
-  --bg-deep: #120c07;
+  /* The ground the windows sit on. Bronze everywhere flattened the screen:
+     the panels only read as lit objects when what is behind them is cool
+     and dark, so the shell keeps its night blue. */
+  --bg-deep: #0b0d12;
   --bg-panel: #3a2718;
   --bg-panel-raised: #4a3320;
   --bg-card: #2e1f13;
@@ -51,6 +54,14 @@
      window edges. (The name is historic: it was the cyan sci-fi layer
      before the interface was reworked in bronze, and it is referenced in
      enough rules that renaming it would be churn for nothing.) */
+  /* The portrait frame. Totems are not part of the furniture: they keep
+     the cold steel-blue light they had, which is also what separates a
+     face from the bronze window it sits in. */
+  --portrait-edge: #2a8f9c;
+  --portrait-back: #1e2330;
+  --portrait-glow: rgba(79, 227, 240, 0.35);
+  --portrait-sheen: rgba(79, 227, 240, 0.14);
+
   --accent-cyan: #dcb87e;
   --accent-cyan-dim: #8a6636;
   --glow-cyan: rgba(220, 184, 126, 0.3);
@@ -134,7 +145,7 @@ textarea {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, var(--bg-deep) 0%, #0a0704 100%);
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #06080d 100%);
   position: relative;
   overflow: hidden;
 }
@@ -147,8 +158,8 @@ textarea {
   inset: 0;
   background-image: repeating-linear-gradient(
     to bottom,
-    rgba(220, 184, 126, 0.025) 0px,
-    rgba(220, 184, 126, 0.025) 1px,
+    rgba(120, 160, 200, 0.025) 0px,
+    rgba(120, 160, 200, 0.025) 1px,
     transparent 1px,
     transparent 3px
   );
@@ -577,8 +588,8 @@ select:focus {
   border-radius: var(--radius-sm);
   object-fit: cover;
   image-rendering: pixelated;
-  background: var(--surface-raised);
-  border: 1px solid var(--border-soft);
+  background: var(--portrait-back);
+  border: 1px solid var(--portrait-edge);
 }
 
 /* ---- Spell card ---- */
@@ -871,11 +882,11 @@ select:focus {
   width: calc(var(--avatar-h) * 1.3);
   overflow: hidden;
   border-radius: var(--radius-md);
-  border: 1px solid var(--accent-cyan-dim);
+  border: 1px solid var(--portrait-edge);
   background:
-    radial-gradient(ellipse at 50% 64%, rgba(220, 184, 126, 0.14), transparent 70%),
-    var(--bg-panel-raised);
-  box-shadow: 0 0 18px -8px var(--glow-cyan), inset 0 0 26px -18px var(--accent-cyan);
+    radial-gradient(ellipse at 50% 64%, var(--portrait-sheen), transparent 70%),
+    var(--portrait-back);
+  box-shadow: 0 0 18px -8px var(--portrait-glow), inset 0 0 26px -18px #4fe3f0;
 }
 
 /* Sized by height, and free of every square-thumbnail rule .avatar-img
@@ -1963,7 +1974,7 @@ select:focus {
      it rather than beside it. */
   margin: 0 -16px;
   padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--bg-deep) 68%, rgba(18, 12, 7, 0));
+  background: linear-gradient(to top, var(--bg-deep) 68%, rgba(11, 13, 18, 0));
 }
 
 .dungeon-start p {
@@ -3452,8 +3463,8 @@ button.totem-hero-frame {
   cursor: pointer;
   font-family: inherit;
   padding: 10px 8px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-strong);
+  background: var(--portrait-back);
+  border: 1px solid var(--portrait-edge);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
 }
@@ -4321,7 +4332,7 @@ button.totem-hero-frame {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-deep, #120c07);
+  background: var(--bg-deep, #0b0d12);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -4361,7 +4372,7 @@ button.totem-hero-frame {
 
 /* A battle does not fade in from black — it snaps, flashes, and clears. */
 .curtain-battle {
-  background: var(--bg-deep, #120c07);
+  background: var(--bg-deep, #0b0d12);
 }
 
 .curtain-battle.is-covering,
@@ -4372,7 +4383,7 @@ button.totem-hero-frame {
 @keyframes battle-flash {
   0% { background: #ffe9c9; }
   35% { background: #6b4a28; }
-  100% { background: var(--bg-deep, #120c07); }
+  100% { background: var(--bg-deep, #0b0d12); }
 }
 
 /* Two bars sweeping apart as the battle screen arrives. Drawn on the
