@@ -91,7 +91,7 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
     // The tap is also the gesture that unlocks audio, so the sting lands on
     // the same frame the book catches light.
     audio.unlock()
-    audio.play('bossDoor')
+    audio.play('confirm')
     setPhase('igniting')
   }
 

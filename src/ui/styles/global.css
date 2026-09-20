@@ -4946,10 +4946,18 @@ button.totem-hero-frame {
 .title-plate-blur {
   object-fit: cover;
   transform: scale(1.35);
-  filter: blur(26px) brightness(0.45) saturate(0.7);
+  filter: blur(26px) brightness(0.6) saturate(0.85);
 }
 
-/* The picture itself, whole.
+/* The picture itself.
+   contain, then scaled up past the frame. Shown whole it only reached 46%
+   of a phone's height, because the art is square-ish and the screen is not;
+   filling the screen outright costs 54% of the picture's width, which on the
+   cover is the figurine, the dice and the magnifier, and on the second plate
+   clips the scholar's hand and the inset. 1.45 is where the book and the
+   scholar read large without either of those going. It is one number per
+   plate, so it can be pushed either way without touching anything else.
+
    drop-shadow follows the painted image box rather than the element box, so
    it lands exactly on the edge where the picture meets the blur whatever the
    art's proportions are. That turns a hard seam into the picture sitting
@@ -4957,6 +4965,7 @@ button.totem-hero-frame {
    would have to guess where that edge is. */
 .title-plate-art {
   object-fit: contain;
+  transform: scale(var(--plate-fill, 1.45));
   filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.9));
 }
 
