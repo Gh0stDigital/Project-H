@@ -5,28 +5,55 @@
    ========================================================================== */
 
 :root {
-  --bg-deep: #0b0d12;
-  --bg-panel: #161a24;
-  --bg-panel-raised: #1e2330;
-  --bg-card: #232838;
-  --border-soft: #333c52;
-  --border-strong: #4a5578;
+  /* ---- Bronze and wood -------------------------------------------------
+     Windows are lit from above: a light band at the top falling to near
+     black at the bottom, inside a bright metal edge. That shape is what
+     makes a 16-bit menu read as a carved object rather than a rectangle,
+     and it is carried here by the --surface-* gradients rather than by the
+     flat colours, which remain for the few places that need one value
+     (color-mix, image backers). */
+  --bg-deep: #120c07;
+  --bg-panel: #3a2718;
+  --bg-panel-raised: #4a3320;
+  --bg-card: #2e1f13;
+  --border-soft: #6a4b2e;
+  /* The bright edge. Light catches the top and side of worked bronze, so
+     this is much lighter than the fill it surrounds. */
+  --border-strong: #c39a62;
 
-  --text-primary: #eef1f8;
-  --text-secondary: #a8b0c8;
-  --text-faint: #6b7390;
+  /* Window fills, top lit. */
+  --surface-panel: linear-gradient(180deg, #6f5031 0%, #402a19 52%, #1d120a 100%);
+  --surface-raised: linear-gradient(180deg, #815c38 0%, #3f2a18 100%);
+  --surface-card: linear-gradient(180deg, #5b3e25 0%, #241709 100%);
+
+  /* A hairline of light along the top edge and shadow along the bottom:
+     the bevel that separates one panel from the one behind it. */
+  --bevel: inset 0 1px 0 rgba(255, 232, 196, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  /* The frame reads as carved because the bright edge has darkness on both
+     sides of it: this is the outer half, drawn outside the border. */
+  --frame: 0 0 0 1px rgba(0, 0, 0, 0.6);
+
+  --text-primary: #f6ecdd;
+  --text-secondary: #c9b294;
+  --text-faint: #8d7859;
 
   --accent-gold: #f2c14e;
   --accent-gold-dim: #b8933a;
   --accent-blue: #5fa8e0;
-  --accent-purple: #a58bd8;
+  /* Wine, not violet: the barrier and the run modifiers keep a colour of
+     their own, shifted to the warm side of purple so it sits on bronze
+     the way a dye sits on leather. */
+  --accent-purple: #c98fb0;
   --accent-green: #6bdb8f;
   --accent-red: #e0654f;
-  /* Secondary "HUD" accent — thin borders, glows, scanline texture. Gold
-     stays the primary brand color; cyan is the sci-fi detailing layer. */
-  --accent-cyan: #4fe3f0;
-  --accent-cyan-dim: #2a8f9c;
-  --glow-cyan: rgba(79, 227, 240, 0.35);
+  /* Secondary accent — thin borders, glows, edge detailing. Gold stays the
+     primary; this is the lighter polished-bronze highlight that runs along
+     window edges. (The name is historic: it was the cyan sci-fi layer
+     before the interface was reworked in bronze, and it is referenced in
+     enough rules that renaming it would be churn for nothing.) */
+  --accent-cyan: #dcb87e;
+  --accent-cyan-dim: #8a6636;
+  --glow-cyan: rgba(220, 184, 126, 0.3);
   --glow-gold: rgba(242, 193, 78, 0.3);
 
   /* Element accents — one per word type (see config/wordTypes.ts). */
@@ -39,8 +66,8 @@
 
   --hp-color: #e0654f;
   --charge-color: #f2c14e;
-  --xp-color: #5fa8e0;
-  --plateau-color: #a58bd8;
+  --xp-color: #c9a227;
+  --plateau-color: #c98fb0;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -107,7 +134,7 @@ textarea {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, var(--bg-deep) 0%, #0d1017 100%);
+  background: linear-gradient(180deg, var(--bg-deep) 0%, #0a0704 100%);
   position: relative;
   overflow: hidden;
 }
@@ -120,8 +147,8 @@ textarea {
   inset: 0;
   background-image: repeating-linear-gradient(
     to bottom,
-    rgba(79, 227, 240, 0.025) 0px,
-    rgba(79, 227, 240, 0.025) 1px,
+    rgba(220, 184, 126, 0.025) 0px,
+    rgba(220, 184, 126, 0.025) 1px,
     transparent 1px,
     transparent 3px
   );
@@ -210,7 +237,8 @@ p {
 .btn {
   appearance: none;
   border: 1px solid var(--border-strong);
-  background: var(--bg-card);
+  background: var(--surface-card);
+  box-shadow: var(--bevel), var(--frame);
   color: var(--text-primary);
   border-radius: var(--radius-md);
   padding: 14px 18px;
@@ -290,12 +318,13 @@ p {
 /* ---- Panels / cards ---- */
 
 .panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-soft);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 16px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 /* Thin HUD-style accent line along the top edge of every panel. */
@@ -311,10 +340,11 @@ p {
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 12px;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .list {
@@ -357,7 +387,7 @@ p {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
   padding: 12px;
@@ -369,7 +399,7 @@ p {
 
 .field input[type='text'],
 .field textarea {
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
   padding: 12px;
@@ -390,6 +420,16 @@ textarea,
 select {
   font-size: 16px;
   outline: none;
+  /* The chrome lives here rather than under .field so that the handful of
+     bare inputs scattered through the screens (compendium search, the
+     Totem's name box) are carved out of the same wood as everything
+     else instead of falling back to the platform's grey box. */
+  background: var(--surface-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  min-height: 48px;
+  color: var(--text-primary);
 }
 
 input[type='text']:focus,
@@ -409,7 +449,7 @@ select:focus {
 .bar-track {
   height: 10px;
   border-radius: 6px;
-  background: #10131b;
+  background: #2a1b10;
   border: 1px solid var(--border-soft);
   overflow: hidden;
 }
@@ -433,11 +473,11 @@ select:focus {
 }
 
 .bar-fill.xp {
-  background: linear-gradient(90deg, #3f7fb0, #5fa8e0);
+  background: linear-gradient(90deg, #7b5c2f, #c9a227);
 }
 
 .bar-fill.plateau {
-  background: linear-gradient(90deg, #7d5fb0, #a58bd8);
+  background: linear-gradient(90deg, #8a5a72, #c98fb0);
 }
 
 .bar-fill.timer {
@@ -468,14 +508,15 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-soft);
-  border-left: 2px solid var(--accent-cyan-dim);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
+  border-left: 2px solid var(--accent-gold-dim);
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
   text-align: left;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .menu-item:active {
@@ -536,7 +577,7 @@ select:focus {
   border-radius: var(--radius-sm);
   object-fit: cover;
   image-rendering: pixelated;
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 1px solid var(--border-soft);
 }
 
@@ -554,6 +595,7 @@ select:focus {
   max-width: 150px;
   cursor: pointer;
   position: relative;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .spell-card.selected {
@@ -596,10 +638,11 @@ select:focus {
   display: flex;
   gap: 12px;
   align-items: center;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 10px 12px;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .spell-card-list-item .thumb {
@@ -635,8 +678,8 @@ select:focus {
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--accent-cyan-dim);
-  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 0 1px rgba(79, 227, 240, 0.08);
-  background: var(--bg-panel);
+  box-shadow: 0 0 22px -8px var(--glow-cyan), inset 0 0 0 1px rgba(220, 184, 126, 0.08);
+  background: var(--surface-panel);
   flex-shrink: 0;
 }
 
@@ -684,7 +727,7 @@ select:focus {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(10, 12, 18, 0.72);
+  background: rgba(18, 12, 7, 0.72);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
   padding: 4px 10px;
@@ -701,7 +744,7 @@ select:focus {
   gap: 8px;
   font-size: 12.5px;
   color: var(--text-secondary);
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 8px 12px;
@@ -738,7 +781,7 @@ select:focus {
 }
 
 .typewriter-box {
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
@@ -762,7 +805,7 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 18px 16px 14px;
@@ -776,7 +819,7 @@ select:focus {
   position: absolute;
   top: -10px;
   left: 12px;
-  background: rgba(10, 12, 18, 0.9);
+  background: rgba(18, 12, 7, 0.9);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
   padding: 3px 10px;
@@ -830,7 +873,7 @@ select:focus {
   border-radius: var(--radius-md);
   border: 1px solid var(--accent-cyan-dim);
   background:
-    radial-gradient(ellipse at 50% 64%, rgba(79, 227, 240, 0.14), transparent 70%),
+    radial-gradient(ellipse at 50% 64%, rgba(220, 184, 126, 0.14), transparent 70%),
     var(--bg-panel-raised);
   box-shadow: 0 0 18px -8px var(--glow-cyan), inset 0 0 26px -18px var(--accent-cyan);
 }
@@ -924,7 +967,7 @@ select:focus {
   width: 100%;
   max-width: 430px;
   max-height: 82dvh;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
   border: 1px solid var(--border-strong);
@@ -934,6 +977,7 @@ select:focus {
   flex-direction: column;
   gap: 12px;
   overflow: hidden;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .slide-panel-body {
@@ -948,7 +992,7 @@ select:focus {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
@@ -988,7 +1032,7 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(165, 139, 216, 0.12);
+  background: rgba(201, 143, 176, 0.12);
   border: 1px solid var(--plateau-color);
   border-radius: var(--radius-md);
   padding: 8px 12px;
@@ -1083,7 +1127,7 @@ select:focus {
   padding: 10px 13px;
   cursor: pointer;
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   transition: transform 0.08s ease, border-color 0.15s ease, opacity 0.15s ease;
@@ -1144,7 +1188,7 @@ select:focus {
 }
 
 .stat-tile {
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 10px 12px;
@@ -1176,7 +1220,7 @@ select:focus {
   padding: 7px 12px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   color: var(--text-secondary);
   font-size: 12.5px;
   cursor: pointer;
@@ -1191,7 +1235,7 @@ select:focus {
 }
 
 .record-row {
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 12px;
@@ -1259,7 +1303,7 @@ select:focus {
   text-align: left;
   appearance: none;
   cursor: pointer;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 18px 16px 14px;
@@ -1283,7 +1327,7 @@ select:focus {
   position: absolute;
   top: -10px;
   left: 12px;
-  background: rgba(10, 12, 18, 0.9);
+  background: rgba(18, 12, 7, 0.9);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
   padding: 3px 10px;
@@ -1372,7 +1416,7 @@ select:focus {
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-left: 3px solid var(--accent-cyan-dim);
   border-radius: var(--radius-md);
@@ -1380,6 +1424,7 @@ select:focus {
   color: var(--text-primary);
   min-height: 98px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .room-action:hover {
@@ -1423,7 +1468,7 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 12px;
@@ -1525,7 +1570,7 @@ select:focus {
   gap: 6px;
   max-height: 260px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 8px;
@@ -1609,12 +1654,13 @@ select:focus {
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   color: var(--text-primary);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .tier-card:active {
@@ -1653,13 +1699,14 @@ select:focus {
 }
 
 .dungeon-info-panel {
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .dungeon-info-desc {
@@ -1705,7 +1752,7 @@ select:focus {
   gap: 6px;
   max-height: 260px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 8px;
@@ -1789,7 +1836,7 @@ select:focus {
   text-align: left;
   cursor: pointer;
   font-family: inherit;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 12px 14px;
@@ -1833,7 +1880,7 @@ select:focus {
 }
 
 .dungeon-info-panel {
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: 14px;
@@ -1916,7 +1963,7 @@ select:focus {
      it rather than beside it. */
   margin: 0 -16px;
   padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--bg-deep) 68%, rgba(11, 13, 18, 0));
+  background: linear-gradient(to top, var(--bg-deep) 68%, rgba(18, 12, 7, 0));
 }
 
 .dungeon-start p {
@@ -1974,7 +2021,7 @@ select:focus {
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  background: rgba(22, 26, 36, 0.82);
+  background: rgba(46, 31, 19, 0.82);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
   color: var(--text-secondary);
@@ -1990,7 +2037,7 @@ select:focus {
   flex-direction: column;
   gap: 6px;
   padding: 8px 12px;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
 }
@@ -2118,7 +2165,7 @@ select:focus {
   position: relative;
   height: 4px;
   margin: 0 12px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
 }
@@ -2158,7 +2205,7 @@ select:focus {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 2px solid var(--border-strong);
   flex-shrink: 0;
 }
@@ -2192,7 +2239,7 @@ select:focus {
 }
 
 .dungeon-track-node.boss.locked {
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border-color: var(--border-strong);
   opacity: 0.6;
 }
@@ -2284,7 +2331,7 @@ select:focus {
   gap: 6px;
   text-align: center;
   /* Light scrim so the location art still reads through the roll. */
-  background: rgba(10, 12, 18, 0.55);
+  background: rgba(18, 12, 7, 0.55);
   backdrop-filter: blur(2px);
   animation: roll-overlay-in 0.18s ease-out;
 }
@@ -2558,11 +2605,12 @@ select:focus {
   flex-direction: column;
   gap: 4px;
   padding: 7px 10px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border-soft);
-  border-left: 2px solid var(--accent-cyan-dim);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
+  border-left: 2px solid var(--accent-gold-dim);
   border-radius: var(--radius-md);
   flex-shrink: 0;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .run-hud-row {
@@ -2604,7 +2652,7 @@ select:focus {
   padding: 2px 7px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -2640,8 +2688,9 @@ select:focus {
   text-align: left;
   min-height: 56px;
   padding: 10px 12px;
-  background: linear-gradient(160deg, var(--bg-card), var(--bg-panel-raised));
-  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  box-shadow: var(--bevel), var(--frame);
+  border: 1px solid var(--border-strong);
   border-left: 3px solid var(--accent-purple);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -2670,7 +2719,7 @@ select:focus {
 
 .reward-panel {
   padding: 10px 12px;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--accent-gold-dim);
   border-radius: var(--radius-md);
   box-shadow: 0 0 18px -10px var(--glow-gold);
@@ -2694,7 +2743,7 @@ select:focus {
 .reward-line {
   padding: 3px 9px;
   font-size: 13px;
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
 }
@@ -2827,7 +2876,7 @@ select:focus {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
 }
 
@@ -2882,7 +2931,7 @@ select:focus {
   align-items: flex-start;
   gap: 8px;
   padding: 7px 9px;
-  background: var(--bg-panel-raised);
+  background: var(--surface-raised);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
 }
@@ -2966,7 +3015,7 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--accent-red);
   border-radius: var(--radius-lg);
   box-shadow: 0 0 30px -12px var(--accent-red);
@@ -3088,8 +3137,8 @@ select:focus {
   padding: 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  border-left: 2px solid var(--accent-cyan-dim);
-  background: var(--bg-panel);
+  border-left: 2px solid var(--accent-gold-dim);
+  background: var(--surface-panel);
   flex-shrink: 0;
 }
 
@@ -3149,7 +3198,7 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--accent-cyan-dim);
   border-radius: var(--radius-lg);
   box-shadow: 0 0 30px -12px var(--glow-cyan);
@@ -3172,7 +3221,7 @@ select:focus {
   font-family: inherit;
   min-height: 68px;
   padding: 12px 14px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-left: 3px solid var(--accent-cyan-dim);
   border-radius: var(--radius-md);
@@ -3403,7 +3452,7 @@ button.totem-hero-frame {
   cursor: pointer;
   font-family: inherit;
   padding: 10px 8px;
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
@@ -3555,10 +3604,10 @@ button.totem-hero-frame {
   z-index: 40;
   max-height: 62%;
   margin: 0;
-  background: var(--bg-panel);
+  background: var(--surface-panel);
   border: 1px solid var(--accent-cyan-dim);
   border-radius: var(--radius-lg);
-  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(79, 227, 240, 0.08);
+  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(220, 184, 126, 0.08);
   animation: sheet-arrive 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
@@ -3672,7 +3721,7 @@ button.totem-hero-frame {
   overflow-y: auto;
   overscroll-behavior: contain;
   border-color: var(--accent-cyan-dim);
-  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(79, 227, 240, 0.08);
+  box-shadow: 0 -20px 44px -14px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(220, 184, 126, 0.08);
   animation: sheet-arrive 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
 }
 
@@ -3724,7 +3773,7 @@ button.totem-hero-frame {
   overflow-y: auto;
   overscroll-behavior: contain;
   /* Translucent so the art stays readable behind the text. */
-  background: rgba(10, 12, 18, 0.82);
+  background: rgba(18, 12, 7, 0.82);
   backdrop-filter: blur(3px);
   border-color: var(--accent-cyan-dim);
   padding: 10px 12px;
@@ -3982,7 +4031,7 @@ button.totem-hero-frame {
   padding: 8px 6px;
   cursor: pointer;
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   transition: transform 0.08s ease, border-color 0.15s ease, opacity 0.15s ease;
@@ -4168,7 +4217,7 @@ button.totem-hero-frame {
   text-align: left;
   cursor: pointer;
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -4272,7 +4321,7 @@ button.totem-hero-frame {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-deep, #05070c);
+  background: var(--bg-deep, #120c07);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -4300,7 +4349,7 @@ button.totem-hero-frame {
 .curtain-label {
   font-size: 13px;
   letter-spacing: 0.22em;
-  color: var(--accent-cyan, #4fe3f0);
+  color: var(--accent-cyan, #dcb87e);
   opacity: 0;
   animation: curtain-label-in 1.6s ease-in-out infinite;
 }
@@ -4312,7 +4361,7 @@ button.totem-hero-frame {
 
 /* A battle does not fade in from black — it snaps, flashes, and clears. */
 .curtain-battle {
-  background: var(--bg-deep, #05070c);
+  background: var(--bg-deep, #120c07);
 }
 
 .curtain-battle.is-covering,
@@ -4321,9 +4370,9 @@ button.totem-hero-frame {
 }
 
 @keyframes battle-flash {
-  0% { background: #eaf6ff; }
-  35% { background: #2d4a63; }
-  100% { background: var(--bg-deep, #05070c); }
+  0% { background: #ffe9c9; }
+  35% { background: #6b4a28; }
+  100% { background: var(--bg-deep, #120c07); }
 }
 
 /* Two bars sweeping apart as the battle screen arrives. Drawn on the
@@ -4335,13 +4384,13 @@ button.totem-hero-frame {
   left: -10%;
   width: 120%;
   height: 50%;
-  background: linear-gradient(180deg, rgba(79, 227, 240, 0.16), transparent);
+  background: linear-gradient(180deg, rgba(220, 184, 126, 0.16), transparent);
   transform: translateY(0);
   transition: transform var(--curtain-ms, 420ms) ease-in;
 }
 
 .curtain-battle::before { top: 0; }
-.curtain-battle::after { bottom: 0; background: linear-gradient(0deg, rgba(79, 227, 240, 0.16), transparent); }
+.curtain-battle::after { bottom: 0; background: linear-gradient(0deg, rgba(220, 184, 126, 0.16), transparent); }
 
 .curtain-battle.is-revealing::before { transform: translateY(-100%); }
 .curtain-battle.is-revealing::after { transform: translateY(100%); }
@@ -4382,8 +4431,8 @@ button.totem-hero-frame {
   border-radius: var(--radius-md);
   border: 1px solid var(--accent-cyan-dim);
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(79, 227, 240, 0.12), transparent 70%),
-    linear-gradient(180deg, #0e131c 0%, #0a0d14 100%);
+    radial-gradient(ellipse at 50% 50%, rgba(220, 184, 126, 0.12), transparent 70%),
+    linear-gradient(180deg, #2a1b10 0%, #170e07 100%);
   overflow: hidden;
 }
 
@@ -4397,7 +4446,7 @@ button.totem-hero-frame {
   right: 0;
   height: 22px;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(5, 7, 12, 0.92), transparent);
+  background: linear-gradient(180deg, rgba(14, 9, 5, 0.92), transparent);
 }
 
 .barrier-reel::after {
@@ -4417,7 +4466,7 @@ button.totem-hero-frame {
 
 .barrier-reel.is-spinning .barrier-reel-clue {
   color: var(--accent-cyan);
-  text-shadow: 0 0 14px var(--glow-cyan, rgba(79, 227, 240, 0.5));
+  text-shadow: 0 0 14px var(--glow-cyan, rgba(220, 184, 126, 0.5));
   opacity: 0.85;
 }
 
@@ -4458,7 +4507,8 @@ button.totem-hero-frame {
   cursor: pointer;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, #131822 0%, #0e131c 100%);
+  background: var(--surface-card);
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .setup-option.wide { grid-column: 1 / -1; }
@@ -4501,7 +4551,7 @@ button.totem-hero-frame {
   text-align: left;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  background: rgba(10, 13, 20, 0.55);
+  background: rgba(18, 12, 7, 0.55);
 }
 
 .example-sentence-label {
@@ -4558,8 +4608,8 @@ button.totem-hero-frame {
   border: 1px solid var(--accent-gold);
   background:
     radial-gradient(ellipse at 50% 0%, rgba(242, 193, 78, 0.08), transparent 60%),
-    linear-gradient(180deg, #171a22 0%, #0f1219 100%);
-  box-shadow: 0 0 22px -12px var(--glow-gold);
+    linear-gradient(180deg, #4a331f 0%, #241710 100%);
+  box-shadow: var(--bevel), 0 0 22px -12px var(--glow-gold);
 }
 
 .totem-card-head {
@@ -4586,7 +4636,7 @@ button.totem-hero-frame {
   padding: 3px 9px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
-  background: rgba(8, 10, 16, 0.6);
+  background: rgba(14, 9, 5, 0.6);
 }
 
 .totem-card-attribute.is-empty { color: var(--text-secondary); }
@@ -4641,7 +4691,7 @@ button.totem-hero-frame {
   color: var(--text-primary);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  background: rgba(8, 10, 16, 0.55);
+  background: rgba(14, 9, 5, 0.55);
 }
 
 .totem-card-stats {
@@ -4679,7 +4729,7 @@ button.totem-hero-frame {
   line-height: 1.6;
   padding: 10px 12px;
   color: var(--text-primary);
-  background: var(--bg-card);
+  background: var(--surface-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
 }
@@ -4714,7 +4764,7 @@ button.totem-hero-frame {
   line-height: 1;
   cursor: pointer;
   color: var(--text-secondary);
-  background: rgba(8, 10, 16, 0.5);
+  background: rgba(14, 9, 5, 0.5);
   border: 1px solid var(--border-soft);
   border-radius: 999px;
 }
