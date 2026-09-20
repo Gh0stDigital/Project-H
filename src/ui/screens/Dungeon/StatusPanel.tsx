@@ -39,7 +39,9 @@ export function StatusPanel({ totem, run, totemSet, challenged, onClose }: Statu
             </div>
           </div>
           <div className="hp-row">
-            <span>✨ {totem.experience}/{xpNeeded}</span>
+            <span>
+              <UiIcon name="exp" size={13} /> {totem.experience}/{xpNeeded}
+            </span>
             <div style={{ flex: 1 }}>
               <Bar value={totem.experience} max={xpNeeded} kind="xp" thin />
             </div>

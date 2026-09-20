@@ -12,15 +12,12 @@ import { AudioSettings } from '@/ui/components/AudioSettings'
 import { SlidePanel } from '@/ui/components/SlidePanel'
 import { UiIcon } from '@/ui/components/UiIcon'
 
-/**
- * `icon` names an interface icon; `glyph` is for the one entry with no art
- * of its own, which keeps its emoji rather than borrowing somebody else's.
- */
+/** Each entry names the interface icon it is drawn with. */
 const menuItems = [
   { screen: 'compendium' as const, icon: 'book' as const, label: '주문 불러오기 / 도감', desc: '주문 단어와 주문 세트를 만들고 정리합니다.' },
   { screen: 'totem' as const, icon: 'totem' as const, label: '토템', desc: '토템을 확인하고 전투용 주문 세트를 장착합니다.' },
   { screen: 'dungeon' as const, icon: 'key' as const, label: '던전', desc: '던전을 설정하고 탐험을 시작합니다.' },
-  { screen: 'records' as const, glyph: '📊', label: '기록', desc: '모든 주문 단어와 학습 통계를 살펴봅니다.' },
+  { screen: 'records' as const, icon: 'chart' as const, label: '기록', desc: '모든 주문 단어와 학습 통계를 살펴봅니다.' },
 ]
 
 export function MainMenuScreen() {
@@ -109,7 +106,9 @@ export function MainMenuScreen() {
               </div>
             </div>
             <div className="hp-row">
-              <span>✨ {totem.experience}/{totemBalance.xpToNextLevel(totem.level)}</span>
+              <span>
+                <UiIcon name="exp" size={13} /> {totem.experience}/{totemBalance.xpToNextLevel(totem.level)}
+              </span>
               <div style={{ flex: 1 }}>
                 <Bar value={totem.experience} max={totemBalance.xpToNextLevel(totem.level)} kind="xp" thin />
               </div>
@@ -125,7 +124,7 @@ export function MainMenuScreen() {
         {menuItems.map((item) => (
           <button key={item.screen} className="menu-item" onClick={() => goTo(item.screen)}>
             <span className="icon">
-              {item.icon ? <UiIcon name={item.icon} size={34} /> : item.glyph}
+              <UiIcon name={item.icon} size={34} />
             </span>
             <div>
               <div className="label">{item.label}</div>

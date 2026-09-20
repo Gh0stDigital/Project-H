@@ -8,6 +8,7 @@ import { sortSpells, filterSpellsBySet, type RecordsSortKey } from '@/systems/re
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
 import { ElementIcon } from '@/ui/components/ElementIcon'
+import { UiIcon } from '@/ui/components/UiIcon'
 
 const sortOptions: { key: RecordsSortKey; label: string }[] = [
   { key: 'level', label: '레벨' },
@@ -58,7 +59,7 @@ export function RecordsScreen() {
 
       {list.length === 0 && (
         <div className="empty-state">
-          <span className="glyph">📊</span>
+          <span className="glyph"><UiIcon name="chart" size={44} /></span>
           <p>아직 보여줄 주문이 없습니다.</p>
         </div>
       )}
