@@ -8,11 +8,12 @@ import { AudioEngine, loopPoints, type AudioContextLike } from './audioEngine'
  */
 function fakeContext() {
   const started: { buffer: unknown; loop: boolean; rate: number; loopStart: number; loopEnd: number }[] = []
+  const stopped: number[] = []
   const ctx = {
     currentTime: 0,
     state: 'running' as AudioContextState,
     destination: { name: 'destination' },
-    resume: () => Promise.resolve(),
+    resume: () => { ctx.state = 'running'; return Promise.resolve() },
     createBuffer: () => ({ duration: 0 }),
     createGain: () => ({
       gain: {
@@ -33,7 +34,7 @@ function fakeContext() {
         loopStart: 0,
         loopEnd: 0,
         start() { started.push({ buffer: node.buffer, loop: node.loop, rate: node.playbackRate.value, loopStart: node.loopStart, loopEnd: node.loopEnd }) },
-        stop() {},
+        stop() { stopped.push(started.length) },
       }
       return node
     },
@@ -51,14 +52,22 @@ function fakeContext() {
   // friends, so it is asserted into place once here rather than at every use.
   /** Moves the context clock on, for the rules that depend on elapsed time. */
   const tick = (seconds: number) => { ctx.currentTime += seconds }
-  return { ctx: ctx as unknown as AudioContextLike, started, tick }
+  /** What the OS does when the app goes to the home screen. */
+  const suspend = () => { ctx.state = 'suspended' }
+  return { ctx: ctx as unknown as AudioContextLike, started, stopped, tick, suspend }
 }
 
 // Decoding reads from the inlined map, so the test needs no network and no
 // files — the same path the offline build takes.
 function inlineEverything() {
   const g = globalThis as { __THOTH_INLINE_ASSETS?: Record<string, string> }
-  g.__THOTH_INLINE_ASSETS = new Proxy({}, { get: () => 'data:audio/wav;base64,AAAA', has: () => true })
+  // The bytes of each cue are its own path, so a double decoder can tell
+  // which cue it has been handed — which is how the ordering test below
+  // holds one decode open without holding them all.
+  g.__THOTH_INLINE_ASSETS = new Proxy({}, {
+    get: (_t, path) => 'data:audio/wav;base64,' + btoa(String(path)),
+    has: () => true,
+  })
 }
 
 const flush = () => new Promise((r) => setTimeout(r, 0))
@@ -71,6 +80,118 @@ describe('audio engine', () => {
     expect(() => engine.play('confirm')).not.toThrow()
     expect(() => engine.setMusic('menu')).not.toThrow()
     expect(engine.unlocked).toBe(false)
+  })
+
+  // ---- Getting the sound back -------------------------------------------
+  //
+  // Two suspends, two different right answers. Never having had a gesture
+  // means the bed may never have made a sound and has to be started again;
+  // coming back from the home screen means it was playing and should carry
+  // on from where it was. Both used to end in silence.
+
+  it('starts a bed that was set up before there was ever a gesture', async () => {
+    const { ctx, started, suspend } = fakeContext()
+    suspend() // No gesture yet: the context has never run.
+    const engine = new AudioEngine(() => ctx)
+    await engine.warm('menu', [])
+    engine.setMusic('menu')
+    await flush()
+    const cold = started.length
+    expect(cold).toBeGreaterThan(0) // A source was issued, on a dead context.
+
+    engine.unlock() // The player taps.
+    await flush()
+    await flush()
+    // Started again on the now-running context, rather than trusting a source
+    // that was issued while it was suspended. Chromium honours those; Safari
+    // does not, and the result there was a game that opened in silence.
+    expect(started.length).toBeGreaterThan(cold + 1) // +blip +restart
+  })
+
+  it('does nothing on a resume before the first gesture', async () => {
+    // Focus and visibility events call resume() too, and neither is a
+    // gesture. Starting the music because a window was focused is both
+    // against the autoplay rules and wrong for an untapped title screen.
+    const { ctx, started, suspend } = fakeContext()
+    suspend()
+    const engine = new AudioEngine(() => ctx)
+    await engine.warm('menu', [])
+    engine.setMusic('menu')
+    await flush()
+    const before = started.length
+
+    await engine.resume()
+    await flush()
+    expect(started.length).toBe(before)
+    expect(engine.unlocked).toBe(false)
+  })
+
+  it('leaves a bed that was already playing alone when the app comes back', async () => {
+    const { ctx, started, suspend } = fakeContext()
+    const engine = new AudioEngine(() => ctx)
+    engine.unlock() // Running before the music starts: the bed is warm.
+    await flush()
+    await engine.warm('menu', [])
+    engine.setMusic('menu')
+    await flush()
+    const playing = started.length
+
+    suspend() // The phone goes to the home screen.
+    await engine.resume()
+    await flush()
+    // Nothing restarted: the track picks up where the interruption left it,
+    // instead of jumping back to the top every time the player takes a call.
+    expect(started.length).toBe(playing)
+  })
+
+  it('is running again after a resume', async () => {
+    const { ctx, suspend } = fakeContext()
+    const engine = new AudioEngine(() => ctx)
+    engine.unlock()
+    await flush()
+    suspend()
+    expect(engine.unlocked).toBe(false)
+    await engine.resume()
+    expect(engine.unlocked).toBe(true)
+  })
+
+  it('survives a resume on a browser with no audio at all', async () => {
+    const engine = new AudioEngine((): AudioContextLike => { throw new Error('unsupported') })
+    engine.unlock()
+    await expect(engine.resume()).resolves.toBeUndefined()
+  })
+
+  it('decodes effects without waiting for the music to finish', async () => {
+    // The menu theme is minutes long and the effects are fractions of a
+    // second. Awaiting the track first held every effect behind it: measured
+    // from a cold load, nothing was decoded for 2.3s and then all 26 arrived
+    // at once, so a player who tapped inside that window heard silence.
+    const { ctx, started } = fakeContext()
+    let releaseMusic = () => {}
+    const musicHeld = new Promise<void>((r) => { releaseMusic = r })
+    const base = ctx as unknown as { decodeAudioData: (b: ArrayBuffer) => Promise<unknown> }
+    const slow = {
+      ...(ctx as unknown as Record<string, unknown>),
+      // Only the music decode is held open. If warm() waits on it, the
+      // effect never decodes and the tap below is silent.
+      decodeAudioData: async (bytes: ArrayBuffer) => {
+        if (new TextDecoder().decode(bytes).includes('/music/')) await musicHeld
+        return base.decodeAudioData(bytes)
+      },
+    } as unknown as AudioContextLike
+
+    const engine = new AudioEngine(() => slow)
+    const warming = engine.warm('menu', ['confirm'])
+    await flush()
+
+    engine.unlock()
+    engine.play('confirm')
+    // One blip from unlock() and one effect: the effect was ready while the
+    // music was still decoding. Serialised, this is the blip alone.
+    expect(started.length).toBe(2)
+
+    releaseMusic()
+    await warming
   })
 
   it('survives a browser with no Web Audio at all', () => {

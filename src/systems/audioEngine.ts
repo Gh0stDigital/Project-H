@@ -58,6 +58,20 @@ interface Bed {
   source: AudioBufferSourceNode
   gain: GainNode
   cue: string
+  /** Everything needed to start this bed a second time. */
+  buffer: AudioBuffer
+  bus: GainNode
+  target: number
+  fade: number
+  /**
+   * Started on a context that was not running yet.
+   *
+   * Such a bed is *supposed* to begin the moment the context resumes, and on
+   * Chromium it does. Safari is not reliable about it — the source is spent
+   * and nothing is ever heard — which is why resume() starts these again
+   * rather than trusting them.
+   */
+  cold: boolean
 }
 
 function inlined(): Record<string, string> | undefined {
@@ -136,6 +150,16 @@ export class AudioEngine {
   private pending: { music: MusicCue | null; ambient: AmbientCue[]; worldId: string | null } | null = null
   private worldId: string | null = null
   private volumes: AudioVolumes = { music: 0.7, sfx: 0.9, muted: false }
+  /**
+   * Whether a real gesture has ever reached unlock().
+   *
+   * resume() is called from page events too — coming back from the home
+   * screen, regaining focus — and those are not gestures. Without this the
+   * app would try to start the music as soon as its window was focused,
+   * which is both against the autoplay rules and wrong for a title screen
+   * that has not been tapped yet.
+   */
+  private everUnlocked = false
   private duckUntil = 0
 
   private makeContext: () => AudioContextLike
@@ -163,10 +187,23 @@ export class AudioEngine {
       return false // No Web Audio: the game is simply silent.
     }
     this.buildBuses()
-    // Safari otherwise routes through the ringer, where the hardware mute
-    // switch silences a game that the player explicitly started.
-    const session = (navigator as { audioSession?: { type: string } }).audioSession
-    if (session) session.type = 'playback'
+    // 'ambient' rather than 'playback'. Both get sound out; the difference
+    // is what iOS then thinks the app is. 'playback' means media — it takes
+    // over the now-playing slot, puts a banner in the status bar, shows
+    // transport controls on the lock screen and stops whatever the player
+    // was already listening to. For a study game that is wrong on every
+    // count. 'ambient' mixes under their music instead and stays out of the
+    // system UI. The cost is that the hardware mute switch now silences the
+    // game, which is the normal bargain for game audio.
+    // Guarded: this is a young API, and a browser that has the object but
+    // rejects the value must not take the whole engine down with it — the
+    // session type is a nicety, the sound is not.
+    try {
+      const session = (navigator as { audioSession?: { type: string } }).audioSession
+      if (session) session.type = 'ambient'
+    } catch {
+      // Left at whatever the browser chose for itself.
+    }
     return true
   }
 
@@ -180,14 +217,22 @@ export class AudioEngine {
    * there is a gesture the buffers are already in memory and resume() is the
    * only work left.
    *
-   * Ordered by when each is needed: the track playing now, then the effects
-   * that have to be instant, then the beds that fade in anyway.
+   * Every decode is issued at once. It used to await the music first, on the
+   * reasoning that the track playing now matters most — but the menu theme is
+   * a two-minute mp3 and the effects are a few hundred milliseconds each, so
+   * awaiting it held every effect behind it: measured from a cold load,
+   * nothing at all was decoded for 2.3 seconds and then all 26 arrived
+   * within 230ms. A player who tapped inside that window got silence, which
+   * is the first thing the game does. decodeAudioData is off the main thread,
+   * so there was never anything to be gained by serialising them.
    */
   async warm(music: MusicCue | null, sfx: readonly SfxCue[], ambient: readonly AmbientCue[] = []): Promise<void> {
     if (!this.ensureContext()) return
-    if (music) await this.buffer('music', music)
-    await Promise.all(sfx.map((c) => this.buffer('sfx', c)))
-    await Promise.all(ambient.map((c) => this.buffer('ambient', c)))
+    await Promise.all([
+      ...(music ? [this.buffer('music', music)] : []),
+      ...sfx.map((c) => this.buffer('sfx', c)),
+      ...ambient.map((c) => this.buffer('ambient', c)),
+    ])
   }
 
   /**
@@ -198,7 +243,8 @@ export class AudioEngine {
   unlock(): void {
     if (!this.ensureContext()) return
     const ctx = this.ctx!
-    void ctx.resume?.()
+    this.everUnlocked = true
+    void this.resume()
     // Older iOS needs to have actually played something before it believes
     // the gesture happened.
     try {
@@ -217,6 +263,50 @@ export class AudioEngine {
       this.setMusic(queued.music)
       this.setAmbience(queued.ambient)
     }
+  }
+
+  /**
+   * Get the context running again, and make sure something is coming out of
+   * it.
+   *
+   * Two things suspend a context: never having had a gesture, and the OS
+   * taking the app away. Coming back from either used to leave the game
+   * silent, because restoring the gain of a suspended context restores the
+   * gain of a context that is not running. resume() is the missing half, and
+   * it is safe to call at any time — on a context already running it does
+   * nothing and costs nothing.
+   *
+   * Beds that were started while suspended are then started again. A bed
+   * that has been playing all along is left alone: it simply carries on
+   * where the suspend interrupted it, which is what should happen when the
+   * player comes back from their home screen.
+   *
+   * It does nothing at all before the first gesture, because resuming is
+   * only ever *re*-starting something the player already started.
+   */
+  async resume(): Promise<void> {
+    if (!this.ctx || !this.everUnlocked) return
+    try {
+      await this.ctx.resume?.()
+    } catch {
+      return // Still no gesture, or no audio at all. The next one will do.
+    }
+    if (this.ctx.state !== 'running') return
+    if (this.music?.cold) this.music = this.restart(this.music)
+    for (const [cue, bed] of this.beds) {
+      if (bed?.cold) this.beds.set(cue, this.restart(bed))
+    }
+  }
+
+  /** Replaces a bed with a fresh one of the same cue, from the top. */
+  private restart(bed: Bed): Bed {
+    try {
+      bed.source.stop()
+    } catch {
+      // Never started, or already stopped. Either way it is being replaced.
+    }
+    bed.gain.disconnect()
+    return this.startBed(bed.buffer, bed.cue, bed.bus, bed.target, bed.fade)
   }
 
   private buildBuses(): void {
@@ -403,7 +493,7 @@ export class AudioEngine {
     source.connect(gain)
     gain.connect(bus)
     source.start(0, start)
-    return { source, gain, cue }
+    return { source, gain, cue, buffer: buf, bus, target, fade, cold: ctx.state !== 'running' }
   }
 
   private fadeOut(bed: Bed | null, fade = audioTiming.musicFadeSeconds): void {

@@ -105,7 +105,7 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
       <div className="title-white" />
 
       {phase === 'cover' && (
-        <button className="title-start" onClick={start} autoFocus>
+        <button className="title-start" onClick={start} autoFocus data-sfx="none">
           <span className="title-start-text">화면을 눌러 시작</span>
           <span className="title-start-sub">TAP TO START</span>
         </button>
