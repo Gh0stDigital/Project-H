@@ -51,6 +51,10 @@ export function migrateSpell(raw: Spell): Spell {
     wordType,
     sampleSentence: str(loose.sampleSentence),
     sampleTranslation: str(loose.sampleTranslation),
+    // Absent from every save written before a second example existed, which
+    // str() turns into '' — the same as an entry that simply has one.
+    sampleSentence2: str(loose.sampleSentence2),
+    sampleTranslation2: str(loose.sampleTranslation2),
     derivedVerb,
     // Guard against a save where the type was later changed to one that
     // doesn't conjugate, leaving stale forms behind.

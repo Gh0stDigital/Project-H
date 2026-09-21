@@ -69,12 +69,28 @@ export function ExampleSentence({ spell, reveal = false, mask = true }: ExampleS
   }
 
   const translation = spell.sampleTranslation?.trim()
+  /**
+   * The second example, if the entry has one.
+   *
+   * Held back while the question is open — two sentences to read under a
+   * timer is a worse prompt, not a better one — and shown once the answer
+   * is in, where a second use of the word in different company is the part
+   * that teaches.
+   */
+  const second = reveal ? spell.sampleSentence2?.trim() : ''
+  const secondTranslation = spell.sampleTranslation2?.trim()
 
   return (
     <div className={`example-sentence${reveal ? ' is-revealed' : ''}`}>
       <span className="example-sentence-label">예문</span>
       <p className="example-sentence-text">{masked ? masked.text : sentence}</p>
       {reveal && translation && <p className="example-sentence-translation">{translation}</p>}
+      {second && (
+        <>
+          <p className="example-sentence-text is-second">{second}</p>
+          {secondTranslation && <p className="example-sentence-translation">{secondTranslation}</p>}
+        </>
+      )}
     </div>
   )
 }

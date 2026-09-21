@@ -18,6 +18,8 @@ export interface SpellContentInput {
   wordType?: WordType
   sampleSentence?: string
   sampleTranslation?: string
+  sampleSentence2?: string
+  sampleTranslation2?: string
   derivedVerb?: string
   presentForm?: string
   pastForm?: string
@@ -68,6 +70,8 @@ export function normalizeContent(input: SpellContentInput): {
   wordType: WordType
   sampleSentence: string
   sampleTranslation: string
+  sampleSentence2: string
+  sampleTranslation2: string
   derivedVerb: string
   presentForm: string
   pastForm: string
@@ -87,6 +91,8 @@ export function normalizeContent(input: SpellContentInput): {
     wordType,
     sampleSentence: clean(input.sampleSentence),
     sampleTranslation: clean(input.sampleTranslation),
+    sampleSentence2: clean(input.sampleSentence2),
+    sampleTranslation2: clean(input.sampleTranslation2),
     derivedVerb,
     presentForm: keepForms ? clean(input.presentForm) : '',
     pastForm: keepForms ? clean(input.pastForm) : '',

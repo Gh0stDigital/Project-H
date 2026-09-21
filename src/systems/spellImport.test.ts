@@ -453,3 +453,83 @@ describe('correcting a word type the broken import never read', () => {
     expect(parseImportText(FILE, complete, { retype: true }).fills).toHaveLength(1)
   })
 })
+
+/**
+ * Header spellings that are the same word written differently.
+ *
+ * The aliases used to hold one spelling each, so a list headed
+ * `sampleSentence` — the field's own name, and what a list exported from a
+ * spreadsheet template looks like — matched nothing and was read as a
+ * column to ignore. Matching on letters alone rather than on punctuation
+ * and spacing is what stops this recurring with the next file.
+ */
+describe('a header written in any reasonable style', () => {
+  const ROW = '물,water,물을 마셨습니다.'
+  const sentenceOf = (header: string) =>
+    parseImportText(`${header}\n${ROW}`, NONE).ok[0]?.input.sampleSentence
+
+  it('reads camelCase, spaced, snake_case and shouted headers alike', () => {
+    for (const header of [
+      'word,definition1,sampleSentence',
+      'word,definition 1,sample sentence',
+      'word,definition_1,sample_sentence',
+      'WORD,DEFINITION 1,SAMPLE SENTENCE',
+      'Word, Definition 1, Sample Sentence',
+      'word,definition-1,sample-sentence',
+    ]) {
+      expect(sentenceOf(header), header).toBe('물을 마셨습니다.')
+    }
+  })
+
+  it('reads a word type written in any of the same styles', () => {
+    for (const spelling of ['actionVerb', 'action verb', 'action_verb', 'ACTION VERB', 'Action-Verb']) {
+      expect(parseWordType(spelling), spelling).toBe('action_verb')
+    }
+    for (const spelling of ['descriptiveVerb', 'descriptive verb', 'Descriptive Verb / Adjective']) {
+      expect(parseWordType(spelling), spelling).toBe('descriptive_verb')
+    }
+  })
+
+  it('does not let two different columns collapse onto one key', () => {
+    // Normalising keys is only safe while no two spellings that mean
+    // different things reduce to the same one.
+    const header = 'sample sentence,sample sentence translation,sample sentence 2,sample sentence translation 2'
+    const columns = parseImportText(`word,definition 1,${header}\n물,water,가,A,나,B`, NONE).headerColumns
+    expect(columns).toEqual([
+      'korean', 'english', 'sampleSentence', 'sampleTranslation', 'sampleSentence2', 'sampleTranslation2',
+    ])
+  })
+})
+
+describe('a word list that carries two examples per word', () => {
+  const HEADER = 'word,wordType,definition1,sampleSentence,sampleSentenceTranslation,sampleSentence2,sampleSentenceTranslation2'
+  const ROW = '안내,noun,guidance,직원이 안내해 줬어요.,The employee explained.,입구에서 좌석을 안내해 줬어요.,They showed me to my seat.'
+
+  it('keeps both, in the columns the file names', () => {
+    const [spell] = parseImportText(`${HEADER}\n${ROW}`, NONE).ok
+    expect(spell.input.sampleSentence).toBe('직원이 안내해 줬어요.')
+    expect(spell.input.sampleTranslation).toBe('The employee explained.')
+    expect(spell.input.sampleSentence2).toBe('입구에서 좌석을 안내해 줬어요.')
+    expect(spell.input.sampleTranslation2).toBe('They showed me to my seat.')
+  })
+
+  it('round-trips both back out through export', () => {
+    const created = parseImportText(`${HEADER}\n${ROW}`, NONE).ok.map((r) => createSpell(r.input))
+    const back = parseImportText(exportSpellsToCsv(created), NONE).ok[0]
+    expect(back.input.sampleSentence2).toBe('입구에서 좌석을 안내해 줬어요.')
+    expect(back.input.sampleTranslation2).toBe('They showed me to my seat.')
+  })
+
+  it('fills a missing second example on re-import without touching the first', () => {
+    const saved = [createSpell({ korean: '안내', english: 'guidance', sampleSentence: '직원이 안내해 줬어요.' })]
+    const patch = parseImportText(`${HEADER}\n${ROW}`, saved).fills[0].fill!.patch
+    expect(patch.sampleSentence).toBeUndefined()
+    expect(patch.sampleSentence2).toBe('입구에서 좌석을 안내해 줬어요.')
+  })
+
+  it('is happy with a list that has only one', () => {
+    const [spell] = parseImportText('word,definition 1,sample sentence\n물,water,가.', NONE).ok
+    expect(spell.input.sampleSentence).toBe('가.')
+    expect(spell.input.sampleSentence2).toBe('')
+  })
+})

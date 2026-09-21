@@ -35,6 +35,8 @@ export function editSpell(spells: Spell[], id: string, patch: SpellEditInput): S
       wordType: patch.wordType ?? s.wordType,
       sampleSentence: patch.sampleSentence ?? s.sampleSentence,
       sampleTranslation: patch.sampleTranslation ?? s.sampleTranslation,
+      sampleSentence2: patch.sampleSentence2 ?? s.sampleSentence2,
+      sampleTranslation2: patch.sampleTranslation2 ?? s.sampleTranslation2,
       derivedVerb: patch.derivedVerb ?? s.derivedVerb,
       presentForm: patch.presentForm ?? s.presentForm,
       pastForm: patch.pastForm ?? s.pastForm,

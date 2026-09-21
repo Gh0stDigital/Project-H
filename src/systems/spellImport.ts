@@ -81,6 +81,8 @@ type ColumnKey =
   | 'definition3'
   | 'sampleSentence'
   | 'sampleTranslation'
+  | 'sampleSentence2'
+  | 'sampleTranslation2'
   | 'derivedVerb'
   | 'presentForm'
   | 'pastForm'
@@ -109,9 +111,11 @@ const COLUMN_ALIASES: Record<string, ColumnKey> = {
   '뜻3': 'definition3',
   '예문': 'sampleSentence',
   '예시': 'sampleSentence',
+  '예문 1': 'sampleSentence',
   '예문 번역': 'sampleTranslation',
-  '예문번역': 'sampleTranslation',
   '번역': 'sampleTranslation',
+  '예문 2': 'sampleSentence2',
+  '예문 번역 2': 'sampleTranslation2',
   '파생 동사': 'derivedVerb',
   '파생동사': 'derivedVerb',
   '현재형': 'presentForm',
@@ -151,9 +155,21 @@ const COLUMN_ALIASES: Record<string, ColumnKey> = {
   sample: 'sampleSentence',
   sentence: 'sampleSentence',
   example: 'sampleSentence',
+  'sample sentence 1': 'sampleSentence',
+  example1: 'sampleSentence',
   'sample sentence translation': 'sampleTranslation',
   'sample translation': 'sampleTranslation',
   translation: 'sampleTranslation',
+  'sample sentence translation 1': 'sampleTranslation',
+
+  // A second example, which study lists routinely carry.
+  'sample sentence 2': 'sampleSentence2',
+  sample2: 'sampleSentence2',
+  sentence2: 'sampleSentence2',
+  example2: 'sampleSentence2',
+  'sample sentence translation 2': 'sampleTranslation2',
+  'sample translation 2': 'sampleTranslation2',
+  translation2: 'sampleTranslation2',
 
   'derived verb': 'derivedVerb',
   derivedverb: 'derivedVerb',
@@ -226,10 +242,39 @@ const WORD_TYPE_ALIASES: Record<string, WordType> = {
   particle: 'grammar',
 }
 
+/**
+ * Reduces a header cell or a word-type value to a key.
+ *
+ * Everything that is only punctuation or spacing goes: case, spaces,
+ * underscores, slashes, hyphens. `sampleSentence`, `sample sentence`,
+ * `Sample_Sentence` and `SAMPLE SENTENCE` are one word written four ways,
+ * and a table that knows only one of them is a table that will be wrong
+ * again next month.
+ *
+ * That is exactly how the examples went missing a second time: the aliases
+ * held `sample sentence`, the file said `sampleSentence`, and the column
+ * was read as one to ignore. The same miss turned `actionVerb` and
+ * `descriptiveVerb` into unknown word types, so every verb in the list came
+ * in as a noun — and the word type is where an entry's Element comes from.
+ */
+function aliasKey(value: string): string {
+  return value.trim().toLowerCase().replace(/[\s_\-/.()]+/g, '')
+}
+
+/** Builds a lookup keyed by aliasKey(), so every spelling finds its column. */
+function normalizeAliases<T>(aliases: Record<string, T>): Record<string, T> {
+  const out: Record<string, T> = {}
+  for (const [spelling, value] of Object.entries(aliases)) out[aliasKey(spelling)] = value
+  return out
+}
+
+const COLUMN_LOOKUP = normalizeAliases(COLUMN_ALIASES)
+const WORD_TYPE_LOOKUP = normalizeAliases(WORD_TYPE_ALIASES)
+
 export function parseWordType(value: string): WordType | null {
-  const key = value.trim().toLowerCase()
+  const key = aliasKey(value)
   if (!key) return null
-  return WORD_TYPE_ALIASES[key] ?? null
+  return WORD_TYPE_LOOKUP[key] ?? null
 }
 
 /**
@@ -300,7 +345,7 @@ function detectDelimiter(lines: string[]): string | RegExp {
  */
 function parseHeader(fields: string[]): ColumnKey[] | null {
   if (fields.length < 2) return null
-  const mapped = fields.map((f) => COLUMN_ALIASES[f.trim().toLowerCase()])
+  const mapped = fields.map((f) => COLUMN_LOOKUP[aliasKey(f)])
   // A header must name the headword column and at least one definition;
   // anything less is data, not a header.
   if (!mapped.includes('korean')) return null
@@ -333,6 +378,8 @@ const COLUMN_LABELS: Partial<Record<ColumnKey, string>> = {
   english: '뜻',
   sampleSentence: '예문',
   sampleTranslation: '예문 번역',
+  sampleSentence2: '예문 2',
+  sampleTranslation2: '예문 번역 2',
   notes: '메모',
 }
 
@@ -351,6 +398,8 @@ const FILLABLE = [
   'definition3',
   'sampleSentence',
   'sampleTranslation',
+  'sampleSentence2',
+  'sampleTranslation2',
   'derivedVerb',
   'presentForm',
   'pastForm',
@@ -486,6 +535,8 @@ export function parseImportText(
       definition3: columns ? get('definition3') : '',
       sampleSentence: columns ? get('sampleSentence') : '',
       sampleTranslation: columns ? get('sampleTranslation') : '',
+      sampleSentence2: columns ? get('sampleSentence2') : '',
+      sampleTranslation2: columns ? get('sampleTranslation2') : '',
       derivedVerb,
       presentForm: columns ? get('presentForm') : '',
       pastForm: columns ? get('pastForm') : '',
@@ -566,6 +617,8 @@ const EXPORT_HEADER = [
   'definition 3',
   'sample sentence',
   'sample sentence translation',
+  'sample sentence 2',
+  'sample sentence translation 2',
   'derived verb',
   'present',
   'past',
@@ -598,6 +651,8 @@ export function exportSpellsToCsv(spells: Spell[]): string {
       s.definition3,
       s.sampleSentence,
       s.sampleTranslation,
+      s.sampleSentence2,
+      s.sampleTranslation2,
       s.derivedVerb,
       forms ? s.presentForm : '',
       forms ? s.pastForm : '',
@@ -621,10 +676,10 @@ export function definitionSummary(spell: Spell): string {
  */
 export const IMPORT_TEMPLATE_CSV = [
   EXPORT_HEADER.join(','),
-  '전달하다,동사,,to deliver,to convey,to pass along,내용을 담당자에게 전달했어요.,I passed the information along to the person in charge.,,전달해요,전달했어요,전달할 거예요,',
-  '괜히,부사,,for no reason,needlessly,unnecessarily,괜히 걱정했어요.,I worried for no reason.,,,,,',
-  '검토,명사,,review,examination,consideration,,,검토하다,검토해요,검토했어요,검토할 거예요,',
-  '안녕하세요,표현/관용구,,hello,,,,,,,,,common greeting',
+  '전달하다,동사,,to deliver,to convey,to pass along,내용을 담당자에게 전달했어요.,I passed the information along to the person in charge.,들은 내용을 그대로 팀에 전달했어요.,I passed on exactly what I heard to the team.,,전달해요,전달했어요,전달할 거예요,',
+  '괜히,부사,,for no reason,needlessly,unnecessarily,괜히 걱정했어요.,I worried for no reason.,,,,,,,',
+  '검토,명사,,review,examination,consideration,,,,,검토하다,검토해요,검토했어요,검토할 거예요,',
+  '안녕하세요,표현/관용구,,hello,,,,,,,,,,,common greeting',
 ].join('\n')
 
 /** The short two-column form, for players who just want a quick list. */

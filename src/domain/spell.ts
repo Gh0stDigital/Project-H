@@ -30,9 +30,19 @@ export interface Spell {
    */
   wordType: WordType
 
-  /** Example usage and its translation. Both optional. */
+  /**
+   * Example usage and its translation. Both optional.
+   *
+   * A second pair, also optional. One example shows what a word means; two
+   * show what it does in different company, which is the difference between
+   * recognising a word and being able to use it. Word lists written for
+   * study routinely carry two, and dropping the second on import threw away
+   * half of what the player had written.
+   */
   sampleSentence: string
   sampleTranslation: string
+  sampleSentence2: string
+  sampleTranslation2: string
 
   /**
    * Conjugations. Populated for verbs and adjectives, or for the derived

@@ -4544,6 +4544,16 @@ button.totem-hero-frame {
   color: var(--text-secondary);
 }
 
+/* The second example, which only ever appears after the answer. A rule
+   above it rather than a gap: two sentences with only space between them
+   read as one run-on, and the pair is the point — the same word in
+   different company. */
+.example-sentence-text.is-second {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+}
+
 /* Once the answer is in, the sentence is the reward for getting it right. */
 .example-sentence.is-revealed {
   border-color: var(--accent-cyan-dim);

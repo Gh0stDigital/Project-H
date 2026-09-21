@@ -37,6 +37,8 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
   const [definition3, setDefinition3] = useState(existing?.definition3 ?? '')
   const [sampleSentence, setSampleSentence] = useState(existing?.sampleSentence ?? '')
   const [sampleTranslation, setSampleTranslation] = useState(existing?.sampleTranslation ?? '')
+  const [sampleSentence2, setSampleSentence2] = useState(existing?.sampleSentence2 ?? '')
+  const [sampleTranslation2, setSampleTranslation2] = useState(existing?.sampleTranslation2 ?? '')
   const [derivedVerb, setDerivedVerb] = useState(existing?.derivedVerb ?? '')
   const [presentForm, setPresentForm] = useState(existing?.presentForm ?? '')
   const [pastForm, setPastForm] = useState(existing?.pastForm ?? '')
@@ -69,6 +71,8 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
       wordType,
       sampleSentence,
       sampleTranslation,
+      sampleSentence2,
+      sampleTranslation2,
       derivedVerb,
       presentForm,
       pastForm,
@@ -180,6 +184,33 @@ export function SpellEditorForm({ existing, onDone, onCancel }: SpellEditorFormP
           value={sampleTranslation}
           onChange={(e) => setSampleTranslation(e.target.value)}
           placeholder="예: I passed the information along."
+        />
+      </div>
+
+      {/* A second example. Shown after the answer rather than during it,
+          so it teaches without making the prompt longer to read. */}
+      <div className="field">
+        <label htmlFor="sample2-input">예문 2 (선택)</label>
+        <input
+          id="sample2-input"
+          type="text"
+          lang="ko"
+          value={sampleSentence2}
+          onChange={(e) => setSampleSentence2(e.target.value)}
+          placeholder="예: 들은 내용을 그대로 팀에 전달했어요."
+        />
+      </div>
+
+      <div className="field">
+        <label htmlFor="sample2-tr-input">예문 2 번역 (선택)</label>
+        <input
+          id="sample2-tr-input"
+          type="text"
+          lang="en"
+          spellCheck
+          value={sampleTranslation2}
+          onChange={(e) => setSampleTranslation2(e.target.value)}
+          placeholder="예: I passed on exactly what I heard to the team."
         />
       </div>
 
