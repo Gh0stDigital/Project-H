@@ -4,6 +4,7 @@ import {
   parseImportText,
   importRowsToInputs,
   exportSpellsToCsv,
+  retypesAnything,
   IMPORT_TEMPLATE_CSV,
   IMPORT_TEMPLATE_SIMPLE_CSV,
 } from '@/systems/spellImport'
@@ -41,16 +42,47 @@ interface SpellImportPanelProps {
 export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
   const spells = usePersistentStore((s) => s.spells)
   const bulkCreateSpells = usePersistentStore((s) => s.bulkCreateSpells)
+  const editSpell = usePersistentStore((s) => s.editSpell)
   const createSpellSet = usePersistentStore((s) => s.createSpellSet)
 
   const [text, setText] = useState('')
   const [makeSet, setMakeSet] = useState(true)
   const [setName, setSetName] = useState('')
+  const [fillBlanks, setFillBlanks] = useState(true)
+  const [retype, setRetype] = useState(false)
   const [imported, setImported] = useState<number | null>(null)
+  const [filled, setFilled] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const result = useMemo(() => parseImportText(text, spells), [text, spells])
+  const result = useMemo(() => parseImportText(text, spells, { retype }), [text, spells, retype])
+  /**
+   * Whether the file disagrees with a saved entry's word type at all — asked
+   * without the option on, so ticking it does not make the question of
+   * whether to offer it depend on its own answer.
+   */
+  const canRetype = useMemo(
+    () => retypesAnything(parseImportText(text, spells), spells),
+    [text, spells],
+  )
   const hasContent = text.trim().length > 0
+  /**
+   * Whether the file claims to carry examples at all.
+   *
+   * Only then is "no example" worth printing next to a row: in the short
+   * two-column form there is nowhere to put one, and saying so on every
+   * line would be noise rather than a warning.
+   */
+  const headerHasExample = result.headerColumns?.includes('sampleSentence') ?? false
+  const willFill = fillBlanks ? result.fills.length : 0
+  const canImport = result.ok.length > 0 || willFill > 0
+  const importLabel =
+    result.ok.length > 0 && willFill > 0
+      ? `단어 ${result.ok.length}개 가져오고 ${willFill}개 채우기`
+      : result.ok.length > 0
+        ? `단어 ${result.ok.length}개 가져오기`
+        : willFill > 0
+          ? `빈 칸 ${willFill}개 채우기`
+          : '가져오기'
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -62,12 +94,18 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
   }
 
   function handleImport() {
-    if (result.ok.length === 0) return
+    if (result.ok.length === 0 && !(fillBlanks && result.fills.length > 0)) return
     const created = bulkCreateSpells(importRowsToInputs(result.ok))
     if (makeSet && created.length > 0) {
       const name = setName.trim() || `가져온 세트 (${created.length})`
       createSpellSet(name, created.map((s) => s.id))
     }
+    // Repairs come after the new entries so one press does both: a corrected
+    // file is usually part list, part fix.
+    if (fillBlanks) {
+      for (const row of result.fills) editSpell(row.fill!.spellId, row.fill!.patch)
+      setFilled(result.fills.length)
+    } else setFilled(0)
     setImported(created.length)
   }
 
@@ -78,7 +116,8 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           <span className="glyph">✅</span>
           <p>
             주문 단어 {imported}개를 가져왔습니다
-            {makeSet ? '. 이 단어들로 주문 세트도 만들었습니다.' : '.'}
+            {makeSet && imported > 0 ? '. 이 단어들로 주문 세트도 만들었습니다.' : '.'}
+            {filled > 0 && <> 이미 있던 단어 {filled}개의 빈 칸도 채웠습니다.</>}
           </p>
         </div>
         <button className="btn btn-primary btn-block" onClick={onDone}>
@@ -147,8 +186,13 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
         <>
           <div className="import-summary">
             <span className="import-count ok">✓ 준비됨 {result.ok.length}</span>
-            {result.duplicates.length > 0 && (
-              <span className="import-count duplicate">⚠ 중복 {result.duplicates.length}</span>
+            {result.fills.length > 0 && (
+              <span className="import-count fill">↻ 채울 수 있음 {result.fills.length}</span>
+            )}
+            {result.duplicates.length - result.fills.length > 0 && (
+              <span className="import-count duplicate">
+                ⚠ 중복 {result.duplicates.length - result.fills.length}
+              </span>
             )}
             {result.errors.length > 0 && <span className="import-count error">✕ 오류 {result.errors.length}</span>}
           </div>
@@ -169,12 +213,21 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
                           </span>
                         )}
                       </span>
+                      {/* The example is the field that used to go missing
+                          without anyone being able to tell until they were
+                          halfway through a dungeon. Now it is on screen
+                          before anything is committed. */}
+                      {row.input.sampleSentence?.trim() ? (
+                        <span className="import-row-example">예문 · {row.input.sampleSentence}</span>
+                      ) : (
+                        headerHasExample && <span className="import-row-example none">예문 없음</span>
+                      )}
                       {row.message && <span className="import-row-message duplicate">{row.message}</span>}
                     </>
                   ) : (
                     <>
                       <span className="faint">{row.raw}</span>
-                      <span className={`import-row-message ${row.status}`}>{row.message}</span>
+                      <span className={`import-row-message ${row.fill ? 'fill' : row.status}`}>{row.message}</span>
                     </>
                   )}
                 </div>
@@ -183,11 +236,26 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
           </div>
 
           <div className="field">
+            {(result.fills.length > 0 || canRetype) && (
+              <label className="row-start" style={{ gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={fillBlanks} onChange={(e) => setFillBlanks(e.target.checked)} />
+                이미 있는 단어의 빈 칸 채우기 (덮어쓰지 않습니다)
+              </label>
+            )}
+            {/* Offered only when it would change something, and only ever by
+                asking: the word type decides an entry's Element, and a saved
+                one cannot be told apart from a default that was never set. */}
+            {fillBlanks && canRetype && (
+              <label className="row-start" style={{ gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={retype} onChange={(e) => setRetype(e.target.checked)} />
+                품사도 파일에 맞추기 (기존 품사를 덮어씁니다)
+              </label>
+            )}
             <label className="row-start" style={{ gap: 8, cursor: 'pointer' }}>
               <input type="checkbox" checked={makeSet} onChange={(e) => setMakeSet(e.target.checked)} />
               이 단어들로 주문 세트도 만들기
             </label>
-            {makeSet && (
+            {makeSet && result.ok.length > 0 && (
               <input
                 type="text"
                 value={setName}
@@ -200,8 +268,8 @@ export function SpellImportPanel({ onDone, onCancel }: SpellImportPanelProps) {
       )}
 
       <div className="btn-row">
-        <button className="btn btn-primary btn-block" onClick={handleImport} disabled={result.ok.length === 0}>
-          {result.ok.length > 0 ? `단어 ${result.ok.length}개 가져오기` : '가져오기'}
+        <button className="btn btn-primary btn-block" onClick={handleImport} disabled={!canImport}>
+          {importLabel}
         </button>
       </div>
       <button className="btn btn-ghost btn-block" onClick={onCancel}>

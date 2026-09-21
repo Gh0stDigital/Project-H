@@ -7,6 +7,7 @@ import {
   importRowsToInputs,
   parseImportText,
   parseWordType,
+  retypesAnything,
 } from './spellImport'
 import { createSpell } from './spellFactory'
 
@@ -195,5 +196,260 @@ describe('word type column stays language-independent', () => {
     expect(parseWordType('부사')).toBe('adverb')
     expect(parseWordType('표현 / 관용구')).toBe('expression')
     expect(parseWordType('문법 / 조사')).toBe('grammar')
+  })
+})
+
+/**
+ * The four ways a real word list lost its sample sentence.
+ *
+ * Every one of these was reported as "the game never shows example
+ * sentences". None of them was a bug in the game: the sentence never
+ * survived the import, so there was nothing to show. The rendering was
+ * correct the whole time, which is why it took three passes to find — the
+ * fix belongs here, at the door, not at the screen.
+ */
+describe('a sample sentence survives the import', () => {
+  const SENTENCE = '물을 마셨습니다.'
+
+  it('reads a header written in Korean', () => {
+    // The app's own form labels these fields 단어 / 뜻 / 예문, so a list
+    // typed to match the interface used those words. The parser knew only
+    // the English spellings, so the row was not recognised as a header at
+    // all: the file dropped to the short positional form, everything past
+    // the third column went out, and the header itself became a word whose
+    // meaning was "뜻".
+    const result = parseImportText(`단어,뜻,예문\n물,water,${SENTENCE}`, NONE)
+    expect(result.headerColumns).not.toBeNull()
+    expect(result.ok).toHaveLength(1)
+    expect(result.ok[0].korean).toBe('물')
+    expect(result.ok[0].input.sampleSentence).toBe(SENTENCE)
+  })
+
+  it('does not import the Korean header row as a word', () => {
+    const result = parseImportText('단어,뜻,예문\n물,water,x', NONE)
+    expect(result.rows.map((r) => r.korean)).not.toContain('단어')
+  })
+
+  it('maps every Korean column name, not just the three it needs', () => {
+    const header = '단어,품사,뜻 1,뜻 2,예문,예문 번역,파생 동사,현재형,메모'
+    const row = '검토,명사,review,examination,서류를 검토했어요.,I reviewed the documents.,검토하다,검토해요,work word'
+    const [spell] = parseImportText(`${header}\n${row}`, NONE).ok
+    expect(spell.input.wordType).toBe('noun')
+    expect(spell.input.definition2).toBe('examination')
+    expect(spell.input.sampleSentence).toBe('서류를 검토했어요.')
+    expect(spell.input.sampleTranslation).toBe('I reviewed the documents.')
+    expect(spell.input.derivedVerb).toBe('검토하다')
+    expect(spell.input.presentForm).toBe('검토해요')
+    expect(spell.notes).toBe('work word')
+  })
+
+  it('honours the quotes a spreadsheet puts around a cell with a comma', () => {
+    // What every spreadsheet exports. Split naively, `"water, aqua"` became
+    // two fields and every column after it shifted left by one, so the
+    // sentence landed in a column nothing reads.
+    const csv = `word,definition 1,sample sentence\n물,"water, aqua","${SENTENCE}"`
+    const [spell] = parseImportText(csv, NONE).ok
+    expect(spell.english).toBe('water, aqua')
+    expect(spell.input.sampleSentence).toBe(SENTENCE)
+  })
+
+  it('reads a doubled quote inside a quoted cell as one quote', () => {
+    const csv = 'word,definition 1,sample sentence\n물,water,"그는 ""물""이라고 했어요."'
+    expect(parseImportText(csv, NONE).ok[0].input.sampleSentence).toBe('그는 "물"이라고 했어요.')
+  })
+
+  it('keeps the whole sentence when an unquoted comma splits it', () => {
+    // Hand-typed lists are not quoted, and a Korean sentence has a comma in
+    // it as often as an English one. Surplus fields belong to the last
+    // column; without the rejoin everything after the comma was dropped.
+    const csv = `word,definition 1,sample sentence\n물,water,물을 마셨습니다, 아주 많이.`
+    expect(parseImportText(csv, NONE).ok[0].input.sampleSentence).toBe('물을 마셨습니다, 아주 많이.')
+  })
+
+  it('does not tear a sentence apart on a dash in a comma file', () => {
+    // The delimiter used to be chosen per line, so a row containing ' - '
+    // was split on that instead of on the commas the rest of the file used.
+    // The first row decides for the whole file now.
+    const csv = 'word,definition 1,sample sentence\n물,water,물 - 그것을 마셨습니다.'
+    const [spell] = parseImportText(csv, NONE).ok
+    expect(spell.korean).toBe('물')
+    expect(spell.input.sampleSentence).toBe('물 - 그것을 마셨습니다.')
+  })
+
+  it('still reads the tab-separated paste a spreadsheet selection produces', () => {
+    const tsv = `단어\t뜻\t예문\n물\twater\t${SENTENCE}`
+    expect(parseImportText(tsv, NONE).ok[0].input.sampleSentence).toBe(SENTENCE)
+  })
+
+  it('reads a header past a UTF-8 byte order mark', () => {
+    // What a spreadsheet writes when it saves CSV as UTF-8. The mark rides
+    // on the first cell, so the mark plus 단어 has to still read as 단어.
+    const csv = `﻿단어,뜻,예문\n물,water,${SENTENCE}`
+    expect(parseImportText(csv, NONE).ok[0].input.sampleSentence).toBe(SENTENCE)
+  })
+})
+
+/**
+ * Re-importing a list to repair what a broken import left behind.
+ *
+ * The words were already in the Compendium with their examples missing, and
+ * every row of a corrected file came back "already there — skipping". The
+ * only way out was to delete the whole list by hand, so the importer fills
+ * blanks on entries it recognises instead.
+ */
+describe('re-importing fills what is missing', () => {
+  const existing = () => [
+    createSpell({ korean: '물', english: 'water', wordType: 'noun' }),
+  ]
+
+  it('offers to fill an example that never made it in', () => {
+    const before = existing()
+    const result = parseImportText('단어,뜻,예문\n물,water,물을 마셨습니다.', before)
+    expect(result.ok).toHaveLength(0)
+    expect(result.fills).toHaveLength(1)
+    expect(result.fills[0].fill!.spellId).toBe(before[0].id)
+    expect(result.fills[0].fill!.patch).toEqual({ sampleSentence: '물을 마셨습니다.' })
+  })
+
+  it('never overwrites something already written', () => {
+    // The player may have fixed a definition by hand since. Importing the
+    // original file again must not undo it.
+    const before = [createSpell({ korean: '물', english: 'water (drinking)', sampleSentence: '내 물.' })]
+    const result = parseImportText('단어,뜻,예문\n물,water,물을 마셨습니다.', before)
+    expect(result.fills).toHaveLength(0)
+    expect(result.duplicates[0].fill).toBeUndefined()
+  })
+
+  it('has nothing to say about a file imported twice unchanged', () => {
+    const before = [createSpell({ korean: '물', english: 'water', sampleSentence: '물을 마셨습니다.' })]
+    const result = parseImportText('단어,뜻,예문\n물,water,물을 마셨습니다.', before)
+    expect(result.fills).toHaveLength(0)
+    expect(result.duplicates[0].message).toContain('건너뜁니다')
+  })
+
+  it('fills several blanks at once and leaves the rest alone', () => {
+    const before = existing()
+    const header = '단어,뜻,뜻 2,예문,예문 번역,메모'
+    const row = '물,drink,water,물을 마셨습니다.,I drank water.,'
+    const patch = parseImportText(`${header}\n${row}`, before).fills[0].fill!.patch
+    expect(patch).toEqual({
+      definition2: 'water',
+      sampleSentence: '물을 마셨습니다.',
+      sampleTranslation: 'I drank water.',
+    })
+    // 뜻 was already 'water'; the file says 'drink' and does not get to say so.
+    expect(patch.english).toBeUndefined()
+    // An empty cell is not a value — it must not blank out a note.
+    expect(patch.notes).toBeUndefined()
+  })
+
+  it('leaves the word type alone', () => {
+    // An entry imported without one holds the default, which is
+    // indistinguishable from a choice the player made on purpose.
+    const before = existing()
+    const result = parseImportText('단어,품사,뜻,예문\n물,동사,water,물을 마셨습니다.', before)
+    expect(result.fills[0].fill!.patch).toEqual({ sampleSentence: '물을 마셨습니다.' })
+  })
+
+  it('does not count a duplicate inside the same file as something to fill', () => {
+    const result = parseImportText('단어,뜻,예문\n물,water,가.\n물,water,나.', NONE)
+    expect(result.ok).toHaveLength(1)
+    expect(result.duplicates).toHaveLength(1)
+    expect(result.fills).toHaveLength(0)
+  })
+})
+
+/**
+ * A stray comma in a file nobody quoted.
+ *
+ * A hand-written list has an unquoted comma in it sooner or later, and a row
+ * with more fields than columns cannot say which cell it came from. The
+ * importer puts it back into the most likely one and says on the row that it
+ * guessed, rather than silently dropping the tail as it used to.
+ */
+describe('an unquoted comma in a cell', () => {
+  it('rejoins into the sentence rather than onto the end of the row', () => {
+    // The shape this game asks people to write: the example in the middle,
+    // its translation after it. Rejoining onto the end truncated the
+    // sentence and corrupted the translation at the same time.
+    const csv = '단어,품사,뜻,예문,예문 번역\n물,명사,water,물을 마셨습니다, 아주 많이.,I drank a lot of water.'
+    const [spell] = parseImportText(csv, NONE).ok
+    expect(spell.input.sampleSentence).toBe('물을 마셨습니다, 아주 많이.')
+    expect(spell.input.sampleTranslation).toBe('I drank a lot of water.')
+    expect(spell.input.wordType).toBe('noun')
+  })
+
+  it('says on the row that it had to guess', () => {
+    const csv = '단어,품사,뜻,예문,예문 번역\n물,명사,water,물을 마셨습니다, 아주 많이.,I drank a lot of water.'
+    const [spell] = parseImportText(csv, NONE).ok
+    expect(spell.status).toBe('ok')
+    expect(spell.message).toContain('예문')
+    expect(spell.message).toContain('따옴표')
+  })
+
+  it('falls back to notes, then to the last column, when there is no example', () => {
+    const noExample = parseImportText('word,definition 1,notes\n물,water,drink, cold', NONE).ok[0]
+    expect(noExample.notes).toBe('drink, cold')
+
+    const neither = parseImportText('word,definition 1,definition 2\n물,water,aqua, h2o', NONE).ok[0]
+    expect(neither.input.definition2).toBe('aqua, h2o')
+  })
+
+  it('keeps a word type reading correctly in front of the broken cell', () => {
+    // The rejoin must not shift the columns before it, or a file with one
+    // stray comma silently changes every entry's Element.
+    const csv = '단어,품사,뜻,예문\n먹다,동사,to eat,밥을 먹었어요, 많이.'
+    const [spell] = parseImportText(csv, NONE).ok
+    expect(spell.input.wordType).toBe('action_verb')
+    expect(spell.english).toBe('to eat')
+  })
+
+  it('says nothing about a row that fits', () => {
+    const csv = '단어,품사,뜻,예문\n먹다,동사,to eat,밥을 먹었어요.'
+    expect(parseImportText(csv, NONE).ok[0].message).toBeUndefined()
+  })
+
+  it('still reports an unknown word type alongside the rejoin', () => {
+    const csv = '단어,품사,뜻,예문\n먹다,zzz,to eat,밥을 먹었어요, 많이.'
+    const message = parseImportText(csv, NONE).ok[0].message!
+    expect(message).toContain('알 수 없는 품사')
+    expect(message).toContain('따옴표')
+  })
+})
+
+describe('correcting a word type the broken import never read', () => {
+  // The same missing header dropped 품사 as well as 예문, so every entry it
+  // made is a noun — and the type is what the entry's Element comes from.
+  const saved = () => [createSpell({ korean: '먹다', english: 'to eat', wordType: 'noun' })]
+  const FILE = '단어,품사,뜻,예문\n먹다,동사,to eat,밥을 먹었어요.'
+
+  it('leaves the type alone unless asked', () => {
+    const patch = parseImportText(FILE, saved()).fills[0].fill!.patch
+    expect(patch.wordType).toBeUndefined()
+    expect(patch.sampleSentence).toBe('밥을 먹었어요.')
+  })
+
+  it('corrects it when asked', () => {
+    const patch = parseImportText(FILE, saved(), { retype: true }).fills[0].fill!.patch
+    expect(patch.wordType).toBe('action_verb')
+  })
+
+  it('offers the choice only when the file actually disagrees', () => {
+    const agrees = [createSpell({ korean: '먹다', english: 'to eat', wordType: 'action_verb' })]
+    expect(retypesAnything(parseImportText(FILE, agrees), agrees)).toBe(false)
+    expect(retypesAnything(parseImportText(FILE, saved()), saved())).toBe(true)
+  })
+
+  it('does not offer it for a file with no word type column', () => {
+    const plain = 'word,definition 1\n먹다,to eat'
+    expect(retypesAnything(parseImportText(plain, saved()), saved())).toBe(false)
+  })
+
+  it('finds something to do for an entry whose only fault is its type', () => {
+    // Nothing to fill, so without the retype this row is a plain duplicate
+    // and the file looks like it has nothing to offer.
+    const complete = [createSpell({ korean: '먹다', english: 'to eat', sampleSentence: '밥을 먹었어요.' })]
+    expect(parseImportText(FILE, complete).fills).toHaveLength(0)
+    expect(parseImportText(FILE, complete, { retype: true }).fills).toHaveLength(1)
   })
 })

@@ -35,6 +35,7 @@ import {
   type WordType,
 } from '@/config/wordTypes'
 import { validateNewSpell, type NewSpellInput } from './spellFactory'
+import type { SpellEditInput } from './spellCompendium'
 
 export type ImportRowStatus = 'ok' | 'error' | 'duplicate'
 
@@ -48,6 +49,12 @@ export interface ImportRow {
   input: NewSpellInput
   status: ImportRowStatus
   message?: string
+  /**
+   * For a word already in the Compendium: which entry it is, and what this
+   * file would add to it. Absent when the file adds nothing the entry is
+   * missing, so a row that carries one is a row worth re-importing.
+   */
+  fill?: { spellId: string; patch: SpellEditInput }
 }
 
 export interface ImportResult {
@@ -55,6 +62,8 @@ export interface ImportResult {
   ok: ImportRow[]
   errors: ImportRow[]
   duplicates: ImportRow[]
+  /** Duplicates that would fill a blank on the entry already saved. */
+  fills: ImportRow[]
   /** Which columns a header row mapped, for the preview to report. */
   headerColumns: string[] | null
 }
@@ -81,6 +90,37 @@ type ColumnKey =
 
 /** Header spellings accepted for each column, all lowercased. */
 const COLUMN_ALIASES: Record<string, ColumnKey> = {
+  // The Korean names, which are what the app's own form calls these fields.
+  // Leaving them out meant a header written in the language of the interface
+  // was not recognised as a header at all: the file fell back to the short
+  // positional form, every column past the third was dropped, and the header
+  // row itself was imported as a word.
+  '단어': 'korean',
+  '한국어': 'korean',
+  '낱말': 'korean',
+  '품사': 'wordType',
+  '뜻': 'english',
+  '뜻 1': 'english',
+  '의미': 'english',
+  '영어': 'english',
+  '뜻 2': 'definition2',
+  '뜻2': 'definition2',
+  '뜻 3': 'definition3',
+  '뜻3': 'definition3',
+  '예문': 'sampleSentence',
+  '예시': 'sampleSentence',
+  '예문 번역': 'sampleTranslation',
+  '예문번역': 'sampleTranslation',
+  '번역': 'sampleTranslation',
+  '파생 동사': 'derivedVerb',
+  '파생동사': 'derivedVerb',
+  '현재형': 'presentForm',
+  '과거형': 'pastForm',
+  '미래형': 'futureForm',
+  '메모': 'notes',
+  '비고': 'notes',
+  '속성': 'ignore',
+
   korean: 'korean',
   kor: 'korean',
   word: 'korean',
@@ -192,12 +232,66 @@ export function parseWordType(value: string): WordType | null {
   return WORD_TYPE_ALIASES[key] ?? null
 }
 
-function splitFields(line: string): string[] {
-  for (const delimiter of DELIMITERS) {
-    const parts = line.split(delimiter)
-    if (parts.length >= 2) return parts.map((p) => p.trim())
+/**
+ * Splits one line on a single-character delimiter, honouring quotes.
+ *
+ * Anything a spreadsheet exports quotes the fields that contain the
+ * delimiter — and a sample sentence contains a comma more often than not.
+ * Without this, `물,"water, aqua",...` became four fields and every column
+ * after the first shifted one to the left, which is how a sentence ended up
+ * in a field nothing reads. A doubled quote inside a quoted field is a
+ * literal quote, as in RFC 4180.
+ */
+function splitQuoted(line: string, delimiter: string): string[] {
+  const out: string[] = []
+  let field = ''
+  let quoted = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (quoted) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { field += '"'; i++ } else quoted = false
+      } else field += ch
+    } else if (ch === '"' && field.trim() === '') {
+      quoted = true
+      field = ''
+    } else if (ch === delimiter) {
+      out.push(field)
+      field = ''
+    } else field += ch
   }
-  return [line.trim()]
+  out.push(field)
+  return out
+}
+
+/**
+ * Splits a line into fields, untrimmed.
+ *
+ * The surrounding spaces are kept because a field may still have to be
+ * glued back to its neighbour below, and `마셨습니다, 아주` rejoined from
+ * trimmed halves comes back as `마셨습니다,아주`. Every caller trims what it
+ * finally uses.
+ */
+function splitOn(line: string, delimiter: string | RegExp): string[] {
+  if (typeof delimiter === 'string') return splitQuoted(line, delimiter)
+  return line.split(delimiter)
+}
+
+/**
+ * Picks one delimiter for the whole file, from its first row.
+ *
+ * It used to be chosen per line, which meant a line was split by whatever
+ * happened to appear in it: a sentence containing ' - ' was torn in half on
+ * that, in a file that was otherwise commas. The first row decides, and
+ * every row after it is read the same way.
+ */
+function detectDelimiter(lines: string[]): string | RegExp {
+  const first = lines.map((l) => l.trim()).find((l) => l && !l.startsWith('#'))
+  if (!first) return ','
+  for (const delimiter of DELIMITERS) {
+    if (splitOn(first, delimiter).length >= 2) return delimiter
+  }
+  return ','
 }
 
 /**
@@ -215,16 +309,121 @@ function parseHeader(fields: string[]): ColumnKey[] | null {
 }
 
 /**
+ * Which column an unquoted delimiter most likely broke.
+ *
+ * The tail of the row is the usual answer and used to be the only one, but
+ * it is wrong for exactly the file this game asks people to write: a list
+ * with the example sentence in the middle and its translation after it.
+ * Rejoining onto the end there truncated the sentence *and* corrupted the
+ * translation. The sentence is far and away the most likely cell to hold a
+ * comma, so it is asked first; the guess is reported on the row either way,
+ * since with two free-text columns the file itself is ambiguous.
+ */
+function surplusColumn(columns: ColumnKey[]): number {
+  const sentence = columns.indexOf('sampleSentence')
+  if (sentence >= 0) return sentence
+  const notes = columns.indexOf('notes')
+  if (notes >= 0) return notes
+  return columns.length - 1
+}
+
+/** Column names as the preview reports them, matching the app's own form. */
+const COLUMN_LABELS: Partial<Record<ColumnKey, string>> = {
+  korean: '단어',
+  english: '뜻',
+  sampleSentence: '예문',
+  sampleTranslation: '예문 번역',
+  notes: '메모',
+}
+
+/**
+ * Fields a re-import is allowed to fill in on an entry that already exists.
+ *
+ * `korean` is not one of them — it is what matched the two entries in the
+ * first place. Neither is `wordType`: an entry imported without one holds
+ * the default, and the default is indistinguishable from a deliberate
+ * choice, so changing it would quietly overwrite a decision the player may
+ * have made by hand.
+ */
+const FILLABLE = [
+  'english',
+  'definition2',
+  'definition3',
+  'sampleSentence',
+  'sampleTranslation',
+  'derivedVerb',
+  'presentForm',
+  'pastForm',
+  'futureForm',
+  'notes',
+] as const
+
+/**
+ * What this file would add to an entry the player already has.
+ *
+ * Only blanks are filled, never anything already written: importing the
+ * same list twice must not undo an edit made in the app afterwards. Returns
+ * null when there is nothing to add, which is what keeps an ordinary
+ * re-import of an unchanged file from offering to do anything at all.
+ *
+ * This exists because of how the sentences went missing: a list imported
+ * through the broken parser produced entries with the right word and
+ * meaning and an empty example, and the only way back was to delete every
+ * one of them and start again. Re-importing the same file now repairs them
+ * in place.
+ *
+ * `retype` is the one thing that overwrites rather than fills. The same
+ * broken import also dropped the 품사 column, so every entry it made holds
+ * the default type — and the type is what an entry's Element is derived
+ * from, which is not a cosmetic detail. It stays off unless asked for,
+ * because a blank cannot be told from a choice.
+ */
+export function fillFromImport(
+  existing: Spell,
+  input: NewSpellInput,
+  retype = false,
+): SpellEditInput | null {
+  const patch: SpellEditInput = {}
+  let any = false
+  for (const field of FILLABLE) {
+    const incoming = (input[field] ?? '').trim()
+    if (!incoming) continue
+    if ((existing[field] ?? '').trim()) continue
+    patch[field] = incoming
+    any = true
+  }
+  if (retype && input.wordType && input.wordType !== existing.wordType) {
+    patch.wordType = input.wordType
+    any = true
+  }
+  return any ? patch : null
+}
+
+/** Whether this file disagrees with an entry's saved word type. */
+export function retypesAnything(result: ImportResult, existingSpells: Spell[]): boolean {
+  const byKorean = new Map(existingSpells.map((sp) => [sp.korean.trim().toLowerCase(), sp]))
+  return result.duplicates.some((row) => {
+    const saved = byKorean.get(row.korean.trim().toLowerCase())
+    return !!saved && !!row.input.wordType && row.input.wordType !== saved.wordType
+  })
+}
+
+/**
  * Parses raw import text into a row-by-row report. `existingSpells` is used
  * only to flag duplicates (by exact Korean word match, case-insensitive) —
  * nothing is created here, this is preview-only.
  */
-export function parseImportText(text: string, existingSpells: Spell[]): ImportResult {
-  const existingKorean = new Set(existingSpells.map((s) => s.korean.trim().toLowerCase()))
+export function parseImportText(
+  text: string,
+  existingSpells: Spell[],
+  options: { retype?: boolean } = {},
+): ImportResult {
+  const existingByKorean = new Map(existingSpells.map((s) => [s.korean.trim().toLowerCase(), s]))
   const seenInBatch = new Set<string>()
   const rows: ImportRow[] = []
 
   const lines = text.split(/\r?\n/)
+  const delimiter = detectDelimiter(lines)
   let columns: ColumnKey[] | null = null
   let headerSeen = false
 
@@ -233,7 +432,7 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
     const lineNumber = idx + 1
     if (!line || line.startsWith('#')) return
 
-    const fields = splitFields(line)
+    let fields = splitOn(line, delimiter)
 
     // Only the first non-comment row may be a header.
     if (!headerSeen) {
@@ -244,6 +443,24 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
         return
       }
     }
+
+    /**
+     * A row with more fields than the header has columns: an unquoted
+     * delimiter inside one of the cells. Put it back together.
+     */
+    let surplusInto: ColumnKey | null = null
+    if (columns && typeof delimiter === 'string' && fields.length > columns.length) {
+      const extra = fields.length - columns.length
+      const at = surplusColumn(columns)
+      surplusInto = columns[at]
+      fields = [
+        ...fields.slice(0, at),
+        fields.slice(at, at + extra + 1).join(delimiter),
+        ...fields.slice(at + extra + 1),
+      ]
+    }
+
+    fields = fields.map((f) => f.trim())
 
     const get = (key: ColumnKey): string => {
       if (!columns) return ''
@@ -288,16 +505,33 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
       return
     }
 
-    // An unrecognised word type is worth saying out loud rather than
-    // silently defaulting, since it decides the entry's Element.
-    let message: string | undefined
+    // Things worth saying out loud rather than doing silently. An
+    // unrecognised word type decides the entry's Element; a rejoined row was
+    // a guess, and the player is the only one who can confirm it.
+    const notes_: string[] = []
     if (rawType.trim() && !wordType) {
-      message = `알 수 없는 품사 "${rawType}" — 기본값으로 넣습니다. 가져온 뒤 고치세요.`
+      notes_.push(`알 수 없는 품사 "${rawType}" — 기본값으로 넣습니다. 가져온 뒤 고치세요.`)
     }
+    if (surplusInto) {
+      notes_.push(
+        `칸보다 ${delimiter === '\t' ? '탭' : `"${String(delimiter)}"`}이(가) 많습니다 — 남은 부분을 ` +
+          `${COLUMN_LABELS[surplusInto] ?? '마지막'} 칸에 이어 붙였습니다. 구분자가 들어간 칸은 따옴표로 감싸 주세요.`,
+      )
+    }
+    const message = notes_.length > 0 ? notes_.join(' ') : undefined
 
-    const key = korean.toLowerCase()
-    if (existingKorean.has(key) || seenInBatch.has(key)) {
-      rows.push({ ...base, status: 'duplicate', message: '이미 도감에 있습니다 — 건너뜁니다.' })
+    const key = korean.trim().toLowerCase()
+    const already = existingByKorean.get(key)
+    if (already || seenInBatch.has(key)) {
+      const patch = already ? fillFromImport(already, input, options.retype === true) : null
+      rows.push({
+        ...base,
+        status: 'duplicate',
+        ...(patch ? { fill: { spellId: already!.id, patch } } : {}),
+        message: patch
+          ? `이미 도감에 있습니다 — 비어 있는 칸 ${Object.keys(patch).length}개를 채울 수 있습니다.`
+          : '이미 도감에 있습니다 — 건너뜁니다.',
+      })
       return
     }
 
@@ -310,6 +544,7 @@ export function parseImportText(text: string, existingSpells: Spell[]): ImportRe
     ok: rows.filter((r) => r.status === 'ok'),
     errors: rows.filter((r) => r.status === 'error'),
     duplicates: rows.filter((r) => r.status === 'duplicate'),
+    fills: rows.filter((r) => r.fill),
     headerColumns: columns,
   }
 }

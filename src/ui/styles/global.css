@@ -1723,188 +1723,33 @@ select:focus {
   color: var(--accent-gold-dim);
 }
 
-/* ---- Dungeon config screen ---- */
-
-.dungeon-name {
-  text-align: center;
-  font-size: 22px;
-  background: linear-gradient(180deg, var(--text-primary), var(--text-secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* A word already saved that this file can complete. Not a problem like a
+   duplicate is, so it reads as an offer rather than a warning. */
+.import-count.fill,
+.import-row-message.fill {
+  color: var(--accent-cyan, var(--accent-green));
+  border-color: currentColor;
 }
 
-.tier-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+/* The example sentence, quoted back before anything is committed.
 
-.tier-card {
-  appearance: none;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-  background: var(--surface-card);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  color: var(--text-primary);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
-  box-shadow: var(--bevel), var(--frame);
-}
-
-.tier-card:active {
-  transform: scale(0.99);
-}
-
-.tier-card[data-selected='true'] {
-  border-color: var(--accent-gold);
-  box-shadow: 0 0 16px -6px var(--glow-gold);
-}
-
-.tier-card-name {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.tier-card-meta {
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-}
-
-/* A card with more than a name and one number has to stack: the row layout
-   above squeezes the name into a one-character column and pushes the rest
-   off the side. Used by the setup sheets, where each option carries its
-   description. */
-.tier-card.stacked {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
-}
-
-.tier-card.stacked .tier-card-meta {
-  flex-shrink: 1;
-  white-space: normal;
-  line-height: 1.45;
-}
-
-.dungeon-info-panel {
-  background: var(--surface-panel);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  box-shadow: var(--bevel), var(--frame);
-}
-
-.dungeon-info-desc {
-  font-size: 13px;
+   This field used to be the one that went missing silently: a list whose
+   header the parser could not read imported its words and dropped their
+   examples, and there was no way to find out until a prompt in a dungeon
+   came up bare. Printing it here makes the import answerable. */
+.import-row-example {
+  font-size: 11px;
   color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.import-row-example.none {
+  color: var(--accent-gold-dim);
   font-style: italic;
 }
 
-/* ---- Spell Word batch import ---- */
-
-.import-summary {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.import-count {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-}
-
-.import-count.ok {
-  color: var(--accent-green);
-  border-color: var(--accent-green);
-}
-
-.import-count.duplicate {
-  color: var(--accent-gold);
-  border-color: var(--accent-gold-dim);
-}
-
-.import-count.error {
-  color: var(--accent-red);
-  border-color: var(--accent-red);
-}
-
-.import-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 260px;
-  overflow-y: auto;
-  background: var(--surface-card);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  padding: 8px;
-}
-
-.import-row {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  border-left: 3px solid var(--border-soft);
-  font-size: 13px;
-}
-
-.import-row.ok {
-  border-left-color: var(--accent-green);
-}
-
-.import-row.duplicate {
-  border-left-color: var(--accent-gold-dim);
-}
-
-.import-row.error {
-  border-left-color: var(--accent-red);
-}
-
-.import-row-line {
-  color: var(--text-faint);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  flex-shrink: 0;
-  width: 22px;
-  text-align: right;
-}
-
-.import-row-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.import-row-message {
-  font-size: 11px;
-}
-
-.import-row-message.error {
-  color: var(--accent-red);
-}
-
-.import-row-message.duplicate {
-  color: var(--accent-gold-dim);
-}
-
 /* ---- Dungeon config screen ---- */
 
 .dungeon-name {
@@ -1938,6 +1783,7 @@ select:focus {
   padding: 12px 14px;
   color: var(--text-primary);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .tier-card:active {
@@ -1983,6 +1829,7 @@ select:focus {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  box-shadow: var(--bevel), var(--frame);
 }
 
 .dungeon-info-desc {
