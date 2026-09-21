@@ -154,6 +154,16 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
       <Plate name="cover" src={getAsset('ui', 'cover')} hidden={!onCover} />
       <Plate name="awaken" src={getAsset('ui', 'awaken')} hidden={onCover} />
 
+      {/* The boards and gilt the cover is held in. Sized in CSS from the same
+          number the picture is scaled by, so it never needs to be told how
+          much space was left over. */}
+      <div className="title-frame" aria-hidden="true">
+        <span className="title-corner tl" />
+        <span className="title-corner tr" />
+        <span className="title-corner bl" />
+        <span className="title-corner br" />
+      </div>
+
       <div className="title-white" />
 
       {phase === 'cover' && (

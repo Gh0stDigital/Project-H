@@ -4879,6 +4879,26 @@ button.totem-hero-frame {
   filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.9));
 }
 
+/* The cover is pushed further than the second plate.
+   It is square where the second is 4:5, so at a shared number it read much
+   the smaller of the two. Measured against what each step cuts: at 1.9 the
+   binding cords down the right edge go, and they are the thing that says
+   this is a stitched book rather than a picture of one; 1.75 keeps them and
+   the page block while leaving a band top and bottom for the frame below to
+   stand in.
+
+   Declared once on the sequence, because the boards below are sized from
+   the same number: pushing the picture further has to move the wood with
+   it, and two copies of 1.75 would drift apart the first time one is
+   touched. */
+.title-sequence {
+  --cover-fill: 1.75;
+}
+
+.title-plate.cover {
+  --plate-fill: var(--cover-fill);
+}
+
 /* The cover holds still until it is touched, then leans in and catches light
    — the book waking up under the finger rather than cutting to the flash. */
 .phase-cover .title-plate.cover,
@@ -4968,6 +4988,130 @@ button.totem-hero-frame {
   opacity: 0;
 }
 
+/* ---- The binding, around whatever the picture does not cover -----------
+
+   The cover art is square and a phone is not, so however hard it is pushed
+   there is a band left at the top and the bottom. Blurring the picture into
+   it reads as a photograph that did not fit. Boards and gold do not: the
+   screen becomes the book seen from above, held in its own binding, and the
+   leftover space is the thing that makes it read that way rather than a
+   mistake to be hidden.
+
+   Sized from the same number the picture is scaled by, so the boards meet
+   the art's edge instead of guessing at it, plus a few pixels of overlap so
+   there is never a hairline of blur between the two. A square source in a
+   portrait box is width-limited, which is what makes 100vw x the fill its
+   painted height. */
+.title-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+/* Only while the book is the thing on screen. The second plate has its own
+   proportions and its own moment, and the flash is a clean break. */
+.phase-cover .title-frame,
+.phase-choosing .title-frame,
+.phase-igniting .title-frame {
+  opacity: 1;
+}
+
+.title-frame::before,
+.title-frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: max(46px, calc((100dvh - 100vw * var(--cover-fill, 1.75)) / 2 + 8px));
+  /* Boards.
+
+     Three grain layers at periods that do not divide into each other, so
+     they never line up into a repeat the eye can catch — one regular comb
+     of stripes reads as corduroy rather than as wood, which is exactly what
+     the first attempt looked like. All of it is low-contrast: this is a
+     frame, and grain loud enough to count is grain loud enough to compete
+     with the book. */
+  background:
+    repeating-linear-gradient(
+      92deg,
+      rgba(255, 238, 205, 0.028) 0 1px,
+      rgba(0, 0, 0, 0) 1px 6px,
+      rgba(0, 0, 0, 0.05) 6px 8px,
+      rgba(0, 0, 0, 0) 8px 17px
+    ),
+    repeating-linear-gradient(
+      88deg,
+      rgba(0, 0, 0, 0.06) 0 13px,
+      rgba(255, 224, 176, 0.022) 13px 23px,
+      rgba(0, 0, 0, 0) 23px 37px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.05) 0 41px,
+      rgba(255, 220, 170, 0.018) 41px 71px
+    ),
+    /* Light falling across the board, and the warm middle of the plank. */
+    linear-gradient(105deg, rgba(0, 0, 0, 0.3) 0%, rgba(255, 210, 150, 0.06) 46%, rgba(0, 0, 0, 0.26) 100%),
+    linear-gradient(180deg, #150e07 0%, #392512 40%, #56371a 72%, #20140a 100%);
+  box-shadow:
+    /* Two gilt fillets, as a bound board carries: a bright rule on the edge
+       that faces the book, and a finer one set in from the outside. */
+    inset 0 -2px 0 rgba(224, 182, 100, 0.95),
+    inset 0 -4px 0 rgba(120, 84, 30, 0.9),
+    inset 0 -6px 9px rgba(0, 0, 0, 0.5),
+    inset 0 9px 0 -7px rgba(198, 156, 84, 0.55),
+    /* The shadow the board casts down onto the picture. */
+    0 9px 20px rgba(0, 0, 0, 0.72);
+}
+
+.title-frame::before {
+  top: 0;
+}
+
+/* The lower board is the same piece of wood the other way up, so its gold
+   rule and its lit edge face the picture too. */
+.title-frame::after {
+  bottom: 0;
+  transform: scaleY(-1);
+}
+
+/* The gilt corner pieces a bound board is protected with, at the four
+   corners of the screen — which is where the boards' own corners are.
+
+   Drawn with gradients rather than art: four more images to decode before
+   the first frame, for something this small, is not a trade worth making.
+   An L of even thickness, lit from the outside corner inwards, so it reads
+   as metal laid on the wood rather than as a shape cut out of it. */
+.title-corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+.title-corner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(246, 219, 154, 0.98) 0%,
+    rgba(205, 162, 82, 0.96) 36%,
+    rgba(138, 100, 40, 0.92) 70%,
+    rgba(96, 68, 26, 0.88) 100%
+  );
+  /* Constant-thickness L: out along the top, back down the left. */
+  clip-path: polygon(0 0, 100% 0, 100% 13%, 13% 13%, 13% 100%, 0 100%);
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
+}
+
+.title-corner.tl { top: 5px; left: 5px; }
+.title-corner.tr { top: 5px; right: 5px; transform: scaleX(-1); }
+.title-corner.bl { bottom: 5px; left: 5px; transform: scaleY(-1); }
+.title-corner.br { bottom: 5px; right: 5px; transform: scale(-1, -1); }
+
 /* ---- Tap to start ---- */
 
 .title-start {
@@ -4983,10 +5127,37 @@ button.totem-hero-frame {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  /* Centred, then pushed down by a fifth of the screen: dead centre puts the
+     words across the title cartouche, and the old position had them on the
+     bottom board. This lands them on the wave pattern below the seal, which
+     is the quietest part of the cover. */
+  justify-content: center;
   gap: 4px;
-  padding: 0 0 calc(74px + env(safe-area-inset-bottom));
+  padding: 28dvh 0 0;
   touch-action: manipulation;
+}
+
+/* A soft pool of dark under the words.
+   There is no quiet part of this cover to put them on — a dragon, the waves
+   and the seal between them cover the whole middle — and at the size the
+   prompt needs to be, a halo on the glyphs alone was not winning. A radial
+   with no edge of its own reads as the light falling off rather than as a
+   panel laid over the art. */
+.title-start::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 63%;
+  width: min(92%, 420px);
+  height: 190px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    60% 50% at 50% 50%,
+    rgba(4, 6, 11, 0.72) 0%,
+    rgba(4, 6, 11, 0.44) 46%,
+    rgba(4, 6, 11, 0) 78%
+  );
+  pointer-events: none;
 }
 
 .title-start-text {
@@ -4994,10 +5165,11 @@ button.totem-hero-frame {
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--text-primary);
-  /* The art is busy under the text, so the legibility comes from a dark halo
-     rather than from a plate that would cover the cover. */
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.8);
+  /* Still haloed on top of the pool: the two together are what make this
+     legible over gold. */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.9);
   animation: title-pulse 2s ease-in-out infinite;
+  position: relative;
 }
 
 .title-start-sub {
@@ -5005,7 +5177,8 @@ button.totem-hero-frame {
   letter-spacing: 0.34em;
   text-indent: 0.34em;
   color: var(--accent-gold);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.98), 0 0 14px rgba(0, 0, 0, 0.9);
+  position: relative;
   animation: title-pulse 2s ease-in-out infinite;
 }
 
