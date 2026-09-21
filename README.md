@@ -129,11 +129,29 @@ public/audio/
               victory defeat correct wrong trapTrigger chestOpen discovery
               shrine bossDoor reward npcTalk move diceRoll confirm cancel
               itemUse levelUp
+  music/<slot>/                        a folder of alternates for that slot
 public/worlds/<id>/music/   dungeon  battle  boss   optional, overrides the above
 ```
 
 A world may ship its own dungeon, battle or boss music; anything it does not
 ship falls back to the global track. A cue with no file is silent, not broken.
+
+### One slot, several tracks
+
+A music slot can be a folder instead of a file. `music/dungeon.mp3` is one
+dungeon theme; `music/dungeon/` is a set of them, and a run picks one at
+random when it starts and keeps it for that whole run — through every battle
+and back out again, so the music never changes under the player. The next run
+picks again, never the track that just played.
+
+Any number of files, any names: nothing lists them, the folder is scanned.
+The single `music/<slot>.mp3` stays the fallback for when the folder is
+empty, which is how every slot behaves today. A world can ship its own set at
+`public/worlds/<id>/music/<slot>/`, which wins over the global folder for
+runs in that world.
+
+`src/systems/musicPool.ts` decides which track; `public/audio/music/dungeon/`
+has the same notes in it for whoever opens the folder first.
 
 `scripts/gen-audio-placeholders.mjs` writes a plain synthesised tone for any
 cue with no file yet, so the whole chain can be heard and checked before real

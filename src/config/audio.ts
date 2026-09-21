@@ -7,7 +7,7 @@
  * loud or too eager — not the audio itself.
  */
 
-import { audioManifest, audioFiles, worldMusic } from './audioManifest'
+import { audioManifest, audioFiles, musicPools, worldMusic } from './audioManifest'
 
 export type MusicCue = (typeof audioManifest.music)[number]
 export type AmbientCue = (typeof audioManifest.ambient)[number]
@@ -100,6 +100,21 @@ export const audioTiming = {
   duckTo: 0.35,
   duckSeconds: 0.25,
   duckHoldSeconds: 0.9,
+}
+
+/**
+ * The alternates available for a music slot, or an empty list.
+ *
+ * A world that ships its own folder of tracks for this slot wins outright:
+ * the world is the theme, and a global pool playing over it would undo the
+ * reason for shipping one. Otherwise the global folder answers.
+ */
+export function musicPool(cue: string, worldId?: string | null): readonly string[] {
+  if (worldId) {
+    const own = (worldMusic[worldId] ?? []).filter((v) => v.startsWith(`${cue}/`))
+    if (own.length > 0) return own
+  }
+  return musicPools[cue] ?? []
 }
 
 /** Where a cue's file lives, as a path from public/. */

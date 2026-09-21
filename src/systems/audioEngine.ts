@@ -35,12 +35,14 @@ import {
   audioPath,
   audioTiming,
   musicGain,
+  musicPool,
   sfxSpec,
   type AmbientCue,
   type AudioFolder,
   type MusicCue,
   type SfxCue,
 } from '@/config/audio'
+import { pickTrack } from './musicPool'
 
 export interface AudioVolumes {
   music: number
@@ -149,6 +151,17 @@ export class AudioEngine {
   /** Asked for before the first gesture; started the moment there is one. */
   private pending: { music: MusicCue | null; ambient: AmbientCue[]; worldId: string | null } | null = null
   private worldId: string | null = null
+  /**
+   * Which alternate is playing for each pooled slot, and which played
+   * before it.
+   *
+   * Held rather than re-rolled, because setMusic('dungeon') is called every
+   * time the player comes back out of a battle. Picking again there would
+   * change the track mid-run, several times a run — the choice belongs to
+   * the run, so it is made once and kept until newRun() throws it away.
+   */
+  private chosen = new Map<string, string>()
+  private previousChoice = new Map<string, string>()
   private volumes: AudioVolumes = { music: 0.7, sfx: 0.9, muted: false }
   /**
    * Whether a real gesture has ever reached unlock().
@@ -428,6 +441,35 @@ export class AudioEngine {
     }
   }
 
+  /**
+   * Forget which alternates are playing, so the next run picks again.
+   *
+   * Called when a run begins. Anything already playing keeps playing — the
+   * menu theme should not restart because a dungeon was configured — and the
+   * new choice lands when the dungeon's own track is next asked for.
+   */
+  newRun(): void {
+    for (const [slot, track] of this.chosen) this.previousChoice.set(slot, track)
+    this.chosen.clear()
+  }
+
+  /**
+   * The file-level cue for a slot: the slot itself, or one of its alternates.
+   *
+   * Everything downstream — decoding, paths, the offline bundle — takes the
+   * result as an ordinary cue name, which is why pools needed no change to
+   * any of it.
+   */
+  private track(cue: MusicCue): string {
+    const pool = musicPool(cue, this.worldId)
+    if (pool.length === 0) return cue
+    const held = this.chosen.get(cue)
+    if (held && pool.includes(held)) return held
+    const picked = pickTrack(pool, this.random, this.previousChoice.get(cue)) ?? cue
+    this.chosen.set(cue, picked)
+    return picked
+  }
+
   setMusic(cue: MusicCue | null): void {
     // Only queue when there is no context at all. Once there is one — warmed
     // before any gesture — the bed is decoded and started immediately; a
@@ -437,15 +479,20 @@ export class AudioEngine {
       this.pending = { music: cue, ambient: this.pending?.ambient ?? [], worldId: this.worldId }
       return
     }
+    // Compared by slot, not by the alternate playing for it: coming back out
+    // of a battle asks for 'dungeon' again, and that must not restart the
+    // track the run is already on.
     if (this.music?.cue === cue) return
     const outgoing = this.music
     this.music = null
     if (outgoing) this.fadeOut(outgoing)
     if (!cue) return
 
-    void this.buffer('music', cue).then((buf) => {
+    const track = this.track(cue)
+    void this.buffer('music', track).then((buf) => {
       // Another track may have been asked for while this one decoded.
       if (!buf || !this.ctx || this.music) return
+      // The bed is labelled with the slot, so the check above keeps working.
       this.music = this.startBed(buf, cue, this.musicBus!, musicGain[cue] ?? 1, audioTiming.musicFadeSeconds)
     })
   }

@@ -67,3 +67,17 @@ export const SLOTS_BY_FOLDER = {
  * name. A world without any of these simply uses the global music.
  */
 export const WORLD_MUSIC_SLOTS = ['dungeon', 'battle', 'boss']
+
+/**
+ * Music slots that may be a folder of alternates instead of a single file.
+ *
+ * `music/dungeon.mp3` is one track. `music/dungeon/` is a set of them, and a
+ * run picks one at random when it starts and keeps it for the whole run.
+ * Dropping another file in the folder is the entire job of adding a track —
+ * nothing here lists them by name.
+ *
+ * Every music slot is allowed one, because the mechanism is the same for all
+ * of them and a game that can vary its dungeon theme will want to vary its
+ * battle theme next.
+ */
+export const MUSIC_POOL_SLOTS = MUSIC_SLOTS

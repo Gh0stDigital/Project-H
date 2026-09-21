@@ -77,11 +77,31 @@ let before = 0
 let after = 0
 const notes = []
 
-for (const folder of Object.keys(TARGETS)) {
-  const dir = join(AUDIO, folder)
-  if (!existsSync(dir)) continue
-  const target = TARGETS[folder]
+/**
+ * Every folder holding audio, with the settings that apply to it.
+ *
+ * A music slot may be a folder of alternates — `music/dungeon/` — and those
+ * are the files most likely to arrive as a 40 MB wav, since they are the
+ * ones being added by hand. One flat list rather than a nested loop, so the
+ * work below does not have to care how deep a file was found.
+ */
+function audioDirs() {
+  const out = []
+  for (const folder of Object.keys(TARGETS)) {
+    const root = join(AUDIO, folder)
+    if (!existsSync(root)) continue
+    out.push({ dir: root, label: folder, target: TARGETS[folder] })
+    for (const entry of readdirSync(root).sort()) {
+      const full = join(root, entry)
+      if (statSync(full).isDirectory()) {
+        out.push({ dir: full, label: `${folder}/${entry}`, target: TARGETS[folder] })
+      }
+    }
+  }
+  return out
+}
 
+for (const { dir, label: folder, target } of audioDirs()) {
   for (const name of readdirSync(dir).sort()) {
     if (!SOURCE.test(name)) continue
     const file = join(dir, name)

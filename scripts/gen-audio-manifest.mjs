@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { artIn, fileTable, AUDIO_EXTENSIONS } from './artFiles.mjs'
-import { AUDIO_FOLDERS, SLOTS_BY_FOLDER, WORLD_MUSIC_SLOTS } from './audioSlots.mjs'
+import { AUDIO_FOLDERS, MUSIC_POOL_SLOTS, SLOTS_BY_FOLDER, WORLD_MUSIC_SLOTS } from './audioSlots.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -21,6 +21,25 @@ const WORLDS_DIR = join(ROOT, 'public', 'worlds')
 const OUT = join(ROOT, 'src', 'config', 'audioManifest.ts')
 
 const scan = (dir, slots) => artIn(dir, slots, AUDIO_EXTENSIONS)
+
+/**
+ * The alternates sitting in `<musicDir>/<slot>/`, as variant cue names.
+ *
+ * A variant is named `<slot>/<file>` — `dungeon/catacombs` — so it is a cue
+ * in its own right, and its entry in the file table carries the subfolder
+ * with it. That is what lets audioPath() resolve a variant without knowing
+ * that pools exist at all.
+ *
+ * Returns `{ variants, files }`; an empty folder, or no folder, gives an
+ * empty pool and the single `<slot>` file keeps being the track.
+ */
+function poolIn(musicDir, slot, prefix) {
+  const found = scan(join(musicDir, slot), [])
+  return {
+    variants: found.map((a) => `${slot}/${a.slot}`),
+    files: Object.fromEntries(found.map((a) => [`${prefix}${slot}/${a.slot}`, `${slot}/${a.file}`])),
+  }
+}
 
 function build() {
   const cues = {}
@@ -36,6 +55,17 @@ function build() {
     }
   }
 
+  // A slot may also be a folder of alternates. The single file stays the
+  // fallback: a pool is what a run picks from, and an empty pool means there
+  // was nothing to pick from and the one track plays as it always did.
+  const musicPools = {}
+  for (const slot of MUSIC_POOL_SLOTS) {
+    const { variants, files: poolFiles } = poolIn(join(AUDIO_DIR, 'music'), slot, 'audio/music/')
+    if (variants.length === 0) continue
+    musicPools[slot] = variants
+    Object.assign(files, poolFiles)
+  }
+
   // A world may ship its own dungeon/battle/boss music. Anything it does not
   // ship falls back to the global track of the same name, so a world needs no
   // music at all to be playable.
@@ -44,9 +74,17 @@ function build() {
     ? readdirSync(WORLDS_DIR).filter((d) => statSync(join(WORLDS_DIR, d)).isDirectory()).sort()
     : []
   for (const id of worldIds) {
-    const found = scan(join(WORLDS_DIR, id, 'music'), WORLD_MUSIC_SLOTS)
-    if (found.length === 0) continue
-    worldMusic[id] = found.map((a) => a.slot)
+    const dir = join(WORLDS_DIR, id, 'music')
+    const found = scan(dir, WORLD_MUSIC_SLOTS)
+    // A world can ship a folder of alternates too, on the same terms.
+    const own = []
+    for (const slot of WORLD_MUSIC_SLOTS) {
+      const { variants, files: poolFiles } = poolIn(dir, slot, `worlds/${id}/music/`)
+      own.push(...variants)
+      Object.assign(files, poolFiles)
+    }
+    if (found.length === 0 && own.length === 0) continue
+    worldMusic[id] = [...found.map((a) => a.slot), ...own]
     Object.assign(files, fileTable(found, `worlds/${id}/music/`))
   }
 
@@ -67,13 +105,20 @@ ${AUDIO_FOLDERS.map((f) => `  ${f}: ${lit(cues[f])},`).join('\n')}
 export const worldMusic: Readonly<Record<string, readonly string[]>> = ${lit(worldMusic)}
 
 /**
+ * Alternates for a music slot, by slot name. A run picks one of these when it
+ * starts and keeps it until the next run, so a dungeon sounds the same all
+ * the way through and different the next time.
+ */
+export const musicPools: Readonly<Record<string, readonly string[]>> = ${lit(musicPools)}
+
+/**
  * The file behind each cue, keyed by its path from public/. Cue names are
  * fixed; the file may be any format the browser decodes and any
  * capitalisation, so the name is recorded rather than reconstructed.
  */
 export const audioFiles: Readonly<Record<string, string>> = ${JSON.stringify(files, null, 2)}
 `
-  return { source, cues, worldMusic, missing, total: Object.values(cues).flat().length }
+  return { source, cues, worldMusic, musicPools, missing, total: Object.values(cues).flat().length }
 }
 
 export function generateAudioManifest() {
@@ -91,8 +136,10 @@ if (process.argv[1] && process.argv[1].endsWith('gen-audio-manifest.mjs')) {
   const r = generateAudioManifest()
   for (const m of r.missing) console.warn(`gen-audio-manifest: no file for ${m} — that cue stays silent.`)
   const worlds = Object.keys(r.worldMusic)
+  const pools = Object.entries(r.musicPools).map(([slot, v]) => `${slot} x${v.length}`)
   console.log(
     `gen-audio-manifest: ${r.total} cues` +
+      (pools.length ? `, alternates for ${pools.join(', ')}` : '') +
       (worlds.length ? `, own music for ${worlds.join(', ')}` : '') +
       (r.changed ? '' : ' (unchanged)'),
   )

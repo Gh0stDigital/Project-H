@@ -77,6 +77,18 @@ export function useSoundtrack(): void {
     audio.setWorld(run?.config.worldId ?? null)
   }, [run?.config.worldId])
 
+  // A new run rolls for its music.
+  //
+  // Keyed on the config object rather than on a new field: it is built once
+  // when the run is set up and carried by reference through every state
+  // update after it, so a change of identity here means a different run and
+  // nothing else does. Leaving a run and starting another therefore picks
+  // again, while walking around inside one does not.
+  const config = run?.config
+  useEffect(() => {
+    if (config) audio.newRun()
+  }, [config])
+
   // Music waits for the curtain.
   //
   // A track starting at the same instant as the screen goes black is the

@@ -16,6 +16,13 @@ export const audioManifest = {
 export const worldMusic: Readonly<Record<string, readonly string[]>> = {}
 
 /**
+ * Alternates for a music slot, by slot name. A run picks one of these when it
+ * starts and keeps it until the next run, so a dungeon sounds the same all
+ * the way through and different the next time.
+ */
+export const musicPools: Readonly<Record<string, readonly string[]>> = {}
+
+/**
  * The file behind each cue, keyed by its path from public/. Cue names are
  * fixed; the file may be any format the browser decodes and any
  * capitalisation, so the name is recorded rather than reconstructed.
