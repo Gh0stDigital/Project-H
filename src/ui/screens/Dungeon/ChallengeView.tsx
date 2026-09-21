@@ -127,7 +127,7 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
 
       {/* Below the options, not above them: it is a clue to glance at, and
           the thing the thumb is reaching for should stay put. */}
-      <ExampleSentence spell={spell} />
+      <ExampleSentence spell={spell} mask={asksForKorean} />
     </div>
   )
 }

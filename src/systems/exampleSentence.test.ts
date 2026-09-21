@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { BLANK, maskExample } from './exampleSentence'
+import { BLANK, maskExample, spellForms } from './exampleSentence'
 
 describe('masking a word out of its own example', () => {
   it('hides the word', () => {
@@ -43,5 +43,58 @@ describe('masking a word out of its own example', () => {
   it('says nothing about an empty sentence', () => {
     expect(maskExample('   ', ['물'])).toEqual({ text: '', safe: false })
     expect(maskExample('물을 마셨습니다.', []).safe).toBe(false)
+  })
+})
+
+describe('which spellings to look for', () => {
+  const entry = (over: Partial<Parameters<typeof spellForms>[0]> = {}) => ({
+    korean: '먹다',
+    altKorean: [],
+    derivedVerb: '',
+    presentForm: '',
+    pastForm: '',
+    futureForm: '',
+    ...over,
+  })
+
+  it('offers the stem of a dictionary form', () => {
+    // The reason examples were not showing. Korean sentences contain 먹어요
+    // and 먹습니다, never 먹다, so matching only the entry meant matching
+    // nothing — and an unmatched sentence is a hidden sentence.
+    expect(spellForms(entry())).toContain('먹')
+  })
+
+  it('finds the word in a conjugated sentence', () => {
+    const r = maskExample('밥을 먹습니다.', spellForms(entry()))
+    expect(r.safe).toBe(true)
+    expect(r.text).toBe(`밥을 ${BLANK}습니다.`)
+  })
+
+  it('prefers a stored conjugation over the stem', () => {
+    // Longest first, so the whole conjugation is taken out rather than its
+    // first syllable, which would leave the ending stranded beside a blank.
+    const r = maskExample('밥을 먹어요.', spellForms(entry({ presentForm: '먹어요' })))
+    expect(r.text).toBe(`밥을 ${BLANK}.`)
+  })
+
+  it('gathers every spelling the entry stores', () => {
+    const forms = spellForms(
+      entry({ altKorean: ['잡수시다'], pastForm: '먹었어요', futureForm: '먹을 거예요' }),
+    )
+    for (const f of ['먹다', '잡수시다', '먹었어요', '먹을 거예요']) expect(forms).toContain(f)
+  })
+
+  it('does not offer a stem that would match half the sentence', () => {
+    // 다 alone, from a one-character entry, would blank every sentence
+    // ending in it.
+    expect(spellForms(entry({ korean: '다' }))).not.toContain('')
+    expect(spellForms(entry({ korean: '다' }))).toEqual(['다'])
+  })
+
+  it('still cannot find a word that contraction swallowed', () => {
+    // 크다 becomes 큽니다 and no prefix of the entry survives. Hiding the
+    // sentence is right here: the alternative is printing the answer.
+    const r = maskExample('집이 아주 큽니다.', spellForms(entry({ korean: '크다' })))
+    expect(r.safe).toBe(false)
   })
 })

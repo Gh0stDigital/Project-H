@@ -32,6 +32,53 @@ function escape(form: string): string {
 }
 
 /**
+ * Every spelling of an entry this can hope to find in a sentence.
+ *
+ * The entry itself is only the dictionary form, and Korean sentences almost
+ * never contain it: 먹다 appears as 먹어요, 갔어요, 먹습니다. Passing only
+ * `korean` meant the masking failed on nearly every verb and adjective, and
+ * a failed mask hides the sentence — which is why examples were not showing
+ * for most words.
+ *
+ * So: the conjugations the entry already stores, and, for anything in
+ * dictionary form, its stem. The stem is the blunt one — 먹다 gives 먹,
+ * which also matches 먹 inside an unrelated word — but a blank in a slightly
+ * wrong place is a far smaller loss than the sentence never appearing.
+ *
+ * Contraction still defeats it: 크다 becomes 큽니다, and no prefix of 크다
+ * survives in that. Those sentences stay hidden while the question is open,
+ * which is the right answer when the word cannot be found to hide it.
+ */
+export function spellForms(spell: {
+  korean: string
+  altKorean?: string[]
+  derivedVerb?: string
+  presentForm?: string
+  pastForm?: string
+  futureForm?: string
+}): string[] {
+  const stored = [
+    spell.korean,
+    ...(spell.altKorean ?? []),
+    spell.derivedVerb,
+    spell.presentForm,
+    spell.pastForm,
+    spell.futureForm,
+  ]
+  const forms: string[] = []
+  for (const raw of stored) {
+    const form = (raw ?? '').trim()
+    if (!form) continue
+    forms.push(form)
+    // 먹다 -> 먹, which catches 먹어요 and 먹습니다 that the stored forms may
+    // not cover. Two characters minimum: a one-character stem would match
+    // most of the sentence.
+    if (form.endsWith('다') && form.length >= 2) forms.push(form.slice(0, -1))
+  }
+  return forms
+}
+
+/**
  * Hides every form of a word in a sentence.
  *
  * Longer forms are masked first so a word that contains another — 불 inside

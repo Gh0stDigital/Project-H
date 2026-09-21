@@ -13,6 +13,7 @@ import { TotemPanel } from '@/ui/components/TotemPanel'
 import { MoveRollModal } from '@/ui/components/MoveRollModal'
 import { RunHud } from '@/ui/components/RunHud'
 import { ChallengeView } from './ChallengeView'
+import { ExampleSentence } from '@/ui/components/ExampleSentence'
 import { WordInfoPanel } from './WordInfoPanel'
 import { ItemPanel } from './ItemPanel'
 import { StatusPanel } from './StatusPanel'
@@ -260,6 +261,19 @@ export function ExploreView() {
             <MagicRoomView puzzle={puzzle} onGuess={guessSyllable} onFinish={finishMagicRoom} />
           )}
 
+          {/* The sentence the player just answered against, now whole and
+              translated. It is the half that teaches, and it could not be
+              shown a moment ago without printing the answer.
+
+              All three outcome stages, because which one a prompt lands on
+              depends on how it went: a chest opened pays out and goes to
+              'reward', the same chest failed goes to 'treasure_result'. An
+              event that had no question leaves challengeSpell null and this
+              renders nothing. */}
+          {(stage === 'trap_result' || stage === 'treasure_result' || stage === 'reward') && (
+            <ExampleSentence spell={challengeSpell} reveal />
+          )}
+
           {/* Reward / plain outcome acknowledgements. */}
           {(stage === 'reward' || stage === 'treasure_result') &&
             (run.pendingReward ? (
@@ -297,6 +311,7 @@ export function ExploreView() {
           onSubmit={submitEventAnswer}
           submitLabel={event!.type === 'trap' ? '해제!' : '열기!'}
           timer={run.eventTimer}
+          spell={challengeSpell}
         />
       )}
 
