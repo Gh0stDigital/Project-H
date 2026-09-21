@@ -23,21 +23,50 @@ interface ExampleSentenceProps {
 /**
  * The word, used in a sentence.
  *
- * Under the options while the question is open it appears with the word cut
- * out, so it is a clue about usage rather than the answer; after the answer
- * it appears whole. A sentence the masking could not cut the word out of is
- * simply not shown until the reveal — see systems/exampleSentence.ts.
+ * While the question is open the sentence appears with the word cut out, so
+ * it is a clue about usage rather than the answer; after the answer it
+ * appears whole, with its translation.
+ *
+ * The panel is on screen for every prompt now, even when there is no
+ * sentence to put in it. It used to render nothing in that case, and nothing
+ * is indistinguishable from a broken feature: the example field is optional,
+ * so a compendium typed in quickly — or imported in the short two-column
+ * form, which has nowhere to put one — has no examples at all, and the game
+ * simply looked like it had stopped showing them. Saying so turns an
+ * invisible blank into something the player can act on.
  */
 export function ExampleSentence({ spell, reveal = false, mask = true }: ExampleSentenceProps) {
   if (!spell) return null
   const sentence = spell.sampleSentence?.trim()
-  if (!sentence) return null
+
+  // Nothing to add afterwards: the note below already said why, while they
+  // were answering.
+  if (!sentence && reveal) return null
+
+  if (!sentence) {
+    return (
+      <div className="example-sentence is-empty">
+        <span className="example-sentence-label">예문</span>
+        <p className="example-sentence-text">이 단어에는 예문이 없습니다 · 도감에서 추가할 수 있어요</p>
+      </div>
+    )
+  }
 
   const hide = mask && !reveal
   const masked = hide ? maskExample(sentence, spellForms(spell)) : null
-  // Only when it had to be cut and could not be: printing the answer is the
-  // one outcome worth losing the sentence over.
-  if (masked && !masked.safe) return null
+
+  // It had to be cut and could not be: Korean contraction can swallow every
+  // spelling of a word — 크다 becomes 큽니다. Printing it would print the
+  // answer, so the sentence waits, and the panel says so rather than
+  // disappearing.
+  if (masked && !masked.safe) {
+    return (
+      <div className="example-sentence is-empty">
+        <span className="example-sentence-label">예문</span>
+        <p className="example-sentence-text">답을 맞힌 뒤에 예문을 보여 드립니다</p>
+      </div>
+    )
+  }
 
   const translation = spell.sampleTranslation?.trim()
 

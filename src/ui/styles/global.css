@@ -4650,6 +4650,28 @@ button.totem-hero-frame {
   background: rgba(18, 12, 7, 0.55);
 }
 
+/* A word that will show no example in a dungeon, marked where it can be
+   fixed. Quiet: it is a note, not a fault. */
+.needs-example {
+  margin-top: 3px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+
+/* The panel with no sentence in it. Present, so the player can tell the
+   difference between "this word has no example" and "the game is not showing
+   examples", but recessive enough not to look like content. */
+.example-sentence.is-empty {
+  border-style: dashed;
+  background: rgba(18, 12, 7, 0.3);
+}
+
+.example-sentence.is-empty .example-sentence-text {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
 .example-sentence-label {
   display: block;
   font-size: 10px;

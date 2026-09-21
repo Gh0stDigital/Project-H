@@ -81,6 +81,11 @@ export function SpellListTab() {
               </div>
               {/* Blank optional definitions are dropped, never shown as empty rows. */}
               <div className="eng">{definitionsOf(spell).join(' · ')}</div>
+              {/* The example is optional, so a compendium typed in quickly has
+                  none — and a word with none shows no example in a dungeon.
+                  Flagging it here is what makes that findable rather than
+                  something the player notices mid-fight. */}
+              {!spell.sampleSentence?.trim() && <div className="needs-example">예문 없음</div>}
               <div className="row" style={{ marginTop: 4 }}>
                 <span className="faint">Lv {spell.level}</span>
                 <div style={{ flex: 1 }}>
