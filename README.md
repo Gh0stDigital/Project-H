@@ -116,6 +116,34 @@ files are just larger than they need to be. Both manifests record the
 extension of each file, so a world dropped in as PNG plays exactly the same as
 the optimized ones, and the two can sit side by side.
 
+## The installed app
+
+Added to a home screen, the game is called **Sound of Worlds** and wears the
+book icon. Three places have to agree, because no single one of them covers
+every platform:
+
+- `index.html` — `<title>`, `apple-mobile-web-app-title` (what iOS writes
+  under the icon; without it the full title is used and truncated), and
+  `rel="apple-touch-icon"`. iOS ignores the manifest's icons when something
+  is added to the home screen and reads that link instead, so leaving it out
+  is what gets you a screenshot of the page as the icon. It must be a PNG.
+- `public/manifest.webmanifest` — the name and icons Android and desktop
+  Chrome install from.
+- `scripts/bundle-offline.mjs` — inlines the icons as data URIs for the
+  single-file build, and precaches them in the service worker.
+
+`node scripts/gen-icons.mjs [source]` cuts all five sizes from
+`icons/master.webp`. The master sits outside `public/` because it is the
+source, not something a player should download.
+
+The icons are written **fully opaque, with no rounded corners of their own**.
+The operating system applies its own mask and composites transparency onto
+black first, so art with a 23% corner radius — which the master has — comes
+back with black wedges at every corner. The generator fills the corners with
+a blurred, darkened copy of the art instead, so whatever survives the mask
+still matches the picture. The separate `maskable` icon keeps the book inside
+the middle 80%, which is all Android guarantees to show.
+
 ## Sound
 
 Every cue is a file under `public/audio/`, named after the cue. Dropping one
@@ -340,6 +368,9 @@ scripts/
                          src/config/worldManifest.ts. Both generators run on
                          dev-server start, on every add or removal while it
                          runs, and at the start of a build.
+  gen-icons.mjs          Cuts the home-screen icons in public/ from
+                         icons/master.webp. Run by hand, not by the build —
+                         see "The installed app" below.
   gen-placeholders.mjs   Fills any slot that has no art yet with a generated
                          placeholder (no external deps — hand-rolled PNG
                          encoder). Runs via `npm install`'s postinstall hook

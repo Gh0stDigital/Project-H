@@ -2,14 +2,22 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./icon-32.png" />
+    <!-- iOS ignores the web manifest's icons when something is added to the
+         home screen and uses this instead, so leaving it out is what gets a
+         screenshot of the page as the icon. A PNG: SVG is not accepted here. -->
+    <link rel="apple-touch-icon" href="./icon-180.png" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <title>Project H</title>
+    <title>Sound of Worlds</title>
     <meta name="theme-color" content="#0b0d12" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- What iOS writes under the icon. Without it the whole <title> is used
+         and gets truncated to something unrecognisable. -->
+    <meta name="apple-mobile-web-app-title" content="Sound of Worlds" />
+    <meta name="application-name" content="Sound of Worlds" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <style>

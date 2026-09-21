@@ -74,12 +74,12 @@ export function MainMenuScreen() {
           plainer menu rather than a blank one. */}
       {titleArt ? (
         <div className="menu-title has-art">
-          <img src={titleArt} alt="Project H" className="menu-title-art" draggable={false} />
+          <img src={titleArt} alt="Sound of Worlds" className="menu-title-art" draggable={false} />
         </div>
       ) : (
         <div className="menu-title">
           <span className="glyph">🔮</span>
-          <h1>Project H</h1>
+          <h1>Sound of Worlds</h1>
           <p className="muted">언어 학습 던전 크롤러</p>
         </div>
       )}

@@ -159,11 +159,13 @@ const inline = {}
   }
 }
 
-// The favicon is referenced by href and would 404 on its own.
-const faviconPath = join(DIST, 'favicon.svg')
+// Icons are referenced by href and would 404 on their own. Inlined so the
+// single file still has a tab icon, and so that installing it from a served
+// copy of this one file has something to put on the home screen.
 let single = html
-if (existsSync(faviconPath)) {
-  single = replaceLiteral(single, 'href="./favicon.svg"', `href="${dataUri(faviconPath)}"`)
+for (const icon of ['icon-32.png', 'icon-180.png']) {
+  const path = join(DIST, icon)
+  if (existsSync(path)) single = replaceLiteral(single, `href="./${icon}"`, `href="${dataUri(path)}"`)
 }
 
 // Must be defined before the app script runs, so it goes immediately
@@ -194,7 +196,11 @@ console.log(
 const precache = [
   './',
   './index.html',
-  './favicon.svg',
+  './icon-32.png',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
   './manifest.webmanifest',
   ...allArt().map((f) => `./${relative(DIST, f).split('\\').join('/')}`),
 ]
