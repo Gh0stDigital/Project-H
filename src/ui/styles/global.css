@@ -4929,22 +4929,26 @@ button.totem-hero-frame {
 }
 
 /* Then it goes out, and the loading screen arrives on black rather than on
-   top of a picture that is still there. The plate keeps drifting in as it
-   fades, so the shot is still moving when it leaves. */
+   top of a picture that is still there. Opacity only. */
 .phase-fading .title-plate.awaken {
   opacity: 0;
-  transform: scale(1.02);
-  transition: opacity var(--title-fade-ms, 700ms) ease-in,
-    transform var(--title-fade-ms, 700ms) ease-out;
+  transform: scale(1);
+  transition: opacity var(--title-fade-ms, 700ms) ease-in;
 }
 
-.phase-flash .title-plate.awaken {
-  transform: scale(1.06);
-}
+/* The second still does not move.
 
+   It used to come in at 1.06 and settle to 1 over 2.4 seconds — a slow pull
+   back meant to feel like the shot arriving. While the beat was two seconds
+   long the drift was cut off before it finished and read as a settle; at
+   four it completes with time to spare, and what you see is the picture
+   shrinking and then stopping, which is not the same thing at all. The fix
+   is not a different curve. A still that is going to be held is better held
+   still. */
+.phase-flash .title-plate.awaken,
 .phase-awaken .title-plate.awaken {
   transform: scale(1);
-  transition: opacity 240ms ease, transform 2400ms ease-out;
+  transition: opacity 240ms ease;
 }
 
 /* A vignette over both plates. It does two jobs: it buries the seam where
