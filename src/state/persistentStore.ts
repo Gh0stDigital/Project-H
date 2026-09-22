@@ -30,8 +30,18 @@ import { hasAsset } from '@/config/assets'
 
 export interface DungeonSelectionDraft {
   totemSpellSetId: string | null
+  /**
+   * The set the dungeon draws its words from, or the marker that says to
+   * pick one at the start of every run (RANDOM_SET_ID).
+   */
   dungeonSpellSetId: string | null
   tierId: DungeonTierId
+  /**
+   * The set the last randomly-chosen run actually landed on, so the next
+   * roll can avoid it. Absent on a save written before random existed, and
+   * on any selection that named its own set.
+   */
+  lastRandomSetId?: string | null
 }
 
 export interface PersistedData {

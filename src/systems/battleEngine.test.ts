@@ -1,30 +1,40 @@
 import { describe, expect, it } from 'vitest'
-import { attackCardClue, defenseDamage } from './battleEngine'
+import { attackCardAvatar, defenseDamage } from './battleEngine'
 
-describe('attack card clue', () => {
-  it('shows the first and last letter, capitalised', () => {
-    expect(attackCardClue('Anxiety')).toBe('AY')
-    expect(attackCardClue('deliver')).toBe('DR')
-    expect(attackCardClue('love')).toBe('LE')
+describe('the face of an attack card', () => {
+  it('is the first syllable of the Korean word', () => {
+    expect(attackCardAvatar('안내')).toBe('안')
+    expect(attackCardAvatar('먹다')).toBe('먹')
+    expect(attackCardAvatar('안녕하세요')).toBe('안')
   })
 
-  it('uses only the first word of a multi-word meaning', () => {
-    expect(attackCardClue('thank you')).toBe('TK')
-    expect(attackCardClue('to deliver')).toBe('TO')
-  })
-
-  it('handles very short and empty meanings without crashing', () => {
-    expect(attackCardClue('go')).toBe('GO')
-    expect(attackCardClue('a')).toBe('A')
-    expect(attackCardClue('')).toBe('??')
-    expect(attackCardClue('   ')).toBe('??')
-  })
-
-  it('never renders the whole word for anything longer than two letters', () => {
-    for (const word of ['Anxiety', 'school', 'water', 'consideration']) {
-      expect(attackCardClue(word).length).toBe(2)
-      expect(attackCardClue(word).toLowerCase()).not.toBe(word.toLowerCase())
+  it('is one syllable however long the word is', () => {
+    for (const word of ['물', '검토', '평평하다', '안녕하세요']) {
+      expect([...attackCardAvatar(word)]).toHaveLength(1)
     }
+  })
+
+  it('stops short of the answer for anything longer than a syllable', () => {
+    // The attack asks for the whole word. One syllable of two or more says
+    // which card this is without saying what to type.
+    for (const word of ['안내', '검토', '평평하다']) {
+      expect(attackCardAvatar(word)).not.toBe(word)
+    }
+  })
+
+  it('ignores whitespace around the word', () => {
+    expect(attackCardAvatar('  물 ')).toBe('물')
+  })
+
+  it('has something to show for an empty word', () => {
+    expect(attackCardAvatar('')).toBe('?')
+    expect(attackCardAvatar('   ')).toBe('?')
+  })
+
+  it('does not split a character into half a surrogate pair', () => {
+    // Not Korean, but a card face rendered as a replacement glyph is worse
+    // than one rendered wrong, and word[0] would produce exactly that.
+    expect(attackCardAvatar('𠮷野')).toBe('𠮷')
   })
 })
 

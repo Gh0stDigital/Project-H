@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Spell } from '@/domain/spell'
-import { attackCardClue } from '@/systems/battleEngine'
+import { attackCardAvatar } from '@/systems/battleEngine'
 import { audio } from '@/systems/audioEngine'
 
 /** How long the reel runs, and how quickly it slows down. */
@@ -102,7 +102,10 @@ export function BarrierRoulette({ candidates, total, onSpin, onLanded }: Barrier
       </div>
 
       <div className={`barrier-reel${spinning ? ' is-spinning' : ''}${landed ? ' is-landed' : ''}`}>
-        <span className="barrier-reel-clue">{showing ? attackCardClue(showing.english) : '—'}</span>
+        {/* The same face the cards wear, so the reel and the hand agree. */}
+        <span className="barrier-reel-clue" lang="ko">
+          {showing ? attackCardAvatar(showing.korean) : '—'}
+        </span>
       </div>
 
       <button

@@ -135,24 +135,34 @@ export function visibleHand(state: BattleState, count: number = battleBalance.vi
 }
 
 export function beginPlayerChallenge(state: BattleState, spell: Spell): BattleState {
-  // Attacking: the card shows a masked clue built from the English meaning
-  // (Courage -> C_____E) and the player supplies the Korean word. The full
-  // English is never shown on the card front or in the prompt.
+  // Attacking: the card shows the word's first syllable and the player
+  // supplies the whole Korean word.
   const challenge = generateChallenge(spell, 'attack', 'eng_to_kor')
   return { ...state, phase: 'player_challenge', activeChallenge: challenge, lastResult: null }
 }
 
 /**
- * The clue shown on an attack card: the first and last letter of the
- * English meaning, capitalised — "Anxiety" becomes "AY". Just enough to
- * tell the cards apart without handing over the answer the player is
- * about to be asked to produce.
+ * The face of an attack card: the first syllable of the Korean word.
+ *
+ * It used to be two letters of the English — "Anxiety" became "AY" — on the
+ * reasoning that an attack asks for the Korean, so the Korean must not
+ * appear. In a hand of eight that reads as eight pairs of initials with
+ * nothing to tell them apart, and it is the wrong language for a card in a
+ * Korean deck besides.
+ *
+ * One syllable is a better card face and no more of a giveaway. Hangul is
+ * syllabic, so 안내 shows 안: enough to know which word you are picking,
+ * and short of the answer, which is the whole word spelled out a syllable
+ * at a time. A word of one syllable gives itself away — but a one-syllable
+ * word is a tile or two on the board anyway, so there was never much to
+ * hide.
  */
-export function attackCardClue(english: string): string {
-  const first = english.trim().split(/\s+/)[0] ?? ''
-  if (first.length === 0) return '??'
-  if (first.length === 1) return first.toUpperCase()
-  return `${first[0]}${first[first.length - 1]}`.toUpperCase()
+export function attackCardAvatar(korean: string): string {
+  const word = korean.trim()
+  if (word.length === 0) return '?'
+  // [...word] rather than word[0]: a character outside the basic plane is
+  // two UTF-16 units, and half of one renders as a replacement glyph.
+  return [...word][0]
 }
 
 export interface AttackOutcome {

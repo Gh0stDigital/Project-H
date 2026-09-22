@@ -3,7 +3,7 @@ import { useUiStore } from '@/state/uiStore'
 import { usePersistentStore } from '@/state/persistentStore'
 import { TopBar } from '@/ui/components/TopBar'
 import { Bar } from '@/ui/components/Bar'
-import { spellAccuracy } from '@/domain/spell'
+import { spellAccuracy, type Spell } from '@/domain/spell'
 import { sortSpells, filterSpellsBySet, type RecordsSortKey } from '@/systems/records'
 import { definitionsOf } from '@/domain/spell'
 import { elementDefFor, wordTypeDefs } from '@/config/wordTypes'
@@ -77,6 +77,13 @@ export function RecordsScreen() {
             </div>
             <p className="muted" style={{ fontSize: 13 }}>{definitionsOf(spell).join(' · ')}</p>
 
+            {/* The entry's own sentences, read outright.
+                Nothing is covered here and nothing is cut out of them: this
+                is the screen for looking a word up, not for being tested on
+                it, so the translation that sits behind a tap mid-dungeon is
+                simply printed. */}
+            <RecordExamples spell={spell} />
+
             <div className="row">
               <span className="faint" style={{ minWidth: 46 }}>
                 충전
@@ -135,3 +142,34 @@ export function RecordsScreen() {
     </div>
   )
 }
+
+/**
+ * The example sentences on a records row.
+ *
+ * Written out here rather than reusing the prompt's ExampleSentence: that
+ * one exists to withhold things — it cuts the answer out of the sentence
+ * and keeps the translation behind a tap — and every one of those
+ * behaviours is wrong on a page whose whole job is to show you the entry.
+ */
+function RecordExamples({ spell }: { spell: Spell }) {
+  const pairs = [
+    { sentence: spell.sampleSentence?.trim(), translation: spell.sampleTranslation?.trim() },
+    { sentence: spell.sampleSentence2?.trim(), translation: spell.sampleTranslation2?.trim() },
+  ].filter((p) => p.sentence)
+
+  // Said out loud rather than left blank: an entry with no example is a
+  // thing to go and fix, and a gap on the page does not say so.
+  if (pairs.length === 0) return <p className="record-examples-none">예문 없음</p>
+
+  return (
+    <div className="record-examples">
+      {pairs.map((p, i) => (
+        <div key={i} className="record-example">
+          <p className="record-example-text" lang="ko">{p.sentence}</p>
+          {p.translation && <p className="record-example-translation">{p.translation}</p>}
+        </div>
+      ))}
+    </div>
+  )
+}
+

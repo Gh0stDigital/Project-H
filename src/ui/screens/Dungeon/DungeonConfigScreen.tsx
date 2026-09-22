@@ -10,6 +10,7 @@ import { SlidePanel } from '@/ui/components/SlidePanel'
 import { dungeonTiers, type DungeonTierId } from '@/config/balance'
 import { buildDungeonConfig } from '@/systems/dungeonSession'
 import { isUsable } from '@/systems/totemManager'
+import { RANDOM_SET_ID, pickRandomSet, usableSets } from '@/systems/spellSetManager'
 import { audio } from '@/systems/audioEngine'
 import { curtain } from '@/state/transitionStore'
 import { curtainTiming } from '@/config/transitions'
@@ -61,7 +62,15 @@ export function DungeonConfigScreen() {
   const close = () => setOpenSetting(null)
 
   const totemSet = spellSets.find((s) => s.id === totemSetId) ?? null
-  const dungeonSet = spellSets.find((s) => s.id === dungeonSetId) ?? null
+  /**
+   * The dungeon's words, or null when the player has asked for them to be
+   * chosen at the start of each run. The marker is carried as a set id, so
+   * the saved selection and this screen's state both hold it without
+   * knowing what it means.
+   */
+  const dungeonRandom = dungeonSetId === RANDOM_SET_ID
+  const dungeonSet = dungeonRandom ? null : spellSets.find((s) => s.id === dungeonSetId) ?? null
+  const randomPool = usableSets(spellSets)
   const tier = dungeonTiers.find((t) => t.id === tierId)!
 
   // Only worlds whose pack is complete can be entered. An unfinished one is
@@ -72,12 +81,29 @@ export function DungeonConfigScreen() {
   const world = resolveWorld(worldId)
 
   const canStart =
-    !!totem && isUsable(totem) && !!totemSet && totemSet.spellIds.length > 0 && !!dungeonSet && dungeonSet.spellIds.length > 0 && !!world
+    !!totem &&
+    isUsable(totem) &&
+    !!totemSet &&
+    totemSet.spellIds.length > 0 &&
+    (dungeonRandom ? randomPool.length > 0 : !!dungeonSet && dungeonSet.spellIds.length > 0) &&
+    !!world
 
   function handleStart() {
-    if (!totem || !totemSet || !dungeonSet || !world) return
-    setLastSelection({ totemSpellSetId: totemSet.id, dungeonSpellSetId: dungeonSet.id, tierId })
-    const config = buildDungeonConfig(totem.id, totemSet.id, dungeonSet.id, dungeonSet.spellIds, tier, world.id)
+    if (!totem || !totemSet || !world) return
+    // Rolled here rather than when the setting was chosen: the marker is
+    // what gets saved, so every run re-rolls instead of the first pick
+    // becoming the permanent answer.
+    const chosen = dungeonRandom
+      ? pickRandomSet(spellSets, Math.random, lastSelection.lastRandomSetId)
+      : dungeonSet
+    if (!chosen) return
+    setLastSelection({
+      totemSpellSetId: totemSet.id,
+      dungeonSpellSetId: dungeonSetId ?? chosen.id,
+      tierId,
+      ...(dungeonRandom ? { lastRandomSetId: chosen.id } : {}),
+    })
+    const config = buildDungeonConfig(totem.id, totemSet.id, chosen.id, chosen.spellIds, tier, world.id)
     // The shrine sting first, then the screen goes dark on top of it, and the
     // dungeon is built behind the curtain. The dungeon's own music does not
     // start until the reveal has finished — useSoundtrack holds it — so the
@@ -146,12 +172,19 @@ export function DungeonConfigScreen() {
             </button>
             <button
               className="setup-option"
-              data-warn={dungeonSet && dungeonSet.spellIds.length > 0 ? undefined : true}
+              data-warn={
+                dungeonRandom ? (randomPool.length > 0 ? undefined : true)
+                : dungeonSet && dungeonSet.spellIds.length > 0 ? undefined : true
+              }
               onClick={() => setOpenSetting('dungeonSet')}
             >
               <span className="setup-option-label">성향 (단어)</span>
               <span className="setup-option-value">
-                {dungeonSet ? `${dungeonSet.name} (${dungeonSet.spellIds.length})` : '— 선택 —'}
+                {dungeonRandom
+                  ? `무작위 (세트 ${randomPool.length}개 중)`
+                  : dungeonSet
+                    ? `${dungeonSet.name} (${dungeonSet.spellIds.length})`
+                    : '— 선택 —'}
               </span>
             </button>
             <button className="setup-option wide" onClick={() => setOpenSetting('answerMode')}>
@@ -166,6 +199,11 @@ export function DungeonConfigScreen() {
             <p className="faint setup-summary">
               단어 {dungeonSet.spellIds.length}개 중 {Math.min(dungeonSet.spellIds.length, tier.wordLimit)}개를 사용합니다 ·
               적 피해 ×{tier.enemyDamageMultiplier}
+            </p>
+          )}
+          {dungeonRandom && randomPool.length > 0 && (
+            <p className="faint setup-summary">
+              시작할 때마다 세트를 하나 고릅니다 · 적 피해 ×{tier.enemyDamageMultiplier}
             </p>
           )}
 
@@ -251,6 +289,26 @@ export function DungeonConfigScreen() {
           {openSetting === 'dungeonSet' && (
             <SlidePanel title="성향 (단어)" onClose={close}>
               <p className="faint">던전이 이번 판에 가르칠 단어들입니다. 보스의 방벽도 여기서 만들어집니다.</p>
+              <div className="tier-card-list">
+                {/* Not a set but a promise to pick one, so it sits above the
+                    list rather than in it. */}
+                <button
+                  className="tier-card stacked"
+                  data-selected={dungeonRandom}
+                  disabled={randomPool.length === 0}
+                  onClick={() => {
+                    setDungeonSetId(RANDOM_SET_ID)
+                    close()
+                  }}
+                >
+                  <div className="tier-card-name">🎲 무작위</div>
+                  <div className="tier-card-meta faint">
+                    {randomPool.length === 0
+                      ? '고를 수 있는 세트가 없습니다'
+                      : `시작할 때마다 ${randomPool.length}개 중에서 고릅니다`}
+                  </div>
+                </button>
+              </div>
               <SpellSetList
                 sets={spellSets}
                 selectedId={dungeonSetId}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDungeonStore } from '@/state/dungeonStore'
 import { usePersistentStore } from '@/state/persistentStore'
-import { attackCardClue, selectableSpellIds } from '@/systems/battleEngine'
+import { attackCardAvatar, selectableSpellIds } from '@/systems/battleEngine'
 import { isFullyCleared, remainingCount, uncleared } from '@/systems/bossPlateau'
 import { WorldImage } from '@/ui/components/WorldImage'
 import { resolveWorld } from '@/systems/worldRegistry'
@@ -124,6 +124,25 @@ export function BattleView() {
           />
         </div>
         <span className="scene-tag">{battle.enemy.name}</span>
+
+        {/* The barrier reads inside the window rather than under it.
+            As a banner of its own it was three lines of text between the
+            enemy and the hand, and on a boss — the one fight where the hand
+            is longest — it pushed the cards off the bottom of the screen.
+            It is the boss's state, so it belongs on the boss. */}
+        {barrierUp && (
+          <div className="scene-barrier">
+            <span className="scene-barrier-title">🛡️ 방벽</span>
+            <span className="scene-barrier-count">
+              {barrierTotal - barrierLeft}/{barrierTotal}
+            </span>
+            <span className="scene-barrier-pips" aria-hidden="true">
+              {battle.plateau?.map((r) => (
+                <span key={r.spellId} className={`scene-barrier-pip${r.cleared ? ' done' : ''}`} />
+              ))}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="enemy-hp-row">
@@ -137,13 +156,6 @@ export function BattleView() {
       </div>
 
       <TotemPanel totem={totem} compact />
-
-      {barrierUp && (
-        <div className="plateau-banner">
-          🛡️ 방벽 발동 — 단어 {barrierTotal}개 중 {barrierLeft}개 남음. 각 단어를 공격이나 방어에서
-          정확히 사용해야 방벽이 깨집니다.
-        </div>
-      )}
 
       {/* Multi-prompt attacks show which word of the volley you're on. */}
       {battle.phase === 'enemy_challenge' && battle.defense && battle.defense.challenges.length > 1 && (
@@ -192,7 +204,7 @@ export function BattleView() {
                 <SpellCard
                   key={spell.id}
                   spell={spell}
-                  clue={attackCardClue(spell.english)}
+                  avatar={attackCardAvatar(spell.korean)}
                   barrierCleared={barrierUp ? cleared : undefined}
                   onClick={() => selectCard(spell.id)}
                 />

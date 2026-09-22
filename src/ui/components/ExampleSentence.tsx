@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Spell } from '@/domain/spell'
 import { maskExample, spellForms } from '@/systems/exampleSentence'
 
@@ -18,6 +19,16 @@ interface ExampleSentenceProps {
    * sentences for nothing.
    */
   mask?: boolean
+  /**
+   * Whether the English is on show from the start.
+   *
+   * False everywhere the sentence follows an answer: reading the
+   * translation is the easy way out of reading the Korean, and offered for
+   * free it is the one most people take. Behind a tap it is still one tap
+   * away, but it is a decision. True where the point is to read the entry
+   * rather than to be tested on it — the Compendium, the records screen.
+   */
+  showTranslation?: boolean
 }
 
 /**
@@ -35,7 +46,22 @@ interface ExampleSentenceProps {
  * simply looked like it had stopped showing them. Saying so turns an
  * invisible blank into something the player can act on.
  */
-export function ExampleSentence({ spell, reveal = false, mask = true }: ExampleSentenceProps) {
+export function ExampleSentence({
+  spell,
+  reveal = false,
+  mask = true,
+  showTranslation = false,
+}: ExampleSentenceProps) {
+  /**
+   * Reset per entry, so the next word starts covered again.
+   *
+   * Keyed on the spell's id rather than cleared by an effect: an effect
+   * would show the previous word's translation for one frame on the way
+   * past, which on a fast answer is exactly the frame the player is
+   * looking at.
+   */
+  const [shownFor, setShownFor] = useState<string | null>(null)
+  const open = showTranslation || shownFor === spell?.id
   if (!spell) return null
   const sentence = spell.sampleSentence?.trim()
 
@@ -79,17 +105,32 @@ export function ExampleSentence({ spell, reveal = false, mask = true }: ExampleS
    */
   const second = reveal ? spell.sampleSentence2?.trim() : ''
   const secondTranslation = spell.sampleTranslation2?.trim()
+  const hasTranslation = !!(translation || secondTranslation)
+  // Only after the answer: while the question is open there is no
+  // translation on screen to cover, and a button offering one would be a
+  // button offering the answer.
+  const coverable = reveal && hasTranslation && !showTranslation
 
   return (
     <div className={`example-sentence${reveal ? ' is-revealed' : ''}`}>
       <span className="example-sentence-label">예문</span>
       <p className="example-sentence-text">{masked ? masked.text : sentence}</p>
-      {reveal && translation && <p className="example-sentence-translation">{translation}</p>}
+      {reveal && translation && open && <p className="example-sentence-translation">{translation}</p>}
       {second && (
         <>
           <p className="example-sentence-text is-second">{second}</p>
-          {secondTranslation && <p className="example-sentence-translation">{secondTranslation}</p>}
+          {secondTranslation && open && <p className="example-sentence-translation">{secondTranslation}</p>}
         </>
+      )}
+      {coverable && !open && (
+        <button
+          type="button"
+          className="example-sentence-peek"
+          onClick={() => setShownFor(spell.id)}
+          data-sfx="none"
+        >
+          뜻 보기
+        </button>
       )}
     </div>
   )

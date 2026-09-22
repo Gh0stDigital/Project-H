@@ -16,8 +16,8 @@ interface ChallengeViewProps {
   onSubmit: (text: string) => void
   submitLabel?: string
   /**
-   * The entry being asked about, so its example sentence can sit under the
-   * options with the word itself cut out of it.
+   * The entry being asked about, so its example sentence can sit above the
+   * prompt with the word itself cut out of it.
    */
   spell?: Spell | null
   /**
@@ -82,6 +82,13 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
           </div>
         </div>
       )}
+      {/* Above the word, not below the tiles.
+          It is context for the question, and context read after the question
+          has been answered is not context. Down at the bottom it sat under
+          the thing the thumb was aiming at, which is where a glance does not
+          go. */}
+      <ExampleSentence spell={spell} mask={asksForKorean} />
+
       <div className="prompt-label">{asksForKorean ? '한국어로 번역하세요' : '영어로 번역하세요'}</div>
       <div className="prompt-word" lang={asksForKorean ? 'en' : 'ko'}>
         {challenge.prompt}
@@ -124,10 +131,6 @@ export function ChallengeView({ challenge, answer, decoyPool, onSubmit, submitLa
           {submitLabel}
         </button>
       </div>
-
-      {/* Below the options, not above them: it is a clue to glance at, and
-          the thing the thumb is reaching for should stay put. */}
-      <ExampleSentence spell={spell} mask={asksForKorean} />
     </div>
   )
 }
