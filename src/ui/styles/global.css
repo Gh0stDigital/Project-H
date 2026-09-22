@@ -4887,16 +4887,18 @@ button.totem-hero-frame {
    the page block while leaving a band top and bottom for the frame below to
    stand in.
 
-   Declared once on the sequence, because the boards below are sized from
-   the same number: pushing the picture further has to move the wood with
-   it, and two copies of 1.75 would drift apart the first time one is
-   touched. */
-.title-sequence {
-  --cover-fill: 1.75;
+   The numbers themselves live in systems/titleSequence.ts and arrive as
+   --cover-h and --awaken-h: the painted height of each plate, which is the
+   only thing the boards below actually need to know. Keeping them there
+   rather than here is what lets the screen and the frame agree — and what
+   lets the frame work out where the picture ends without being told the
+   shape of the file. */
+.title-plate.cover {
+  --plate-fill: var(--cover-fill, 1.55);
 }
 
-.title-plate.cover {
-  --plate-fill: var(--cover-fill);
+.title-plate.awaken {
+  --plate-fill: var(--awaken-fill, 1.4);
 }
 
 /* The cover holds still until it is touched, then leans in and catches light
@@ -5011,12 +5013,30 @@ button.totem-hero-frame {
   transition: opacity 320ms ease;
 }
 
-/* Only while the book is the thing on screen. The second plate has its own
-   proportions and its own moment, and the flash is a clean break. */
+/* Up for both stills. The binding is the screen's frame, not the cover's:
+   dropping it for the second plate made the flash look like the app had
+   changed shape rather than like the book had opened.
+
+   Not during the flash itself, which is a white wipe over everything, and
+   not once the picture is on its way out. */
 .phase-cover .title-frame,
 .phase-choosing .title-frame,
-.phase-igniting .title-frame {
+.phase-igniting .title-frame,
+.phase-awaken .title-frame {
   opacity: 1;
+}
+
+/* Which plate the boards are meeting. Each carries its own painted height,
+   so the wood moves to the new edge across the flash rather than staying
+   where the cover left it. */
+.title-frame {
+  --plate-h: var(--cover-h, 0px);
+}
+
+.phase-flash .title-frame,
+.phase-awaken .title-frame,
+.phase-fading .title-frame {
+  --plate-h: var(--awaken-h, 0px);
 }
 
 .title-frame::before,
@@ -5025,7 +5045,7 @@ button.totem-hero-frame {
   position: absolute;
   left: 0;
   right: 0;
-  height: max(46px, calc((100dvh - 100vw * var(--cover-fill, 1.75)) / 2 + 8px));
+  height: max(46px, calc((100dvh - var(--plate-h, 0px)) / 2 + 8px));
   /* Boards.
 
      Three grain layers at periods that do not divide into each other, so

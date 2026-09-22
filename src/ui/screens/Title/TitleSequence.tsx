@@ -6,6 +6,7 @@ import { autosaveTime, usePersistentStore } from '@/state/persistentStore'
 import { useUiStore } from '@/state/uiStore'
 import {
   nextTitlePhase,
+  titleFill,
   titleHasArrived,
   titleIsWaiting,
   titlePhaseMs,
@@ -55,6 +56,15 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
    * this session touched anything.
    */
   const [existing] = useState<Date | null>(() => autosaveTime())
+  /**
+   * How tall each plate's file is relative to its width, once decoded.
+   *
+   * Only used to work out how much room the picture leaves for the binding.
+   * Until a plate has loaded there is nothing on screen for the boards to
+   * meet, and the fallback below keeps them at their minimum rather than
+   * letting them jump when the number arrives.
+   */
+  const [aspect, setAspect] = useState<{ cover?: number; awaken?: number }>({})
 
   // Nothing to show: leave before the player ever sees a frame of it.
   useEffect(() => {
@@ -148,11 +158,28 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
         {
           '--title-fade-ms': `${titleTimings.fading}ms`,
           '--title-reveal-ms': `${titleTimings.revealing}ms`,
+          // The painted height of each plate: its width on screen — the
+          // viewport, since both files are taller than a phone is wide — times
+          // how far it is scaled up, times its own proportions.
+          '--cover-fill': `${titleFill.cover}`,
+          '--awaken-fill': `${titleFill.awaken}`,
+          '--cover-h': `calc(100vw * ${titleFill.cover} * ${aspect.cover ?? 1})`,
+          '--awaken-h': `calc(100vw * ${titleFill.awaken} * ${aspect.awaken ?? 1})`,
         } as React.CSSProperties
       }
     >
-      <Plate name="cover" src={getAsset('ui', 'cover')} hidden={!onCover} />
-      <Plate name="awaken" src={getAsset('ui', 'awaken')} hidden={onCover} />
+      <Plate
+        name="cover"
+        src={getAsset('ui', 'cover')}
+        hidden={!onCover}
+        onAspect={(r) => setAspect((a) => (a.cover === r ? a : { ...a, cover: r }))}
+      />
+      <Plate
+        name="awaken"
+        src={getAsset('ui', 'awaken')}
+        hidden={onCover}
+        onAspect={(r) => setAspect((a) => (a.awaken === r ? a : { ...a, awaken: r }))}
+      />
 
       {/* The boards and gilt the cover is held in. Sized in CSS from the same
           number the picture is scaled by, so it never needs to be told how
@@ -230,18 +257,41 @@ export function TitleSequence({ onDone }: TitleSequenceProps) {
 /**
  * One full-screen still.
  *
- * The art is square-ish and the screen is a tall phone, so cropping to fill
- * would throw away most of each picture — on the cover that is the desk, the
- * figurine and the dice, which is the half that says what kind of game this
- * is. Instead the picture is shown whole and the space left over is filled
- * with a blown-up, blurred copy of itself: no letterbox bars, and nothing
- * lost out of frame. Both layers are the same `src`, so it is one decode.
+ * The art is square-ish and the screen is a tall phone, so filling the screen
+ * outright would throw away most of each picture. Instead the picture is
+ * shown whole, scaled up to a point chosen per plate, and the space left over
+ * at the top and bottom is the binding the whole thing sits in.
+ *
+ * `onAspect` reports the file's proportions once it has decoded. The boards
+ * have to meet the painted edge, and where that edge falls depends on the
+ * shape of the art — so it is measured rather than written down. A number in
+ * the stylesheet would be correct until the day the art is replaced, which on
+ * this screen has already happened twice.
  */
-function Plate({ name, src, hidden }: { name: string; src: string; hidden: boolean }) {
+function Plate({
+  name,
+  src,
+  hidden,
+  onAspect,
+}: {
+  name: string
+  src: string
+  hidden: boolean
+  onAspect: (ratio: number) => void
+}) {
   return (
     <div className={`title-plate ${name}`} aria-hidden={hidden}>
       <img className="title-plate-blur" src={src} alt="" draggable={false} />
-      <img className="title-plate-art" src={src} alt="" draggable={false} />
+      <img
+        className="title-plate-art"
+        src={src}
+        alt=""
+        draggable={false}
+        onLoad={(e) => {
+          const img = e.currentTarget
+          if (img.naturalWidth > 0) onAspect(img.naturalHeight / img.naturalWidth)
+        }}
+      />
     </div>
   )
 }

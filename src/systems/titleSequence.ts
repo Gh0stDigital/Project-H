@@ -46,7 +46,15 @@ const ORDER: readonly TitlePhase[] = [
 export const titleTimings = {
   igniting: 900,
   flash: 260,
-  awaken: 2000,
+  /**
+   * The long look at what the book let out.
+   *
+   * The shot worth holding, and the only beat here whose length is a matter
+   * of taste rather than of mechanics: it is a picture with a lot in it — a
+   * scholar, a spell, an inset of somewhere else — and two seconds was not
+   * enough to find the inset before it went.
+   */
+  awaken: 4000,
   /** The picture going out, so the loading screen arrives on black. */
   fading: 700,
   /**
@@ -63,6 +71,28 @@ export const titleTimings = {
    * frame of loading screen and rips it away again, which reads as a glitch.
    */
   minLoading: 700,
+} as const
+
+/**
+ * How far past its natural size each still is pushed.
+ *
+ * Shown whole, a plate reaches less than half a phone's height, because both
+ * files are squarish and a phone is not. Filling the screen outright costs
+ * more than half the picture's width. These are the compromise, one per
+ * plate because the two have different proportions and different things in
+ * their corners — and what is left over at the top and bottom is not waste
+ * but the binding the book sits in, so there is no reason to push either to
+ * the edge.
+ *
+ * Here rather than in the stylesheet because the screen needs them too: the
+ * boards are sized from the same numbers, and two copies would drift apart
+ * the first time one was touched.
+ */
+export const titleFill = {
+  /** Square. Past 1.7 the stitched cords down the right edge start to go. */
+  cover: 1.55,
+  /** 4:5, so it already stands taller on the same number. */
+  awaken: 1.4,
 } as const
 
 export function nextTitlePhase(phase: TitlePhase): TitlePhase {
