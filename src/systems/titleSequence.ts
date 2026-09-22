@@ -89,10 +89,18 @@ export const titleTimings = {
  * the first time one was touched.
  */
 export const titleFill = {
-  /** Square. Past 1.7 the stitched cords down the right edge start to go. */
-  cover: 1.55,
+  /**
+   * Square, and pushed as far as it goes before the stitched cords down the
+   * right edge start to be cut.
+   *
+   * Eased back to 1.55 once the boards existed, on the reasoning that the
+   * frame had bought room to show more of the desk. It had not: what it
+   * bought was more board, and a third of the screen in dark wood reads as
+   * the picture having shrunk rather than as a wider view. The picture wins.
+   */
+  cover: 1.75,
   /** 4:5, so it already stands taller on the same number. */
-  awaken: 1.4,
+  awaken: 1.45,
 } as const
 
 export function nextTitlePhase(phase: TitlePhase): TitlePhase {

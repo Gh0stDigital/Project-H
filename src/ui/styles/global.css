@@ -4894,11 +4894,11 @@ button.totem-hero-frame {
    lets the frame work out where the picture ends without being told the
    shape of the file. */
 .title-plate.cover {
-  --plate-fill: var(--cover-fill, 1.55);
+  --plate-fill: var(--cover-fill, 1.75);
 }
 
 .title-plate.awaken {
-  --plate-fill: var(--awaken-fill, 1.4);
+  --plate-fill: var(--awaken-fill, 1.45);
 }
 
 /* The cover holds still until it is touched, then leans in and catches light
@@ -5147,13 +5147,12 @@ button.totem-hero-frame {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Centred, then pushed down by a fifth of the screen: dead centre puts the
-     words across the title cartouche, and the old position had them on the
-     bottom board. This lands them on the wave pattern below the seal, which
-     is the quietest part of the cover. */
+  /* The middle of the screen. There is nowhere quiet to put it — the seal is
+     roughly here and the cartouche is just above — so the legibility comes
+     from the pool of dark below rather than from finding a gap in the art. */
   justify-content: center;
   gap: 4px;
-  padding: 28dvh 0 0;
+  padding: 0;
   touch-action: manipulation;
 }
 
@@ -5167,9 +5166,9 @@ button.totem-hero-frame {
   content: '';
   position: absolute;
   left: 50%;
-  top: 63%;
-  width: min(92%, 420px);
-  height: 190px;
+  top: 50%;
+  width: min(96%, 440px);
+  height: 210px;
   transform: translate(-50%, -50%);
   background: radial-gradient(
     60% 50% at 50% 50%,
