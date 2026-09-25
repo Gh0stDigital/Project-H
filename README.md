@@ -1,4 +1,4 @@
-# Thoth
+# Sound of Worlds
 
 A lightweight, offline, portrait-mobile dungeon-crawling language-study RPG prototype, built for the
 iPhone 14 Pro Max viewport (~430×932 CSS px) and responsive down to smaller phones.
